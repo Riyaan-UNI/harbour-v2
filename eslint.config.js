@@ -52,7 +52,12 @@ export default tseslint.config(
     rules: {
       'react-refresh/only-export-components': [
         'warn',
-        { allowConstantExport: true },
+        {
+          allowConstantExport: true,
+          // The layout primitives are built by a factory, so the rule cannot
+          // see them as components without being told.
+          extraHOCs: ['createPolymorphicComponent'],
+        },
       ],
     },
   },

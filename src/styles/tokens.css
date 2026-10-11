@@ -140,8 +140,19 @@
   /* --- §6 Layout ------------------------------------------------------- */
   --section-padding-block: clamp(4rem, 3rem + 6vw, 8rem);
   --container-max-inline-size: 75rem;
+  --container-narrow: 28rem; /* spec §10: the signup/login form column */
   --container-padding-inline: 1rem;
   --touch-target: 2.75rem;
+
+  /* How much room a sticky nav needs above a section it links to. PROPOSED:
+     the spec gives the nav a sticky glass bar but no height. */
+  --section-scroll-margin: 5rem;
+
+  /* Grid track minimums, spec §6. `md` is the value the spec names (17rem);
+     `sm` and `lg` are the smaller and larger steps the Grid primitive exposes. */
+  --grid-min-sm: 14rem;
+  --grid-min-md: 17rem;
+  --grid-min-lg: 22rem;
 
   /* Hairline. The only permitted px value in the codebase (builder rule 2). */
   --hairline: 1px;

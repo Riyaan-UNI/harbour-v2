@@ -280,6 +280,7 @@
 
 .aurora-patch__content {
   position: relative;
+  padding: var(--space-6);
 }
 
 /* --------------------------------------------------------------------------

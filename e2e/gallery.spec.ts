@@ -166,3 +166,29 @@ test('theme toggle is operable from the keyboard alone', async ({ page }) => {
   );
   expect(stored).toBe('dark');
 });
+
+/**
+ * The glass section on its own, in both themes at 360 and 1440.
+ *
+ * The full-page shots above include it, but glass is the one surface whose
+ * legibility depends entirely on what is behind it, so it gets a close-up over
+ * its own aurora patch.
+ */
+test.describe('glass section over the aurora patch', () => {
+  for (const theme of THEMES) {
+    for (const width of [360, 1440]) {
+      test(`glass · ${theme} · ${width}px`, async ({ page }) => {
+        await openGallery(page, theme, width);
+
+        const patch = page.locator('.aurora-patch');
+        await expect(patch).toBeVisible();
+        await patch.screenshot({
+          path: `${SCREENSHOT_DIR}/glass-${theme}-${width}.png`,
+        });
+
+        await expectNoHorizontalOverflow(page);
+        await expectNoSeriousAxeViolations(page);
+      });
+    }
+  }
+});

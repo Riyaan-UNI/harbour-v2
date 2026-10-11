@@ -2,6 +2,14 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Aurora } from '../../components/Aurora';
 import { AuroraPatch } from '../../components/AuroraPatch';
 import { ThemeToggle } from '../../components/ThemeToggle';
+import {
+  Cluster,
+  Grid,
+  Heading,
+  Section,
+  Stack,
+  Text,
+} from '../../components/layout';
 import { THEME_CHANGE_EVENT } from '../../theme/theme';
 import { useResolvedTheme } from '../../theme/useTheme';
 import { cn } from '../../lib/cn';
@@ -27,6 +35,7 @@ const COLOUR_GROUPS = [
       '--glass-fill',
       '--glass-fill-strong',
       '--border',
+      '--glass-tint',
     ],
   },
   { title: 'Text', tokens: ['--text', '--text-muted', '--text-subtle'] },
@@ -140,7 +149,12 @@ function useTokenValues(tokens: readonly string[]): Record<string, string> {
   return values;
 }
 
-function Section({
+/**
+ * A gallery block: a Section, a Container (from Section), and a heading pair.
+ * Every one of those is a primitive — the gallery has no layout classes of its
+ * own.
+ */
+function Block({
   title,
   description,
   children,
@@ -150,31 +164,37 @@ function Section({
   children: ReactNode;
 }): JSX.Element {
   return (
-    <section className="mt-12">
-      <h2 className="type-h2 text-text">{title}</h2>
-      <p className="type-small text-text-muted max-w-measure mt-2">
-        {description}
-      </p>
-      <div className="mt-6">{children}</div>
-    </section>
+    <Section>
+      <Stack gap={6}>
+        <Stack gap={2}>
+          <Heading level={2}>{title}</Heading>
+          <Text role="small" tone="muted">
+            {description}
+          </Text>
+        </Stack>
+        {children}
+      </Stack>
+    </Section>
   );
 }
 
 function Swatch({ token, value }: { token: string; value: string }): JSX.Element {
   return (
-    <li className="flex items-center gap-3">
+    <Cluster as="li" gap={3} align="center">
       <span
         aria-hidden="true"
         className="border-border size-8 shrink-0 rounded-sm border"
         style={{ backgroundColor: `var(${token})` }}
       />
-      <span className="min-w-0">
-        <span className="type-label text-text block">{token}</span>
-        <span className="type-small text-text-muted block break-all">
+      <Stack as="span" gap={1}>
+        <Text as="span" role="label">
+          {token}
+        </Text>
+        <Text as="span" role="small" tone="muted" className="break-all">
           {value || '—'}
-        </span>
-      </span>
-    </li>
+        </Text>
+      </Stack>
+    </Cluster>
   );
 }
 
@@ -194,30 +214,34 @@ export function Gallery(): JSX.Element {
     <>
       <Aurora />
 
-      <main className="layer-raised max-w-page mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <header className="flex flex-wrap items-start justify-between gap-6">
-          <div>
-            <p className="type-label text-text-muted">Harbour · Brick 0</p>
-            <h1 className="type-h1 text-text mt-2">Foundation gallery</h1>
-            <p className="type-body text-text-muted mt-3">
-              Every token, surface and motion value from the design spec, in both
-              themes. Currently rendering the{' '}
-              <strong className="text-text font-semibold">{resolved}</strong>{' '}
-              theme.
-            </p>
-          </div>
-          <ThemeToggle />
-        </header>
+      <main className="layer-raised">
+        <Section>
+          <Cluster as="header" justify="between" align="start" gap={6}>
+            <Stack gap={3}>
+              <Text role="label" tone="muted">
+                Harbour · Brick 0
+              </Text>
+              <Heading level={1}>Foundation gallery</Heading>
+              <Text tone="muted">
+                Every token, surface and motion value from the design spec, in
+                both themes. Currently rendering the{' '}
+                <strong className="text-text font-semibold">{resolved}</strong>{' '}
+                theme.
+              </Text>
+            </Stack>
+            <ThemeToggle />
+          </Cluster>
+        </Section>
 
-        <Section
+        <Block
           title="Colour tokens"
           description="Each chip is painted from the token itself, so it repaints on theme change. The caption shows the value the browser resolves right now."
         >
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          <Grid min="md" gap={8}>
             {COLOUR_GROUPS.map((group) => (
-              <div key={group.title}>
-                <h3 className="type-h3 text-text">{group.title}</h3>
-                <ul className="mt-4 grid gap-3">
+              <Stack key={group.title} gap={4}>
+                <Heading level={3}>{group.title}</Heading>
+                <Stack as="ul" gap={3}>
                   {group.tokens.map((token) => (
                     <Swatch
                       key={token}
@@ -225,127 +249,140 @@ export function Gallery(): JSX.Element {
                       value={colourValues[token] ?? ''}
                     />
                   ))}
-                </ul>
-              </div>
+                </Stack>
+              </Stack>
             ))}
-          </div>
-        </Section>
+          </Grid>
+        </Block>
 
-        <Section
+        <Block
           title="Type scale"
           description="Fluid roles from spec section 5. Display and body carry their maximum measure; the rest are unbounded."
         >
-          <ul className="grid gap-6">
+          <Stack as="ul" gap={6}>
             {TYPE_ROLES.map((role) => (
-              <li key={role.name} className="border-border border-t pt-4">
-                <p className="type-label text-text-muted">
+              <Stack as="li" gap={4} key={role.name}>
+                <div className="border-border border-t" aria-hidden="true" />
+                <Text role="label" tone="muted">
                   {role.name} · {role.token}
-                </p>
-                <p className={cn(role.utility, 'text-text mt-2')}>
+                </Text>
+                <p className={cn(role.utility, 'text-text')}>
                   Harbour keeps you steady
                 </p>
-              </li>
+              </Stack>
             ))}
-          </ul>
-        </Section>
+          </Stack>
+        </Block>
 
-        <Section
+        <Block
           title="Spacing scale"
-          description="The ten permitted steps. Nothing outside this list may be used for spacing."
+          description="The ten permitted steps. Nothing outside this list may be used for spacing, and Tailwind's step numbers are not these numbers."
         >
-          <ul className="grid gap-3">
+          <Stack as="ul" gap={3}>
             {SPACE_TOKENS.map((token) => (
-              <li key={token} className="flex items-center gap-4">
-                <span className="type-label text-text-muted w-24 shrink-0">
+              <Cluster as="li" gap={4} align="center" key={token}>
+                <Text
+                  as="span"
+                  role="label"
+                  tone="muted"
+                  className="w-24 shrink-0"
+                >
                   {token}
-                </span>
+                </Text>
                 <span
                   aria-hidden="true"
                   className="bg-accent-fill block h-3 rounded-sm"
                   style={{ inlineSize: `var(${token})` }}
                 />
-                <span className="type-small text-text-muted">
+                <Text as="span" role="small" tone="muted">
                   {spaceValues[token] ?? '—'}
-                </span>
-              </li>
+                </Text>
+              </Cluster>
             ))}
-          </ul>
-        </Section>
+          </Stack>
+        </Block>
 
-        <Section
+        <Block
           title="Radii"
           description="sm 0.5rem, md 1rem, lg 1.5rem and pill. Glass uses lg (spec section 4); the university logo box uses md (spec section 8)."
         >
-          <ul className="flex flex-wrap items-end gap-6">
+          <Cluster as="ul" gap={6} align="end">
             {RADIUS_TOKENS.map((token) => (
-              <li key={token} className="grid gap-2">
+              <Stack as="li" gap={2} key={token}>
                 <span
                   aria-hidden="true"
                   className="bg-accent-fill block size-16"
                   style={{ borderRadius: `var(${token})` }}
                 />
-                <span className="type-label text-text-muted">{token}</span>
-                <span className="type-small text-text-muted">
+                <Text as="span" role="label" tone="muted">
+                  {token}
+                </Text>
+                <Text as="span" role="small" tone="muted">
                   {radiusValues[token] ?? '—'}
-                </span>
-              </li>
+                </Text>
+              </Stack>
             ))}
-          </ul>
-        </Section>
+          </Cluster>
+        </Block>
 
-        <Section
+        <Block
           title="Glass over a colour field"
           description="Three glass surfaces, the maximum the spec allows on screen at once. The cards sit on their own contained aurora patch, so glass is always reviewed over a real colour field rather than wherever the page blobs happen to land. The blur is static and never animated."
         >
           <AuroraPatch>
-            <div className="p-6">
-              <div className="grid gap-6 md:grid-cols-3">
-                {GLASS_CARDS.map((card) => (
-                  <article key={card.title} className="glass p-6">
-                    <h3 className="type-h3 text-text">{card.title}</h3>
-                    <p className="type-small text-text-muted mt-2">
+            <Grid min="md" gap={6}>
+              {GLASS_CARDS.map((card) => (
+                <article key={card.title} className="glass p-6">
+                  <Stack gap={2}>
+                    <Heading level={3}>{card.title}</Heading>
+                    <Text role="small" tone="muted">
                       {card.body}
-                    </p>
-                  </article>
-                ))}
-              </div>
-            </div>
+                    </Text>
+                  </Stack>
+                </article>
+              ))}
+            </Grid>
           </AuroraPatch>
-        </Section>
+        </Block>
 
-        <Section
+        <Block
           title="Chart palette"
           description="Read through CSS variables. Colour alone never carries meaning — charts also use direct labels or markers."
         >
-          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-5">
+          <Grid as="ul" min="sm" gap={4}>
             {CHART_TOKENS.map((token) => (
-              <li key={token} className="grid gap-2">
+              <Stack as="li" gap={2} key={token}>
                 <span
                   aria-hidden="true"
                   className="border-border block h-16 rounded-md border"
                   style={{ backgroundColor: `var(${token})` }}
                 />
-                <span className="type-label text-text-muted">{token}</span>
-              </li>
+                <Text as="span" role="label" tone="muted">
+                  {token}
+                </Text>
+              </Stack>
             ))}
-          </ul>
-        </Section>
+          </Grid>
+        </Block>
 
-        <Section
+        <Block
           title="Motion tokens"
           description="Press any block to set them all moving. Each square travels on a different duration token, all on the spec's ease-out curve."
         >
-          <ul className="grid gap-4 sm:grid-cols-4">
+          <Grid as="ul" min="sm" gap={4}>
             {MOTION_TOKENS.map((item) => (
-              <li key={item.name} className="grid gap-2">
-                <button
+              <Stack as="li" gap={2} key={item.name}>
+                <Cluster
+                  as="button"
+                  gap={3}
+                  align="center"
                   type="button"
                   aria-pressed={moved}
                   aria-label={`Move the ${item.name} block`}
                   onClick={() => {
                     setMoved((current) => !current);
                   }}
-                  className="bg-glass-fill-strong border-border hover:bg-glass-fill flex h-16 w-full items-center rounded-md border px-3"
+                  className="bg-glass-fill-strong border-border hover:bg-glass-fill h-16 w-full rounded-md border px-3"
                 >
                   <span
                     aria-hidden="true"
@@ -356,31 +393,35 @@ export function Gallery(): JSX.Element {
                       moved && 'translate-x-12',
                     )}
                   />
-                </button>
-                <span className="type-label text-text-muted">{item.name}</span>
-                <span className="type-small text-text-muted">
+                </Cluster>
+                <Text as="span" role="label" tone="muted">
+                  {item.name}
+                </Text>
+                <Text as="span" role="small" tone="muted">
                   {motionValues[item.token] ?? '—'}
-                </span>
-              </li>
+                </Text>
+              </Stack>
             ))}
-          </ul>
-        </Section>
+          </Grid>
+        </Block>
 
-        <Section
+        <Block
           title="Scales"
           description="The remaining fixed scales. These are consumed through tokens rather than utilities."
         >
-          <dl className="grid gap-3">
+          <Stack as="dl" gap={3}>
             {SCALE_ROWS.map((row) => (
-              <div key={row.label} className="flex flex-wrap gap-x-4 gap-y-1">
-                <dt className="type-label text-text w-32 shrink-0">
+              <Cluster key={row.label} gap={4}>
+                <Text as="dt" role="label" className="w-32 shrink-0">
                   {row.label}
-                </dt>
-                <dd className="type-small text-text-muted">{row.value}</dd>
-              </div>
+                </Text>
+                <Text as="dd" role="small" tone="muted">
+                  {row.value}
+                </Text>
+              </Cluster>
             ))}
-          </dl>
-        </Section>
+          </Stack>
+        </Block>
       </main>
     </>
   );

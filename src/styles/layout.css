@@ -1,0 +1,136 @@
+/* ==========================================================================
+   Harbour — layout primitives (spec §6)
+
+   The structural CSS behind src/components/layout. Everything is in
+   @layer components, so a Tailwind utility added by a caller still wins.
+
+   Spacing here is never a raw value: Stylelint's spacing rule allows only
+   var(--space-*), 0, auto, the section and container tokens, and the aurora
+   geometry tokens. Every other number is a width, a column count or a
+   breakpoint, none of which is spacing.
+
+   The gap on Stack, Cluster, Grid and Bento is not set here — it comes from a
+   typed prop on the component and is written as var(--space-N) inline, so the
+   ten spec steps are the only values that type-check.
+   ========================================================================== */
+
+@layer components {
+  /* --- Container --------------------------------------------------------
+     Spec §6: max-inline-size 75rem, padding-inline 1rem, then 1.5rem from
+     40em, then 2rem from 64em. The padding steps live on the token itself
+     (tokens.css), so this rule never repeats them. */
+  .layout-container {
+    inline-size: 100%;
+    margin-inline: auto;
+    padding-inline: var(--container-padding-inline);
+  }
+
+  .layout-container--page {
+    max-inline-size: var(--container-max-inline-size);
+  }
+
+  .layout-container--measure {
+    max-inline-size: var(--measure-body);
+  }
+
+  .layout-container--narrow {
+    max-inline-size: var(--container-narrow);
+  }
+
+  /* --- Section ----------------------------------------------------------
+     Spec §6: padding-block clamp(4rem, 3rem + 6vw, 8rem). scroll-margin keeps
+     a sticky nav from covering the heading of the section it links to. */
+  .layout-section {
+    padding-block: var(--section-padding-block);
+    scroll-margin-block-start: var(--section-scroll-margin);
+  }
+
+  /* --- Grid -------------------------------------------------------------
+     Spec §6: repeat(auto-fit, minmax(min(100%, X), 1fr)). The min(100%, X)
+     is what keeps a single track from overflowing a narrow viewport. */
+  .layout-grid {
+    display: grid;
+  }
+
+  .layout-grid--sm {
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(100%, var(--grid-min-sm)), 1fr)
+    );
+  }
+
+  .layout-grid--md {
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(100%, var(--grid-min-md)), 1fr)
+    );
+  }
+
+  .layout-grid--lg {
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(100%, var(--grid-min-lg)), 1fr)
+    );
+  }
+
+  /* --- Bento ------------------------------------------------------------
+     Spec §6: 12 columns from 64em, 2 from 40em, 1 below.
+     Item spans per stage:
+       1 column  — every size spans 1
+       2 columns — third and half span 1; twothirds and full span 2
+       12 columns — third 4, half 6, twothirds 8, full 12
+     `tall` doubles the row span, and only from 64em, where rows are uniform. */
+  .layout-bento {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .layout-bento__item {
+    grid-column: span 1;
+  }
+
+  @media (width >= 40em) {
+    .layout-bento {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .layout-bento__item--twothirds,
+    .layout-bento__item--full {
+      grid-column: span 2;
+    }
+  }
+
+  @media (width >= 64em) {
+    .layout-bento {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+
+    .layout-bento__item--third {
+      grid-column: span 4;
+    }
+
+    .layout-bento__item--half {
+      grid-column: span 6;
+    }
+
+    .layout-bento__item--twothirds {
+      grid-column: span 8;
+    }
+
+    .layout-bento__item--full {
+      grid-column: span 12;
+    }
+
+    .layout-bento__item--tall {
+      grid-row: span 2;
+    }
+  }
+
+  /* --- Container-query wrapper ------------------------------------------
+     Spec §6: cards respond to their own width, not the viewport. Wrap a block
+     in <Cq> (or className="layout-cq") and Tailwind v4's container variants —
+     @sm:, @md:, @lg:, … — resolve against it instead of the page. */
+  .layout-cq {
+    container-type: inline-size;
+  }
+}
