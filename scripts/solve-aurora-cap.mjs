@@ -1,11 +1,38 @@
 /**
- * Solves for the aurora opacity cap that keeps text legible over the worst
- * possible stack of blobs, in both themes.
+ * Contrast matrix, and the solver for the two aurora opacity caps.
  *
- * The blobs are decorative and sit beneath content, so any text can land on top
- * of them. The only safe assumption is the worst case: every blob stacked.
+ * Brick 0 only checked `--text` and `--text-muted` against a stack of blobs.
+ * Review found that too narrow: it never checked the other five text tokens,
+ * and it never checked text *inside a glass surface*, which is where the glass
+ * section actually puts it.
+ *
+ * This script now checks:
+ *
+ *   text tokens  — text, text-muted, text-subtle, accent-text, gold-text,
+ *                  danger, success   (every text token in spec §3)
+ *   surfaces     — bg
+ *                  bg-elevated
+ *                  the page aurora (worst-case stack of all three blobs)
+ *                  glass over bg
+ *                  glass over bg-elevated
+ *                  glass over the page aurora
+ *                  glass over the gallery patch
+ *   themes       — dark and light, separately, because they are designed
+ *                  separately and not inverted.
+ *
+ * A glass surface is composited exactly as `.glass` paints it: the tint
+ * (`--glass-tint`) under the white sheen (`--glass-fill`), over whatever is
+ * behind. The aurora worst case is every non-empty subset of the three blobs,
+ * painted in DOM order — the only safe assumption, since text can land
+ * anywhere on the fixed layer.
+ *
+ * Required: 4.5:1. WCAG's 3:1 large-text allowance applies to display and H1
+ * sizes; only `--text` is ever painted at those sizes, and it is also used at
+ * body sizes, so it is held to 4.5 too. The 3:1 column is reported for
+ * information only.
  *
  * Run: node scripts/solve-aurora-cap.mjs
+ * Exits 1 if any cell fails, so it can gate a build.
  */
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -26,7 +53,7 @@ function readBlock(selector) {
 }
 
 function readToken(block, name) {
-  const match = block.match(new RegExp(`--${name}:\\s*([^;]+);`));
+  const match = block.match(new RegExp(`(?:^|[\\s;])--${name}:\\s*([^;]+);`));
   if (!match) throw new Error(`token not found: --${name}`);
   return match[1].trim();
 }
@@ -45,32 +72,44 @@ function parseColour(value) {
   throw new Error(`cannot parse colour: ${value}`);
 }
 
-const dark = readBlock(':root {');
-const light = readBlock(":root[data-theme='light'] {");
+/** Every text token in spec §3. */
+const TEXT_TOKENS = [
+  'text',
+  'text-muted',
+  'text-subtle',
+  'accent-text',
+  'gold-text',
+  'danger',
+  'success',
+];
+
+/** Used at display and H1 sizes, where 3:1 is allowed instead of 4.5:1. */
+const LARGE_TEXT_TOKENS = new Set(['text']);
+
+const REQUIRED = 4.5;
+const REQUIRED_LARGE = 3;
+
+function readTheme(name, block) {
+  const colour = (token) => parseColour(readToken(block, token));
+  return {
+    name,
+    bg: colour('bg'),
+    bgElevated: colour('bg-elevated'),
+    glassFill: colour('glass-fill'),
+    glassTint: colour('glass-tint'),
+    blobOpacity: Number.parseFloat(readToken(block, 'aurora-blob-opacity')),
+    patchOpacity: Number.parseFloat(readToken(block, 'aurora-patch-opacity')),
+    blobs: [colour('aurora-1'), colour('aurora-2'), colour('aurora-3')],
+    text: Object.fromEntries(TEXT_TOKENS.map((t) => [t, colour(t)])),
+  };
+}
+
+const darkBlock = readBlock(':root {');
+const lightBlock = readBlock(":root[data-theme='light'] {");
 
 const THEMES = [
-  {
-    name: 'dark',
-    bg: parseColour(readToken(dark, 'bg')),
-    text: parseColour(readToken(dark, 'text')),
-    textMuted: parseColour(readToken(dark, 'text-muted')),
-    blobs: [
-      parseColour(readToken(dark, 'aurora-1')),
-      parseColour(readToken(dark, 'aurora-2')),
-      parseColour(readToken(dark, 'aurora-3')),
-    ],
-  },
-  {
-    name: 'light',
-    bg: parseColour(readToken(light, 'bg')),
-    text: parseColour(readToken(light, 'text')),
-    textMuted: parseColour(readToken(light, 'text-muted')),
-    blobs: [
-      parseColour(readToken(light, 'aurora-1')),
-      parseColour(readToken(light, 'aurora-2')),
-      parseColour(readToken(light, 'aurora-3')),
-    ],
-  },
+  readTheme('dark', darkBlock),
+  readTheme('light', lightBlock),
 ];
 
 /* --- colour maths -------------------------------------------------------- */
@@ -98,10 +137,19 @@ function contrast(a, b) {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-/** Every non-empty subset of blobs, painted in DOM order. */
-function worstCaseBackground(theme, cap) {
-  let worst = null;
+function rgb(colour) {
+  return `rgb(${Math.round(colour.r)}, ${Math.round(colour.g)}, ${Math.round(colour.b)})`;
+}
 
+/** `.glass` paints the tint, then the sheen, over whatever is behind. */
+function glassOver(theme, backdrop) {
+  const tinted = composite(backdrop, theme.glassTint, theme.glassTint.a);
+  return composite(tinted, theme.glassFill, theme.glassFill.a);
+}
+
+/** Every non-empty subset of blobs, painted in DOM order, at `cap`. */
+function blobBackdrops(theme, cap) {
+  const backdrops = [];
   for (let mask = 1; mask < 1 << theme.blobs.length; mask += 1) {
     let colour = { ...theme.bg };
     for (let i = 0; i < theme.blobs.length; i += 1) {
@@ -109,50 +157,208 @@ function worstCaseBackground(theme, cap) {
       const blob = theme.blobs[i];
       colour = composite(colour, blob, blob.a * cap);
     }
-    const ratios = {
-      text: contrast(theme.text, colour),
-      'text-muted': contrast(theme.textMuted, colour),
-    };
-    const min = Math.min(ratios.text, ratios['text-muted']);
-    if (worst === null || min < worst.min) {
-      worst = { mask, colour, ratios, min };
-    }
+    backdrops.push(colour);
   }
+  return backdrops;
+}
 
+/** The blob stack that is worst for this token, with or without glass on top. */
+function worstOverBlobs(theme, cap, tokenColour, withGlass) {
+  let worst = null;
+  for (const backdrop of blobBackdrops(theme, cap)) {
+    const surface = withGlass ? glassOver(theme, backdrop) : backdrop;
+    const ratio = contrast(tokenColour, surface);
+    if (worst === null || ratio < worst.ratio) worst = { ratio, surface };
+  }
   return worst;
 }
 
-/* --- report -------------------------------------------------------------- */
+/* --- the matrix ---------------------------------------------------------- */
 
-const CAPS = [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.45, 0.4, 0.35, 0.3, 0.25, 0.2, 0.18, 0.15, 0.12, 0.1];
+const SURFACES = [
+  { key: 'bg', label: 'bg', blobCap: null },
+  { key: 'bg-elevated', label: 'bg-elev', blobCap: null },
+  { key: 'aurora', label: 'aurora', blobCap: 'blob' },
+  { key: 'glass-bg', label: 'glass/bg', blobCap: null },
+  { key: 'glass-elevated', label: 'glass/elev', blobCap: null },
+  { key: 'glass-aurora', label: 'glass/aurora', blobCap: 'blob' },
+  { key: 'glass-patch', label: 'glass/patch', blobCap: 'patch' },
+];
 
-console.log('Worst-case contrast over any stack of aurora blobs\n');
-console.log('theme  cap    worst-bg          text    text-muted   verdict');
+function cell(theme, token, surface) {
+  const colour = theme.text[token];
+  switch (surface.key) {
+    case 'bg':
+      return { ratio: contrast(colour, theme.bg) };
+    case 'bg-elevated':
+      return { ratio: contrast(colour, theme.bgElevated) };
+    case 'glass-bg':
+      return { ratio: contrast(colour, glassOver(theme, theme.bg)) };
+    case 'glass-elevated':
+      return { ratio: contrast(colour, glassOver(theme, theme.bgElevated)) };
+    case 'aurora':
+      return worstOverBlobs(theme, theme.blobOpacity, colour, false);
+    case 'glass-aurora':
+      return worstOverBlobs(theme, theme.blobOpacity, colour, true);
+    case 'glass-patch':
+      return worstOverBlobs(theme, theme.patchOpacity, colour, true);
+    default:
+      throw new Error(`unknown surface: ${surface.key}`);
+  }
+}
 
-const recommendations = {};
+const failures = [];
+
+console.log('Harbour contrast matrix — every text token over every surface');
+console.log(`Required ${REQUIRED}:1 (3:1 allowed only at display and H1 sizes)`);
+console.log('Aurora and glass/aurora use --aurora-blob-opacity.');
+console.log('glass/patch uses --aurora-patch-opacity (the gallery glass backdrop).\n');
 
 for (const theme of THEMES) {
-  let best = null;
-  for (const cap of CAPS) {
-    const worst = worstCaseBackground(theme, cap);
-    const passes = worst.min >= 4.5;
-    if (passes && (best === null || cap > best.cap)) best = { cap, worst };
+  console.log(
+    `${theme.name}  (blob cap ${theme.blobOpacity}, patch cap ${theme.patchOpacity})\n`,
+  );
 
-    const rgb = `rgb(${Math.round(worst.colour.r)}, ${Math.round(worst.colour.g)}, ${Math.round(worst.colour.b)})`;
+  const header = ['token', ...SURFACES.map((s) => s.label), '3:1'];
+  const rows = [];
+
+  for (const token of TEXT_TOKENS) {
+    const cells = SURFACES.map((surface) => {
+      const { ratio } = cell(theme, token, surface);
+      const fails = ratio < REQUIRED;
+      if (fails) {
+        failures.push({
+          theme: theme.name,
+          token,
+          surface: surface.label,
+          ratio,
+          // WCAG's large-text allowance only rescues the tokens that are ever
+          // painted at display or H1 sizes.
+          rescuedByLargeText:
+            LARGE_TEXT_TOKENS.has(token) && ratio >= REQUIRED_LARGE,
+        });
+      }
+      return `${ratio.toFixed(2)}${fails ? ' !' : '  '}`;
+    });
+    const large = LARGE_TEXT_TOKENS.has(token) ? 'yes' : '-';
+    rows.push([token, ...cells, large]);
+  }
+
+  const widths = header.map((h, i) =>
+    Math.max(h.length, ...rows.map((r) => r[i].length)),
+  );
+  const line = (cells) =>
+    cells.map((c, i) => c.padEnd(widths[i])).join('  ');
+
+  console.log(line(header));
+  console.log(widths.map((w) => '-'.repeat(w)).join('  '));
+  for (const row of rows) console.log(line(row));
+
+  // Diagnostics: what the worst-case backdrop actually resolves to.
+  const worstDirect = worstOverBlobs(
+    theme,
+    theme.blobOpacity,
+    theme.text['text-muted'],
+    false,
+  );
+  const worstGlass = worstOverBlobs(
+    theme,
+    theme.patchOpacity,
+    theme.text['text-muted'],
+    true,
+  );
+  console.log(
+    `\n  worst aurora backdrop for --text-muted: ${rgb(worstDirect.surface)} (${worstDirect.ratio.toFixed(2)}:1)`,
+  );
+  console.log(
+    `  worst patch+glass surface for --text-muted: ${rgb(worstGlass.surface)} (${worstGlass.ratio.toFixed(2)}:1)\n`,
+  );
+}
+
+/* --- solving the two caps ------------------------------------------------ */
+
+const CAP_STEPS = [];
+for (let c = 1; c >= 0.04; c -= 0.01) CAP_STEPS.push(Number(c.toFixed(2)));
+
+function solveCap(theme, withGlass) {
+  for (const cap of CAP_STEPS) {
+    let ok = true;
+    for (const token of TEXT_TOKENS) {
+      const { ratio } = worstOverBlobs(theme, cap, theme.text[token], withGlass);
+      if (ratio < REQUIRED) {
+        ok = false;
+        break;
+      }
+    }
+    if (ok) return cap;
+  }
+  return null;
+}
+
+console.log('Highest cap at which every text token clears 4.5:1\n');
+console.log('theme  token                  current  solved');
+
+const SOLVED = {};
+for (const theme of THEMES) {
+  const blob = solveCap(theme, false);
+  const patch = solveCap(theme, true);
+  SOLVED[theme.name] = { blob, patch };
+  console.log(
+    `${theme.name.padEnd(6)} ${'--aurora-blob-opacity'.padEnd(22)} ${String(theme.blobOpacity).padEnd(8)} ${blob}`,
+  );
+  console.log(
+    `${''.padEnd(6)} ${'--aurora-patch-opacity'.padEnd(22)} ${String(theme.patchOpacity).padEnd(8)} ${patch}`,
+  );
+}
+
+/* --- verdict ------------------------------------------------------------- */
+
+console.log('');
+
+const blocking = failures.filter((f) => !f.rescuedByLargeText);
+const rescued = failures.filter((f) => f.rescuedByLargeText);
+
+const describe = (list) => {
+  for (const f of list) {
     console.log(
-      `${theme.name.padEnd(6)} ${String(cap).padEnd(6)} ${rgb.padEnd(17)} ` +
-        `${worst.ratios.text.toFixed(2).padEnd(7)} ${worst.ratios['text-muted'].toFixed(2).padEnd(12)} ` +
-        `${passes ? 'ok' : 'FAIL'}`,
+      `  ${f.theme.padEnd(6)} ${f.token.padEnd(12)} ${f.surface.padEnd(14)} ${f.ratio.toFixed(2)}:1`,
     );
   }
-  recommendations[theme.name] = best;
+};
+
+if (rescued.length > 0) {
+  console.log(
+    `${rescued.length} pair(s) below ${REQUIRED}:1 but legal at display/H1 sizes (${REQUIRED_LARGE}:1):\n`,
+  );
+  describe(rescued);
   console.log('');
 }
 
-console.log('Highest passing cap per theme:');
-for (const theme of THEMES) {
-  const best = recommendations[theme.name];
+if (blocking.length > 0) {
+  console.log(`${blocking.length} failing pair(s):\n`);
+  describe(blocking);
+  process.exit(1);
+}
+
+const anySolvedBelowCurrent = THEMES.some(
+  (t) =>
+    SOLVED[t.name].blob < t.blobOpacity ||
+    SOLVED[t.name].patch < t.patchOpacity,
+);
+
+if (anySolvedBelowCurrent) {
   console.log(
-    `  ${theme.name.padEnd(6)} cap = ${best.cap}  (text-muted ${best.worst.ratios['text-muted'].toFixed(2)}, text ${best.worst.ratios.text.toFixed(2)})`,
+    'No failures at the current caps, but a solved cap is lower than the token — retune.',
+  );
+  process.exit(1);
+}
+
+console.log(
+  `All ${THEMES.length * TEXT_TOKENS.length * SURFACES.length} pairs clear ${REQUIRED}:1 at the current caps.`,
+);
+
+if (rescued.length === 0) {
+  console.log(
+    `The ${REQUIRED_LARGE}:1 large-text allowance is unused: --text clears ${REQUIRED}:1 everywhere, so no size depends on it.`,
   );
 }

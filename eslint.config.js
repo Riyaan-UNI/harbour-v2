@@ -2,7 +2,9 @@ import globals from 'globals';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import tseslint from 'typescript-eslint';
-import noTailwindArbitraryValues from './eslint-rules/no-tailwind-arbitrary-values.mjs';
+import noTailwindArbitraryValues, {
+  noOffScaleSpacing,
+} from './eslint-rules/no-tailwind-arbitrary-values.mjs';
 
 export default tseslint.config(
   {
@@ -27,7 +29,10 @@ export default tseslint.config(
     plugins: {
       'react-hooks': reactHooks,
       harbour: {
-        rules: { 'no-tailwind-arbitrary-values': noTailwindArbitraryValues },
+        rules: {
+          'no-tailwind-arbitrary-values': noTailwindArbitraryValues,
+          'no-off-scale-spacing': noOffScaleSpacing,
+        },
       },
     },
     rules: {
@@ -35,6 +40,8 @@ export default tseslint.config(
       'react-hooks/exhaustive-deps': 'warn',
       // Builder rule 1: tokens only. Spec §12 asks for this check by name.
       'harbour/no-tailwind-arbitrary-values': 'error',
+      // Spec §6's spacing scale is ten values, not Tailwind's numeric scale.
+      'harbour/no-off-scale-spacing': 'error',
     },
   },
 

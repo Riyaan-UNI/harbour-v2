@@ -115,16 +115,16 @@
 }
 
 .aurora__blob--1 {
-  inset-block-start: -20%;
-  inset-inline-start: -15%;
+  inset-block-start: var(--aurora-blob-1-block-start);
+  inset-inline-start: var(--aurora-blob-1-inline-start);
   inline-size: 70vmax;
   block-size: 70vmax;
   background-color: var(--aurora-1);
 }
 
 .aurora__blob--2 {
-  inset-block-end: -25%;
-  inset-inline-end: -20%;
+  inset-block-end: var(--aurora-blob-2-block-end);
+  inset-inline-end: var(--aurora-blob-2-inline-end);
   inline-size: 60vmax;
   block-size: 60vmax;
   background-color: var(--aurora-2);
@@ -133,8 +133,8 @@
 }
 
 .aurora__blob--3 {
-  inset-block-start: 25%;
-  inset-inline-start: 35%;
+  inset-block-start: var(--aurora-blob-3-block-start);
+  inset-inline-start: var(--aurora-blob-3-inline-start);
   inline-size: 45vmax;
   block-size: 45vmax;
   background-color: var(--aurora-3);
@@ -147,8 +147,10 @@
   animation-play-state: paused;
 }
 
-/* Faint noise overlay — stops the large blurred blobs from banding. */
-.aurora__noise {
+/* Faint noise overlay — stops the large blurred blobs from banding. Shared by
+   the page aurora and the contained patch below, so the texture is defined
+   once. */
+.aurora-noise {
   position: absolute;
   inset: 0;
   opacity: var(--aurora-noise-opacity);
@@ -218,6 +220,66 @@
   .aurora__blob {
     animation: none;
   }
+}
+
+/* --------------------------------------------------------------------------
+   Contained aurora patch — a local colour field, for reviewing glass.
+
+   Same three blobs as the page aurora, but inside a rounded box rather than
+   fixed to the viewport, and allowed to run hotter: a patch is always covered
+   by glass, and the glass tint is what keeps text legible. The page aurora has
+   bare text on it, so its cap is far lower. Both caps are solved by
+   scripts/solve-aurora-cap.mjs; geometry is PROPOSED and reuses the blob
+   corner offsets from tokens.css.
+
+   Used by the gallery's glass section, so glass is reviewed over a real colour
+   field instead of wherever the page blobs happen to land.
+   -------------------------------------------------------------------------- */
+
+.aurora-patch {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background-color: var(--bg);
+}
+
+/* The blobs sit in their own absolutely positioned layer so the content after
+   them paints on top without needing a z-index. */
+.aurora-patch__blobs {
+  position: absolute;
+  inset: 0;
+}
+
+.aurora-patch__blob {
+  position: absolute;
+  inline-size: 70%;
+  block-size: 160%;
+  border-radius: var(--radius-pill);
+  filter: blur(var(--aurora-blur));
+  opacity: var(--aurora-patch-opacity);
+}
+
+.aurora-patch__blob--1 {
+  inset-block-start: var(--aurora-blob-1-block-start);
+  inset-inline-start: var(--aurora-blob-1-inline-start);
+  background-color: var(--aurora-1);
+}
+
+.aurora-patch__blob--2 {
+  inset-block-end: var(--aurora-blob-2-block-end);
+  inset-inline-end: var(--aurora-blob-2-inline-end);
+  background-color: var(--aurora-2);
+}
+
+.aurora-patch__blob--3 {
+  inset-block-start: var(--aurora-blob-3-block-start);
+  inset-inline-start: var(--aurora-blob-3-inline-start);
+  background-color: var(--aurora-3);
+}
+
+.aurora-patch__content {
+  position: relative;
 }
 
 /* --------------------------------------------------------------------------
@@ -298,6 +360,33 @@
 
 @utility duration-scene {
   transition-duration: var(--dur-scene);
+}
+
+/* --------------------------------------------------------------------------
+   z-index utilities — spec §6's scale, bridged to Tailwind.
+   Tailwind v4 has no z-index theme namespace, so each step is declared as a
+   static utility here. `z-10` and friends are NOT defined: the scale is the
+   token scale or nothing. `--z-base` needs no utility — the default is 0.
+   -------------------------------------------------------------------------- */
+
+@utility z-raised {
+  z-index: var(--z-raised);
+}
+
+@utility z-nav {
+  z-index: var(--z-nav);
+}
+
+@utility z-dropdown {
+  z-index: var(--z-dropdown);
+}
+
+@utility z-modal {
+  z-index: var(--z-modal);
+}
+
+@utility z-toast {
+  z-index: var(--z-toast);
 }
 
 /* --------------------------------------------------------------------------

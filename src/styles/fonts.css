@@ -4,9 +4,13 @@
    Self-hosted via the Fontsource variable packages. Each package ships its own
    @font-face rules with `font-display: swap` already set.
 
-   Noto Sans TC is a CJK fallback, split by the package into ~108 unicode-range
-   subsets. Nothing downloads until a glyph in that range is actually rendered,
-   so it costs nothing on a Latin-only page.
+   CJK is DEFERRED (Part A3, recorded in spec §2). Noto Sans TC used to be
+   imported here; its CSS alone is ~112 kB (~20 kB gzip) on every page, and no
+   Cantonese copy exists before Brick 5. Brick 5 adds it back as a lazy import,
+   and will prefer Noto Sans HK if Fontsource ships a variable build of it.
+   Until then `--font-heading` / `--font-body` keep 'Noto Sans TC Variable' in
+   the stack, so a CJK glyph simply falls through to system-ui, and `lang="zh-HK"`
+   still selects the right glyphs from whatever CJK font the OS provides.
 
    The two blocks at the bottom are metric-adjusted local fallbacks: they make
    Arial occupy the same space as the web font, so swapping in the real font
@@ -17,7 +21,6 @@
 @import '@fontsource-variable/bricolage-grotesque';
 @import '@fontsource-variable/geist';
 @import '@fontsource-variable/geist-mono';
-@import '@fontsource-variable/noto-sans-tc';
 
 /* Bricolage Grotesque (headings) vs Arial
    web width 3796.31 / ascent 93 / descent 27, Arial 3812.55 / 91 / 21 */

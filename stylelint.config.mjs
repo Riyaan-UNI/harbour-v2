@@ -1,9 +1,11 @@
 /**
  * Harbour Stylelint config — spec §12.
  *
- * Two rules carry the weight:
+ * Three rules carry the weight:
  *   1. No `px` anywhere except 1px hairlines (builder rule 2).
  *   2. No raw hex, rgb or hsl outside tokens.css (builder rule 1).
+ *   3. Spacing declarations may only use the spacing scale, the two layout
+ *      tokens the spec names, or a keyword (spec §6, added in Part A2).
  *
  * Everything else is stylelint-config-standard, with the handful of rules that
  * fight Tailwind v4's CSS-first syntax or the spec's mandated legacy notation
@@ -12,6 +14,41 @@
 
 /** Any px measurement that is not exactly `1px`. */
 const OFF_SCALE_PX = /(?:\d*\.\d+|\d{2,}|[02-9])px/;
+
+/**
+ * The property families the spacing scale owns: padding, margin, gap and
+ * inset. `row-gap` / `column-gap` are named explicitly because they do not
+ * start with `gap`; `top` / `right` / `bottom` / `left` are the physical
+ * longhands of `inset`.
+ *
+ * Deliberately NOT included: `scroll-margin-*` and `scroll-padding-*`. Those
+ * are scroll-snap offsets, not layout spacing — a sticky nav's scroll-margin
+ * is a distance the *scroll container* reserves, not a gap in the design.
+ * Custom properties (`--section-padding-block`) are also untouched, because
+ * they begin with `--` and never match this pattern.
+ */
+const SPACING_PROPERTIES =
+  '/^(?:padding|margin|gap|row-gap|column-gap|inset|top|right|bottom|left)(?:-[a-z-]+)?$/';
+
+/**
+ * One permitted value in a spacing declaration:
+ *   - a step of the spec's ten-value scale (`var(--space-1..10)`),
+ *   - the section and container tokens the spec names in §6,
+ *   - the aurora blob corner offsets, which are *positions* in %, not spacing
+ *     steps, and live in tokens.css like every other value,
+ *   - the keywords `0` and `auto`.
+ */
+const SPACING_VALUE =
+  '(?:var\\(--space-\\d+\\)|var\\(--section-padding-block\\)|var\\(--container-padding-inline\\)|var\\(--aurora-blob-[a-z0-9-]+\\)|0|auto)';
+
+/**
+ * Flags a spacing value that is NOT a whitespace-separated run of permitted
+ * values — so `padding: var(--space-2) var(--space-4)` passes, and
+ * `padding: 1rem`, `gap: 12px` and `margin-inline: 3%` do not.
+ */
+const OFF_SCALE_SPACING = new RegExp(
+  `^(?!${SPACING_VALUE}(?:\\s+${SPACING_VALUE})*$)`,
+);
 
 export default {
   extends: ['stylelint-config-standard'],
@@ -24,6 +61,9 @@ export default {
     /* --- Builder rule 2: px only for 1px hairlines --------------------- */
     'declaration-property-value-disallowed-list': {
       '/.*/': [OFF_SCALE_PX],
+
+      /* --- Spec §6: the spacing scale, and nothing else ---------------- */
+      [SPACING_PROPERTIES]: [OFF_SCALE_SPACING],
     },
 
     /* The spec's colour table is written in legacy rgba() with decimal alpha,

@@ -32,7 +32,7 @@
   --border: rgba(255, 255, 255, 0.14);
   --text: #eaf5f3;
   --text-muted: #a9c4c0;
-  --text-subtle: #7f9e9a;
+  --text-subtle: #92aca9;
   --accent-fill: #4fe3d0;
   --on-accent: #04201d;
   --accent-text: #4fe3d0;
@@ -67,16 +67,37 @@
   --aurora-blur: 5rem;
 
   /* ADDED. The blobs are decorative and sit beneath content, so text can land
-     directly on one. 0.22 is the highest value at which the worst-case stack of
-     all three blobs still gives --text-muted 4.5:1 in dark. Solved by
-     scripts/solve-aurora-cap.mjs, not guessed. */
-  --aurora-blob-opacity: 0.22;
+     directly on one. 0.18 is the highest value at which the worst-case stack of
+     all three blobs clears 4.5:1 for every text token in spec §3 — not just
+     `--text` and `--text-muted`, which is all Brick 0 checked. Solved by
+     scripts/solve-aurora-cap.mjs, not guessed. Part A4 re-solved it. */
+  --aurora-blob-opacity: 0.18;
+
+  /* ADDED in Part A5. The gallery glass section paints its own contained aurora
+     patch, so glass is reviewed over a real colour field instead of wherever
+     the page blobs happen to land. The patch may run hotter than the page
+     aurora because glass always sits on top of it, and the glass tint is what
+     keeps text legible — the page aurora has bare text on it, so its cap is
+     far lower. Solved by scripts/solve-aurora-cap.mjs, not guessed. */
+  --aurora-patch-opacity: 0.29;
   --aurora-noise-opacity: 0.035; /* PROPOSED — spec says "3 to 4%" */
   --aurora-grid-opacity: 0.04; /* PROPOSED — spec says "about 4%" */
   --aurora-grid-size: 4rem; /* PROPOSED — spec gives no cell size */
   --aurora-drift-1: 30s; /* spec: "30 to 50 seconds" */
   --aurora-drift-2: 40s;
   --aurora-drift-3: 50s;
+
+  /* Blob geometry — PROPOSED (the spec gives no sizes or positions).
+     The corner offsets are held as tokens because Stylelint's spacing rule
+     polices `inset-*`, and these are positions, not spacing steps: they are
+     percentages of the fixed aurora layer, so they scale with the viewport.
+     The blob sizes (vmax) are not policed and stay in base.css. */
+  --aurora-blob-1-block-start: -20%;
+  --aurora-blob-1-inline-start: -15%;
+  --aurora-blob-2-block-end: -25%;
+  --aurora-blob-2-inline-end: -20%;
+  --aurora-blob-3-block-start: 25%;
+  --aurora-blob-3-inline-start: 35%;
 
   /* --- §5 Typography roles -------------------------------------------- */
   --type-display: clamp(2.75rem, 1.6rem + 5.5vw, 6rem);
@@ -168,7 +189,7 @@
   --border: rgba(11, 57, 53, 0.14);
   --text: #0b2b28;
   --text-muted: #3f5f5b;
-  --text-subtle: #4f6e6a;
+  --text-subtle: #496662;
   --accent-fill: #0b3935;
   --on-accent: #f7f3e9;
   --accent-text: #09675f;
@@ -176,7 +197,7 @@
   --on-gold: #2b2000;
   --gold-text: #7a5a00;
   --danger: #b3261e;
-  --success: #1b7a4b;
+  --success: #186e44;
   --focus-ring: #09675f;
   --aurora-1: #bfe5e2;
   --aurora-2: #f7e3b0;
@@ -194,9 +215,10 @@
   --shadow-glass: 0 1.5rem 3rem -1rem rgba(11, 57, 53, 0.18);
   --glass-tint: rgba(247, 243, 233, 0.55);
 
-  /* Light already clears 4.5:1 at full strength: the worst-case stack bottoms
-     out at 5.17 for --text-muted. No cap needed, so the token is a no-op. */
+  /* Light clears 4.5:1 at full strength: the worst-case stack bottoms out at
+     4.62 for --text-subtle, so the cap is a no-op in this theme. */
   --aurora-blob-opacity: 1;
+  --aurora-patch-opacity: 1;
 }
 
 /* --------------------------------------------------------------------------
@@ -240,13 +262,13 @@
 
 @theme static {
   /* --- §6 Radii --------------------------------------------------------
-     PROPOSED mapping. The spec lists 0.5 / 1 / 1.5 rem and "pill" without
-     naming which is md and which is lg. `--radius-lg` is used by .glass and
-     "radius md" by UniversityLogo (a 2 to 3rem box), so the only mapping
-     that makes both usages sensible is md = 0.5, lg = 1, xl = 1.5. */
-  --radius-md: 0.5rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
+     Settled in review (Part A1). The spec lists 0.5 / 1 / 1.5 rem and "pill";
+     the names are now sm 0.5, md 1, lg 1.5. `--radius-lg` is what `.glass`
+     uses (spec §4), and the university logo box (§8) takes "radius md" = 1rem.
+     `--radius-xl` was removed: the spec defines three radii plus pill, no more. */
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
   --radius-pill: 9999rem;
 
   /* --- §5 Typography ---------------------------------------------------

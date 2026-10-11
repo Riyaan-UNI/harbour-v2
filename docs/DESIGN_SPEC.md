@@ -33,6 +33,7 @@ The old LandIn Three.js animation and the bunny game are dropped. This is a fres
 - react-hook-form + zod, Zustand with persist, i18n-iso-countries + flag-icons, Fontsource, Recharts.
 - Playwright + @axe-core/playwright, Stylelint, ESLint.
 - Pin exact versions and add one dependency at a time.
+- **CJK font is deferred.** Noto Sans TC is *not* imported in Brick 0 or 1: its CSS alone is ~112 kB (~20 kB gzip) on every page, and no Cantonese copy exists before Brick 5. The font stack keeps `Noto Sans TC Variable` in place, so a CJK glyph falls through to `system-ui`, and `lang="zh-HK"` still selects the right glyphs from whatever the OS provides. Brick 5 adds it back as a lazy import, preferring Noto Sans HK if Fontsource ships a variable build of it.
 
 Roles: GSAP runs the landing timeline, scroll effects and the two SVG scenes. Motion handles React component states and layout animation. Lenis smooths scrolling on the landing page only, and is off in the app and under reduced motion.
 
@@ -49,7 +50,7 @@ Dark is the default theme. Dark and light are designed separately, not auto-inve
 | border | rgba(255,255,255,0.14) | rgba(11,57,53,0.14) | hairlines |
 | text | #EAF5F3 | #0B2B28 | primary text |
 | text-muted | #A9C4C0 | #3F5F5B | secondary text |
-| text-subtle | #7F9E9A | #4F6E6A | captions only |
+| text-subtle | #92ACA9 | #496662 | captions only |
 | accent-fill | #4FE3D0 | #0B3935 | primary buttons, key fills |
 | on-accent | #04201D | #F7F3E9 | text on accent-fill |
 | accent-text | #4FE3D0 | #09675F | links, highlights |
@@ -57,7 +58,7 @@ Dark is the default theme. Dark and light are designed separately, not auto-inve
 | on-gold | #2B2000 | #2B2000 | text on gold-fill |
 | gold-text | #F1C96F | #7A5A00 | gold used as text |
 | danger | #FF8A80 | #B3261E | errors |
-| success | #6EE7A6 | #1B7A4B | confirmations |
+| success | #6EE7A6 | #186E44 | confirmations |
 | focus-ring | #7CF0E3 | #09675F | 2px ring, 2px offset |
 | aurora-1 | #0F6B63 | #BFE5E2 | background blob |
 | aurora-2 | #1AA89B | #F7E3B0 | background blob |
@@ -66,6 +67,27 @@ Dark is the default theme. Dark and light are designed separately, not auto-inve
 Gold is a fill with dark text on it. It is never body text on ivory.
 
 Contrast targets are 4.5:1 for text and 3:1 for UI and graphics. These values were chosen by estimate, so the automated axe check is the authority. If a pair fails, adjust the token, not the component.
+
+`scripts/solve-aurora-cap.mjs` is the authority for text over the aurora and over glass. It composites every non-empty stack of the three blobs at the current cap — bare and under glass — and reports a full matrix of all seven text tokens against seven surface stacks, in both themes. Part A4 widened it from the original two tokens, and three pairs failed:
+
+| Token | Theme | Was | Now | Measured over the worst-case aurora stack |
+| --- | --- | --- | --- | --- |
+| `--text-subtle` | dark | `#7F9E9A` | `#92ACA9` | 3.42:1 |
+| `--text-subtle` | light | `#4F6E6A` | `#496662` | 4.12:1 |
+| `--success` | light | `#1B7A4B` | `#186E44` | 3.95:1 |
+
+Nothing else moved. The dark aurora cap also came down (see §4); `--danger` and every other pair cleared 4.5:1 once the cap was re-solved.
+
+### Added tokens
+
+Not in the original colour table. All live in `src/styles/tokens.css`.
+
+| Token | Dark | Light | Use |
+| --- | --- | --- | --- |
+| `--glass-tint` | `rgba(6,27,26,0.55)` | `rgba(247,243,233,0.55)` | painted under the white sheen, so glass is legible over anything |
+| `--aurora-blob-opacity` | `0.18` | `1` | cap on the page aurora blobs, so bare text over them stays legible |
+| `--aurora-patch-opacity` | `0.29` | `1` | cap on a *contained* aurora patch, which is always covered by glass |
+| `--mask-opaque` | `#000` | `#000` | the opaque end of the aurora grid's mask gradient; never painted |
 
 ### Chart and avatar palette
 
@@ -83,12 +105,15 @@ Charts read these through CSS variables (var(--chart-1)), including axes, grid (
 
 ```css
 .glass {
-  background: var(--glass-fill);
-  border: 1px solid var(--border);
+  /* --glass-tint (the page background at 55% alpha) sits under the white sheen,
+     so a glass surface is legible whatever is behind it. */
+  background-color: var(--glass-tint);
+  background-image: linear-gradient(var(--glass-fill), var(--glass-fill));
+  border: var(--hairline) solid var(--border);
   border-radius: var(--radius-lg);
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
   backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
-  box-shadow: inset 0 1px 0 var(--glass-highlight), var(--shadow-glass);
+  box-shadow: inset 0 var(--hairline) 0 var(--glass-highlight), var(--shadow-glass);
 }
 @supports not (backdrop-filter: blur(1px)) { .glass { background: var(--bg-elevated); } }
 @media (prefers-reduced-transparency: reduce) {
@@ -101,6 +126,8 @@ Supporting tokens: glass-blur 1.25rem (0.75rem below 40em); glass-highlight rgba
 Rules: glass only sits over the aurora or a colour field. Never put glass on glass; nested elements use solid surfaces. Never animate the blur radius.
 
 **Aurora background:** one fixed layer behind content with three blurred blobs (aurora-1 to 3), each with a static blur of about 5rem and a slow transform-only drift of 30 to 50 seconds. It pauses when the tab is hidden and is static under reduced motion. Add a faint noise overlay (inline SVG feTurbulence at 3 to 4% opacity) to prevent colour banding. An optional 1px grid at about 4% opacity, masked to fade out, gives the futuristic feel.
+
+The blobs carry `--aurora-blob-opacity` — the highest cap at which every text token in §3 still clears 4.5:1 over the *worst-case* stack of all three blobs, since text can land anywhere on the fixed layer. It is 0.18 in dark and 1 in light, and it is solved by `scripts/solve-aurora-cap.mjs`, never guessed. A **contained** patch (`.aurora-patch`, a rounded local colour field) may run hotter via `--aurora-patch-opacity`, because a patch is always covered by glass, and the glass tint is what keeps text legible. Glass is reviewed over such a patch in `/dev/gallery`.
 
 ## 5. Typography
 
@@ -123,19 +150,36 @@ Rules: glass only sits over the aurora or a colour field. Never put glass on gla
 
 ## 6. Spacing, layout and responsiveness
 
-- Spacing scale: 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4, 6, 8 rem (space-1 to space-10). Nothing outside it.
+- Spacing scale: 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4, 6, 8 rem (space-1 to space-10). Nothing outside it. The spec names and Tailwind's numeric steps are different numbers — see the table below.
 - Section padding-block: clamp(4rem, 3rem + 6vw, 8rem).
-- Container: max-inline-size 75rem, padding-inline 1rem, then 1.5rem from 40em, then 2rem from 64em.
-- Radii: 0.5rem, 1rem, 1.5rem, and pill. Hairlines are 1px.
+- Container: max-inline-size 75rem (`page`), 65ch (`measure`) or 28rem (`narrow`); padding-inline 1rem, then 1.5rem from 40em, then 2rem from 64em.
+- Radii: `--radius-sm` 0.5rem, `--radius-md` 1rem, `--radius-lg` 1.5rem, `--radius-pill`. There is no `xl`. Hairlines are 1px.
 - Breakpoints (in em): 40, 48, 64, 80.
 - Minimum touch target 2.75rem.
-- z-index scale: base 0, raised 10, nav 100, dropdown 200, modal 300, toast 400.
+- z-index scale: base 0, raised 10, nav 100, dropdown 200, modal 300, toast 400 — bridged as the Tailwind utilities `z-raised`, `z-nav`, `z-dropdown`, `z-modal` and `z-toast`. `z-10` and friends are not defined.
 - Use logical properties (padding-inline, margin-block, inline-size).
 - Long text and nicknames wrap with overflow-wrap: anywhere. No horizontal page scroll at any width.
 
-**Primitives:** Container, Section, Stack (column with gap token), Cluster (wrapping row), Grid (repeat(auto-fit, minmax(min(100%, 17rem), 1fr))), and Bento (12 columns from 64em, 2 from 40em, 1 below).
+**Spacing: spec names vs Tailwind steps.** These are *not* the same numbers, and confusing them silently produces off-scale values — `space-5` is 1.5rem, which is Tailwind `p-6`, not `p-5` (1.25rem, which is not on the scale). Two gates enforce the table: the ESLint rule `harbour/no-off-scale-spacing` and the spacing rule in `stylelint.config.mjs`.
 
-**Cards adapt to their own width** using container queries (container-type: inline-size on the card wrapper), not the viewport.
+| Spec name | rem | Tailwind step | Referred to in CSS as |
+| --- | --- | --- | --- |
+| space-1 | 0.25 | 1 | `var(--space-1)` |
+| space-2 | 0.5 | 2 | `var(--space-2)` |
+| space-3 | 0.75 | 3 | `var(--space-3)` |
+| space-4 | 1 | 4 | `var(--space-4)` |
+| space-5 | 1.5 | 6 | `var(--space-5)` |
+| space-6 | 2 | 8 | `var(--space-6)` |
+| space-7 | 3 | 12 | `var(--space-7)` |
+| space-8 | 4 | 16 | `var(--space-8)` |
+| space-9 | 6 | 24 | `var(--space-9)` |
+| space-10 | 8 | 32 | `var(--space-10)` |
+
+Any other Tailwind step in a `p*`, `m*`, `gap*` or `space-*` utility is an error. `0`, `px`, `auto` and `space-x-reverse` are keywords rather than steps, and are allowed. In CSS, padding, margin, gap and inset declarations may only take `var(--space-*)`, `0`, `auto`, `var(--section-padding-block)`, `var(--container-padding-inline)`, or the aurora blob geometry tokens (which are corner offsets in `%`, not spacing steps). `scroll-margin-*` and `scroll-padding-*` are deliberately not policed — they are scroll-snap offsets, not layout spacing.
+
+**Primitives:** Container, Section, Stack (column with gap token), Cluster (wrapping row), Grid (repeat(auto-fit, minmax(min(100%, X), 1fr)), where X is 14rem, 17rem or 22rem), and Bento (12 columns from 64em, 2 from 40em, 1 below).
+
+**Cards adapt to their own width** using container queries (container-type: inline-size on the card wrapper), not the viewport. A documented `.cq` wrapper carries the pattern, with Tailwind v4 `@` variants for the queries.
 
 **Landing nav:** sticky glass top bar. Logo on the left, links (Features, How it works, Trust), then Log in (ghost) and Get started (primary). Below 48em it becomes a sheet menu with 2.75rem items.
 
@@ -285,7 +329,7 @@ Use Zustand persist with a versioned schema and zod validation on read. Wrap eve
 
 ## 12. Quality gates
 
-- **Stylelint:** ban px except 1px; ban hex, rgb and hsl outside the token file. **ESLint:** flag Tailwind arbitrary values such as w-\[437px\].
+- **Stylelint:** ban px except 1px; ban hex, rgb and hsl outside the token file; restrict padding, margin, gap and inset values to the spacing scale, the section/container tokens, `0`, `auto` or the aurora geometry tokens. **ESLint:** flag Tailwind arbitrary values such as w-\[437px\], and off-scale spacing steps such as `p-5` or `gap-7` (see the §6 mapping table).
 - **Playwright matrix:** every route at 360, 390, 768, 1024 and 1440 px, in both themes, with screenshots. Fail if scrollWidth exceeds clientWidth. Add a 200% zoom pass.
 - **axe-core:** no serious or critical violations, in both themes.
 - **Gallery page** at /dev/gallery showing every component in every state, with a theme toggle, behind a dev flag.

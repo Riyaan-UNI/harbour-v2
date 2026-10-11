@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Aurora } from '../../components/Aurora';
+import { AuroraPatch } from '../../components/AuroraPatch';
 import { ThemeToggle } from '../../components/ThemeToggle';
 import { THEME_CHANGE_EVENT } from '../../theme/theme';
 import { useResolvedTheme } from '../../theme/useTheme';
@@ -64,9 +65,9 @@ const SPACE_TOKENS = [
 ] as const;
 
 const RADIUS_TOKENS = [
+  '--radius-sm',
   '--radius-md',
   '--radius-lg',
-  '--radius-xl',
   '--radius-pill',
 ] as const;
 
@@ -149,7 +150,7 @@ function Section({
   children: ReactNode;
 }): JSX.Element {
   return (
-    <section className="mt-10">
+    <section className="mt-12">
       <h2 className="type-h2 text-text">{title}</h2>
       <p className="type-small text-text-muted max-w-measure mt-2">
         {description}
@@ -164,7 +165,7 @@ function Swatch({ token, value }: { token: string; value: string }): JSX.Element
     <li className="flex items-center gap-3">
       <span
         aria-hidden="true"
-        className="border-border size-8 shrink-0 rounded-md border"
+        className="border-border size-8 shrink-0 rounded-sm border"
         style={{ backgroundColor: `var(${token})` }}
       />
       <span className="min-w-0">
@@ -260,7 +261,7 @@ export function Gallery(): JSX.Element {
                 </span>
                 <span
                   aria-hidden="true"
-                  className="bg-accent-fill block h-3 rounded-md"
+                  className="bg-accent-fill block h-3 rounded-sm"
                   style={{ inlineSize: `var(${token})` }}
                 />
                 <span className="type-small text-text-muted">
@@ -273,7 +274,7 @@ export function Gallery(): JSX.Element {
 
         <Section
           title="Radii"
-          description="md 0.5rem, lg 1rem, xl 1.5rem and pill. Glass uses lg; the university logo box uses md."
+          description="sm 0.5rem, md 1rem, lg 1.5rem and pill. Glass uses lg (spec section 4); the university logo box uses md (spec section 8)."
         >
           <ul className="flex flex-wrap items-end gap-6">
             {RADIUS_TOKENS.map((token) => (
@@ -293,17 +294,23 @@ export function Gallery(): JSX.Element {
         </Section>
 
         <Section
-          title="Glass over the aurora"
-          description="Three glass surfaces, the maximum the spec allows on screen at once. The blur is static and never animated."
+          title="Glass over a colour field"
+          description="Three glass surfaces, the maximum the spec allows on screen at once. The cards sit on their own contained aurora patch, so glass is always reviewed over a real colour field rather than wherever the page blobs happen to land. The blur is static and never animated."
         >
-          <div className="grid gap-6 md:grid-cols-3">
-            {GLASS_CARDS.map((card) => (
-              <article key={card.title} className="glass p-5">
-                <h3 className="type-h3 text-text">{card.title}</h3>
-                <p className="type-small text-text-muted mt-2">{card.body}</p>
-              </article>
-            ))}
-          </div>
+          <AuroraPatch>
+            <div className="p-6">
+              <div className="grid gap-6 md:grid-cols-3">
+                {GLASS_CARDS.map((card) => (
+                  <article key={card.title} className="glass p-6">
+                    <h3 className="type-h3 text-text">{card.title}</h3>
+                    <p className="type-small text-text-muted mt-2">
+                      {card.body}
+                    </p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </AuroraPatch>
         </Section>
 
         <Section
@@ -343,7 +350,7 @@ export function Gallery(): JSX.Element {
                   <span
                     aria-hidden="true"
                     className={cn(
-                      'bg-accent-fill block size-8 rounded-md',
+                      'bg-accent-fill block size-8 rounded-sm',
                       'transition-transform ease-out',
                       item.utility,
                       moved && 'translate-x-12',

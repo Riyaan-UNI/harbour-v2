@@ -31,7 +31,7 @@ export function Aurora(): JSX.Element {
       <div className="aurora__blob aurora__blob--2" />
       <div className="aurora__blob aurora__blob--3" />
       <div className="aurora__grid" />
-      <div className="aurora__noise" />
+      <div className="aurora-noise" />
     </div>
   );
 }
