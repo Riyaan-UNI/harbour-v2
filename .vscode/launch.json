@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "//": "Run `npm run dev` first, then start this to debug in Chrome with source maps.",
+      "name": "Harbour: Chrome against dev server",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://127.0.0.1:5173/dev/gallery",
+      "webRoot": "${workspaceFolder}/src"
+    }
+  ]
+}

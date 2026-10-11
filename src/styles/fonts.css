@@ -1,0 +1,42 @@
+/* ==========================================================================
+   Harbour — font loading (spec §5)
+
+   Self-hosted via the Fontsource variable packages. Each package ships its own
+   @font-face rules with `font-display: swap` already set.
+
+   Noto Sans TC is a CJK fallback, split by the package into ~108 unicode-range
+   subsets. Nothing downloads until a glyph in that range is actually rendered,
+   so it costs nothing on a Latin-only page.
+
+   The two blocks at the bottom are metric-adjusted local fallbacks: they make
+   Arial occupy the same space as the web font, so swapping in the real font
+   moves nothing. The values are measured, not guessed — regenerate with
+   `node scripts/measure-font-fallbacks.mjs` if a font version changes.
+   ========================================================================== */
+
+@import '@fontsource-variable/bricolage-grotesque';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+@import '@fontsource-variable/noto-sans-tc';
+
+/* Bricolage Grotesque (headings) vs Arial
+   web width 3796.31 / ascent 93 / descent 27, Arial 3812.55 / 91 / 21 */
+@font-face {
+  font-family: 'Bricolage Grotesque Fallback';
+  src: local('Arial');
+  size-adjust: 100.76%;
+  ascent-override: 92.3%;
+  descent-override: 26.8%;
+  line-gap-override: 0%;
+}
+
+/* Geist (body) vs Arial
+   web width 3796.2 / ascent 101 / descent 30, Arial 3812.55 / 91 / 21 */
+@font-face {
+  font-family: 'Geist Fallback';
+  src: local('Arial');
+  size-adjust: 100.43%;
+  ascent-override: 100.57%;
+  descent-override: 29.87%;
+  line-gap-override: 0%;
+}

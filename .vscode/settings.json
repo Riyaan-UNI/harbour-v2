@@ -1,0 +1,20 @@
+{
+  "//": "Harbour. Deliberately minimal — see docs/DESIGN_SPEC.md for the rules these settings support.",
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+
+  "eslint.useFlatConfig": true,
+  "stylelint.validate": ["css"],
+
+  "//css": "VS Code's built-in CSS checker does not understand Tailwind v4 at-rules; Stylelint does.",
+  "css.validate": false,
+
+  "//tailwind": "So Tailwind IntelliSense sees the classes inside cn() / clsx() calls.",
+  "tailwindCSS.experimental.classRegex": [
+    ["(?:cn|clsx|twMerge)\\(([^)]*)\\)", "[\"'`]([^\"'`]*)[\"'`]"]
+  ],
+
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true
+}

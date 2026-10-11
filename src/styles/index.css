@@ -1,0 +1,16 @@
+/* ==========================================================================
+   Harbour — stylesheet entry
+
+   Import order matters: Tailwind first, then fonts, tokens and base. tokens.css
+   carries the @theme bridge that turns semantic variables into utilities.
+   ========================================================================== */
+
+@import 'tailwindcss';
+@import './fonts.css';
+@import './tokens.css';
+@import './base.css';
+
+/* Spec §11: the dark variant is keyed to data-theme on <html>, never on a
+   wrapper, so Radix and shadcn portals inherit it.
+   Syntax per the Tailwind v4 dark-mode docs, "Using a data attribute". */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));

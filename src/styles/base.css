@@ -1,0 +1,360 @@
+/* ==========================================================================
+   Harbour — base layer
+   Reset-adjacent styles, the .glass surface, the aurora background, and the
+   typographic role utilities. Colours and sizes come only from tokens.css.
+   ========================================================================== */
+
+@layer base {
+  /* Keep the browser default root size (spec: do not set 62.5%). */
+  html {
+    -webkit-text-size-adjust: 100%;
+    scrollbar-width: thin;
+    scrollbar-color: var(--text-subtle) transparent;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: var(--type-body);
+    line-height: var(--leading-body);
+    min-block-size: 100svh;
+    overflow-wrap: anywhere;
+  }
+
+  /* Long words and nicknames wrap rather than forcing a horizontal scrollbar. */
+  h1,
+  h2,
+  h3,
+  p {
+    overflow-wrap: anywhere;
+  }
+
+  /* Zero-specificity so any component can override it. */
+  :where(:focus-visible) {
+    outline: var(--focus-ring-width) solid var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  ::selection {
+    background-color: var(--accent-fill);
+    color: var(--on-accent);
+  }
+
+  /* Spec §7: under reduced motion, show final states with no movement. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Glass — spec §4, verbatim, plus the two fallbacks it requires.
+   Glass only ever sits over the aurora or a colour field. Never nest it.
+   -------------------------------------------------------------------------- */
+
+.glass {
+  /* --glass-tint (the page background at 55% alpha) sits under the spec's white
+     sheen, so a glass surface is legible regardless of what is behind it. */
+  background-color: var(--glass-tint);
+  background-image: linear-gradient(var(--glass-fill), var(--glass-fill));
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-lg);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+  box-shadow:
+    inset 0 var(--hairline) 0 var(--glass-highlight),
+    var(--shadow-glass);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .glass {
+    background: var(--bg-elevated);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass {
+    background: var(--bg-elevated);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Aurora — spec §4. One fixed layer behind content with three blurred blobs.
+   Transform-only drift, paused while the tab is hidden, static under reduced
+   motion. Geometry is PROPOSED (the spec gives no sizes or positions).
+   -------------------------------------------------------------------------- */
+
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-base);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.aurora__blob {
+  position: absolute;
+
+  /* Capped so text placed directly over a blob still clears 4.5:1. The value
+     is solved, not guessed — see scripts/solve-aurora-cap.mjs. */
+  opacity: var(--aurora-blob-opacity);
+  border-radius: var(--radius-pill);
+  filter: blur(var(--aurora-blur));
+  will-change: transform;
+  animation: harbour-drift-a var(--aurora-drift-1) var(--ease-in-out) infinite
+    alternate;
+}
+
+.aurora__blob--1 {
+  inset-block-start: -20%;
+  inset-inline-start: -15%;
+  inline-size: 70vmax;
+  block-size: 70vmax;
+  background-color: var(--aurora-1);
+}
+
+.aurora__blob--2 {
+  inset-block-end: -25%;
+  inset-inline-end: -20%;
+  inline-size: 60vmax;
+  block-size: 60vmax;
+  background-color: var(--aurora-2);
+  animation-name: harbour-drift-b;
+  animation-duration: var(--aurora-drift-2);
+}
+
+.aurora__blob--3 {
+  inset-block-start: 25%;
+  inset-inline-start: 35%;
+  inline-size: 45vmax;
+  block-size: 45vmax;
+  background-color: var(--aurora-3);
+  animation-name: harbour-drift-c;
+  animation-duration: var(--aurora-drift-3);
+}
+
+/* Paused by the component when the tab is hidden. */
+.aurora[data-paused='true'] .aurora__blob {
+  animation-play-state: paused;
+}
+
+/* Faint noise overlay — stops the large blurred blobs from banding. */
+.aurora__noise {
+  position: absolute;
+  inset: 0;
+  opacity: var(--aurora-noise-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+/* Optional 1px grid, masked to fade out. Cell size is PROPOSED. */
+.aurora__grid {
+  position: absolute;
+  inset: 0;
+  opacity: var(--aurora-grid-opacity);
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      var(--border) 0 var(--hairline),
+      transparent var(--hairline) var(--aurora-grid-size)
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      var(--border) 0 var(--hairline),
+      transparent var(--hairline) var(--aurora-grid-size)
+    );
+  -webkit-mask-image: radial-gradient(
+    ellipse at 50% 0%,
+    var(--mask-opaque) 0%,
+    transparent 75%
+  );
+  mask-image: radial-gradient(
+    ellipse at 50% 0%,
+    var(--mask-opaque) 0%,
+    transparent 75%
+  );
+}
+
+@keyframes harbour-drift-a {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  to {
+    transform: translate3d(6%, -5%, 0) scale(1.12);
+  }
+}
+
+@keyframes harbour-drift-b {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.05);
+  }
+
+  to {
+    transform: translate3d(-7%, 6%, 0) scale(1);
+  }
+}
+
+@keyframes harbour-drift-c {
+  from {
+    transform: translate3d(0, 0, 0) scale(0.95);
+  }
+
+  to {
+    transform: translate3d(-5%, -7%, 0) scale(1.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora__blob {
+    animation: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Typographic roles — spec §5. Exposed as Tailwind utilities so they compose
+   with variants, and so no component ever hand-writes a font size.
+   -------------------------------------------------------------------------- */
+
+@utility type-display {
+  font-family: var(--font-heading);
+  font-size: var(--type-display);
+  font-weight: 700;
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display);
+  max-inline-size: var(--measure-display);
+}
+
+@utility type-h1 {
+  font-family: var(--font-heading);
+  font-size: var(--type-h1);
+  font-weight: 700;
+  line-height: var(--leading-h1);
+}
+
+@utility type-h2 {
+  font-family: var(--font-heading);
+  font-size: var(--type-h2);
+  font-weight: 600;
+  line-height: var(--leading-h2);
+}
+
+@utility type-h3 {
+  font-family: var(--font-heading);
+  font-size: var(--type-h3);
+  font-weight: 600;
+  line-height: var(--leading-h3);
+}
+
+@utility type-body {
+  font-family: var(--font-body);
+  font-size: var(--type-body);
+  font-weight: 400;
+  line-height: var(--leading-body);
+  max-inline-size: var(--measure-body);
+}
+
+@utility type-small {
+  font-family: var(--font-body);
+  font-size: var(--type-small);
+  font-weight: 400;
+  line-height: var(--leading-small);
+}
+
+@utility type-label {
+  font-family: var(--font-mono);
+  font-size: var(--type-label);
+  font-weight: 500;
+  line-height: var(--leading-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------------------
+   Motion utilities — spec §7 durations as Tailwind utilities, so no component
+   ever writes a raw millisecond value.
+   -------------------------------------------------------------------------- */
+
+@utility duration-fast {
+  transition-duration: var(--dur-fast);
+}
+
+@utility duration-base {
+  transition-duration: var(--dur-base);
+}
+
+@utility duration-slow {
+  transition-duration: var(--dur-slow);
+}
+
+@utility duration-scene {
+  transition-duration: var(--dur-scene);
+}
+
+/* --------------------------------------------------------------------------
+   Layers — the aurora is a fixed layer at --z-base, so page content has to sit
+   above it. Both values come from the spec's z-index scale.
+   -------------------------------------------------------------------------- */
+
+.layer-raised {
+  position: relative;
+  z-index: var(--z-raised);
+}
+
+/* --------------------------------------------------------------------------
+   Theme switching — spec §11.
+
+   Supported path: the View Transitions API draws a circular reveal out of the
+   toggle. Other transitions are suspended for the duration so nothing else
+   animates underneath it.
+
+   Fallback path: a short colour crossfade (see .harbour-theme-fade below).
+   Reduced motion: no transition at all — theme.ts applies the change directly.
+   -------------------------------------------------------------------------- */
+
+.harbour-theme-switching,
+.harbour-theme-switching * {
+  transition: none !important;
+}
+
+@supports (view-transition-name: none) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+
+  ::view-transition-new(root) {
+    animation: harbour-reveal var(--dur-slow) var(--ease-out) both;
+  }
+}
+
+@keyframes harbour-reveal {
+  from {
+    clip-path: circle(0% at var(--vt-x, 50%) var(--vt-y, 50%));
+  }
+
+  to {
+    clip-path: circle(150% at var(--vt-x, 50%) var(--vt-y, 50%));
+  }
+}
+
+/* Guarded so it can never out-specify the reduced-motion rule in @layer base. */
+@media not (prefers-reduced-motion: reduce) {
+  .harbour-theme-fade,
+  .harbour-theme-fade * {
+    transition:
+      background-color var(--dur-base) var(--ease-out),
+      border-color var(--dur-base) var(--ease-out),
+      color var(--dur-base) var(--ease-out);
+  }
+}

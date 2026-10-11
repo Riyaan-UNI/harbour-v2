@@ -1,0 +1,311 @@
+/* ==========================================================================
+   Harbour — design tokens
+   Source of truth: docs/DESIGN_SPEC.md, sections 3 to 7.
+
+   This file is the ONE place allowed to contain raw colour values.
+   Stylelint exempts it from `color-no-hex` and `function-disallowed-list`.
+
+   Structure
+     1. Dark theme (default) — spec §3 colour, §4 glass, §5 type, §6 space,
+        layout and z-index, §7 motion.
+     2. Light theme — spec §3 says dark and light are designed separately,
+        never auto-inverted, so light is written out in full.
+     3. Responsive overrides.
+     4. Tailwind bridge — maps these semantic variables onto Tailwind v4
+        theme namespaces so they become utilities. Declared here, at the end,
+        so every token lives in this one file.
+
+   Values marked "PROPOSED" are not in the spec. They are listed in
+   docs/PROGRESS.md for review.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Dark theme — the default
+   -------------------------------------------------------------------------- */
+
+:root {
+  /* --- §3 Colour ------------------------------------------------------- */
+  --bg: #061b1a;
+  --bg-elevated: #0b2624;
+  --glass-fill: rgba(255, 255, 255, 0.06);
+  --glass-fill-strong: rgba(255, 255, 255, 0.1);
+  --border: rgba(255, 255, 255, 0.14);
+  --text: #eaf5f3;
+  --text-muted: #a9c4c0;
+  --text-subtle: #7f9e9a;
+  --accent-fill: #4fe3d0;
+  --on-accent: #04201d;
+  --accent-text: #4fe3d0;
+  --gold-fill: #f1c96f;
+  --on-gold: #2b2000;
+  --gold-text: #f1c96f;
+  --danger: #ff8a80;
+  --success: #6ee7a6;
+  --focus-ring: #7cf0e3;
+  --aurora-1: #0f6b63;
+  --aurora-2: #1aa89b;
+  --aurora-3: rgba(241, 201, 111, 0.12);
+
+  /* --- §3 Chart and avatar palette ------------------------------------- */
+  --chart-1: #4fe3d0;
+  --chart-2: #f1c96f;
+  --chart-3: #8fa8ff;
+  --chart-4: #ff9e7a;
+  --chart-5: #c79bff;
+
+  /* --- §4 Glass supporting tokens -------------------------------------- */
+  --glass-blur: 1.25rem;
+  --glass-highlight: rgba(255, 255, 255, 0.22);
+  --shadow-glass: 0 1.5rem 3rem -1rem rgba(0, 0, 0, 0.5);
+
+  /* ADDED (not in spec §3/§4). The page background at 55% alpha, painted
+     under the white sheen so a glass surface stays legible whatever is behind
+     it. See docs/PROGRESS.md for the axe run that forced this. */
+  --glass-tint: rgba(6, 27, 26, 0.55);
+
+  /* --- §4 Aurora background ------------------------------------------- */
+  --aurora-blur: 5rem;
+
+  /* ADDED. The blobs are decorative and sit beneath content, so text can land
+     directly on one. 0.22 is the highest value at which the worst-case stack of
+     all three blobs still gives --text-muted 4.5:1 in dark. Solved by
+     scripts/solve-aurora-cap.mjs, not guessed. */
+  --aurora-blob-opacity: 0.22;
+  --aurora-noise-opacity: 0.035; /* PROPOSED — spec says "3 to 4%" */
+  --aurora-grid-opacity: 0.04; /* PROPOSED — spec says "about 4%" */
+  --aurora-grid-size: 4rem; /* PROPOSED — spec gives no cell size */
+  --aurora-drift-1: 30s; /* spec: "30 to 50 seconds" */
+  --aurora-drift-2: 40s;
+  --aurora-drift-3: 50s;
+
+  /* --- §5 Typography roles -------------------------------------------- */
+  --type-display: clamp(2.75rem, 1.6rem + 5.5vw, 6rem);
+  --type-h1: clamp(2.25rem, 1.5rem + 3.5vw, 4rem);
+  --type-h2: clamp(1.75rem, 1.3rem + 2.2vw, 2.75rem);
+  --type-h3: clamp(1.25rem, 1.1rem + 0.8vw, 1.625rem);
+  --type-body: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --type-small: 0.875rem;
+  --type-label: 0.75rem;
+
+  --leading-display: 1.05;
+  --leading-h1: 1.1;
+  --leading-h2: 1.15;
+  --leading-h3: 1.25;
+  --leading-body: 1.6;
+  --leading-small: 1.5;
+  --leading-label: 1.3;
+
+  --tracking-display: -0.02em;
+  --tracking-label: 0.08em;
+
+  --measure-display: 16ch;
+  --measure-body: 65ch;
+
+  /* --- §6 Spacing scale ------------------------------------------------
+     Exposed under the spec's own names. The ten values are exactly the
+     subset of Tailwind's default numeric scale at 1, 2, 3, 4, 6, 8, 12,
+     16, 24 and 32 — see the mapping note in docs/PROGRESS.md. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+  --space-10: 8rem;
+
+  /* --- §6 Layout ------------------------------------------------------- */
+  --section-padding-block: clamp(4rem, 3rem + 6vw, 8rem);
+  --container-max-inline-size: 75rem;
+  --container-padding-inline: 1rem;
+  --touch-target: 2.75rem;
+
+  /* Hairline. The only permitted px value in the codebase (builder rule 2). */
+  --hairline: 1px;
+
+  /* Mask stop. Not a visible colour: it is the opaque end of the aurora grid's
+     mask gradient, kept here so no other file has to write a raw value. */
+  --mask-opaque: #000;
+
+  /* Focus ring. Spec §3 says "2px ring, 2px offset"; expressed in rem so
+     builder rule 2 ("px only for 1px hairlines") still holds. */
+  --focus-ring-width: 0.125rem;
+  --focus-ring-offset: 0.125rem;
+
+  /* --- §6 z-index scale ------------------------------------------------ */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-nav: 100;
+  --z-dropdown: 200;
+  --z-modal: 300;
+  --z-toast: 400;
+
+  /* --- §7 Motion -------------------------------------------------------
+     Durations live here as plain custom properties: Tailwind v4 has no
+     duration namespace, so they are consumed by CSS directly. */
+  --dur-fast: 150ms;
+  --dur-base: 300ms;
+  --dur-slow: 600ms;
+  --dur-scene: 1200ms;
+
+  /* Motion spring values are read by the Motion library as numbers. */
+  --spring-stiffness: 260;
+  --spring-damping: 24;
+}
+
+/* --------------------------------------------------------------------------
+   2. Light theme — designed separately, not inverted
+   -------------------------------------------------------------------------- */
+
+:root[data-theme='light'] {
+  /* --- §3 Colour ------------------------------------------------------- */
+  --bg: #f7f3e9;
+  --bg-elevated: #ffffff;
+  --glass-fill: rgba(255, 255, 255, 0.62);
+  --glass-fill-strong: rgba(255, 255, 255, 0.82);
+  --border: rgba(11, 57, 53, 0.14);
+  --text: #0b2b28;
+  --text-muted: #3f5f5b;
+  --text-subtle: #4f6e6a;
+  --accent-fill: #0b3935;
+  --on-accent: #f7f3e9;
+  --accent-text: #09675f;
+  --gold-fill: #f1c96f;
+  --on-gold: #2b2000;
+  --gold-text: #7a5a00;
+  --danger: #b3261e;
+  --success: #1b7a4b;
+  --focus-ring: #09675f;
+  --aurora-1: #bfe5e2;
+  --aurora-2: #f7e3b0;
+  --aurora-3: #e7f1ee;
+
+  /* --- §3 Chart and avatar palette ------------------------------------- */
+  --chart-1: #0a6f66;
+  --chart-2: #b7791f;
+  --chart-3: #3b55d9;
+  --chart-4: #c2410c;
+  --chart-5: #7c3aed;
+
+  /* --- §4 Glass supporting tokens -------------------------------------- */
+  --glass-highlight: rgba(255, 255, 255, 0.9);
+  --shadow-glass: 0 1.5rem 3rem -1rem rgba(11, 57, 53, 0.18);
+  --glass-tint: rgba(247, 243, 233, 0.55);
+
+  /* Light already clears 4.5:1 at full strength: the worst-case stack bottoms
+     out at 5.17 for --text-muted. No cap needed, so the token is a no-op. */
+  --aurora-blob-opacity: 1;
+}
+
+/* --------------------------------------------------------------------------
+   3. Responsive overrides
+   -------------------------------------------------------------------------- */
+
+/* Spec §4: glass-blur is 0.75rem below 40em. */
+@media (width < 40em) {
+  :root {
+    --glass-blur: 0.75rem;
+  }
+}
+
+/* Spec §6: container padding grows at 40em and 64em. */
+@media (width >= 40em) {
+  :root {
+    --container-padding-inline: 1.5rem;
+  }
+}
+
+@media (width >= 64em) {
+  :root {
+    --container-padding-inline: 2rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. Tailwind v4 bridge
+   Maps the semantic tokens above onto Tailwind theme namespaces so they
+   become utilities (bg-bg, text-text-muted, font-heading, rounded-lg, …).
+
+   `static` keeps every variable in the compiled :root output even when no
+   utility uses it — the spec's own CSS (e.g. `var(--radius-lg)` in .glass)
+   and the SVG scenes read them directly.
+
+   Radii, fonts, easings and breakpoints are declared here rather than in
+   section 1 because Tailwind owns those namespaces: a `@theme` variable is
+   emitted to :root as a real custom property, so `var(--radius-lg)` and
+   `rounded-lg` resolve to the same single definition.
+   -------------------------------------------------------------------------- */
+
+@theme static {
+  /* --- §6 Radii --------------------------------------------------------
+     PROPOSED mapping. The spec lists 0.5 / 1 / 1.5 rem and "pill" without
+     naming which is md and which is lg. `--radius-lg` is used by .glass and
+     "radius md" by UniversityLogo (a 2 to 3rem box), so the only mapping
+     that makes both usages sensible is md = 0.5, lg = 1, xl = 1.5. */
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-pill: 9999rem;
+
+  /* --- §5 Typography ---------------------------------------------------
+     Fontsource variable packages, with Noto Sans TC as the CJK fallback and
+     the metric-adjusted local fallback from fonts.css in between. Spec §5
+     allows a one-token swap of the heading family to Geist 600. */
+  --font-heading:
+    'Bricolage Grotesque Variable', 'Bricolage Grotesque Fallback',
+    'Noto Sans TC Variable', system-ui, sans-serif;
+  --font-body:
+    'Geist Variable', 'Geist Fallback', 'Noto Sans TC Variable', system-ui,
+    sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SFMono-Regular', monospace;
+
+  /* --- §7 Easings ------------------------------------------------------ */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* --- §6 Breakpoints --------------------------------------------------
+     The spec specifies em. Tailwind's defaults are the same numbers in rem,
+     which diverge from em when the user changes the browser's base size. */
+  --breakpoint-sm: 40em;
+  --breakpoint-md: 48em;
+  --breakpoint-lg: 64em;
+  --breakpoint-xl: 80em;
+  --breakpoint-2xl: initial;
+
+  /* --- §6 Container ---------------------------------------------------- */
+  --container-page: var(--container-max-inline-size);
+  --container-measure: var(--measure-body);
+}
+
+@theme static inline {
+  /* --- §3 Colour ------------------------------------------------------- */
+  --color-bg: var(--bg);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-glass-fill: var(--glass-fill);
+  --color-glass-fill-strong: var(--glass-fill-strong);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-text-subtle: var(--text-subtle);
+  --color-accent-fill: var(--accent-fill);
+  --color-on-accent: var(--on-accent);
+  --color-accent-text: var(--accent-text);
+  --color-gold-fill: var(--gold-fill);
+  --color-on-gold: var(--on-gold);
+  --color-gold-text: var(--gold-text);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --color-focus-ring: var(--focus-ring);
+  --color-aurora-1: var(--aurora-1);
+  --color-aurora-2: var(--aurora-2);
+  --color-aurora-3: var(--aurora-3);
+
+  /* --- §3 Chart palette ------------------------------------------------ */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+}
