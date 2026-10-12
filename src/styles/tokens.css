@@ -94,6 +94,14 @@
      keeps text legible — the page aurora has bare text on it, so its cap is
      far lower. Solved by scripts/solve-aurora-cap.mjs, not guessed. */
   --aurora-patch-opacity: 0.29;
+
+  /* ADDED in Brick 3. The hero's own contained patch (`.aurora-patch--hero`).
+     It may run hotter than either of the above because it is a different
+     bargain: the only text on the bare patch is the display/H1 headline, which
+     the 3:1 large-text allowance covers, and every other token in the hero sits
+     on a glass panel over the patch. Solved by scripts/solve-aurora-cap.mjs
+     under both rules at once, never guessed. */
+  --aurora-hero-opacity: 0.59;
   --aurora-noise-opacity: 0.035; /* PROPOSED — spec says "3 to 4%" */
   --aurora-grid-opacity: 0.04; /* PROPOSED — spec says "about 4%" */
   --aurora-grid-size: 4rem; /* PROPOSED — spec gives no cell size */
@@ -219,6 +227,10 @@
      behind it. Also a surface text can sit on (through the panel's glass), so
      the script composites it too. Solved, not guessed. */
   --overlay-alpha: 80%;
+
+  /* ADDED. The peak tint of the empty art slot's placeholder gradient, over
+     `--bg-elevated`. Text sits on it, so it is a surface the script checks. */
+  --art-tint-alpha: 8%;
 }
 
 /* --------------------------------------------------------------------------
@@ -275,11 +287,16 @@
   --aurora-blob-opacity: 1;
   --aurora-patch-opacity: 1;
 
+  /* ADDED in Brick 3 — see the dark block. Light clears 4.5:1 at full strength
+     on every surface, so the hero patch is a no-op here too. */
+  --aurora-hero-opacity: 1;
+
   /* ADDED in Brick 3, same value as dark — see the dark block. The solver
      would allow 0.18 here, but one value for both themes keeps the effect
      looking the same in either. */
   --spotlight-alpha: 12%;
   --overlay-alpha: 80%;
+  --art-tint-alpha: 8%;
 }
 
 /* --------------------------------------------------------------------------

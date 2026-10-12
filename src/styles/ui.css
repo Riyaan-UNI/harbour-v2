@@ -240,3 +240,52 @@
     transparent
   );
 }
+
+/* The sheet panel. It meets the inline end and the block edges, so it is
+   anchored rather than centred like the expanded-card panel. */
+.ui-sheet {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-end: 0;
+  inline-size: min(100%, var(--container-narrow));
+  overflow-y: auto;
+  border-start-start-radius: var(--radius-lg);
+  border-end-start-radius: var(--radius-lg);
+  animation: ui-sheet-in var(--dur-base) var(--ease-out);
+}
+
+.ui-sheet[data-state='closed'] {
+  animation: ui-sheet-out var(--dur-fast) var(--ease-in-out);
+}
+
+.ui-sheet__overlay {
+  animation: ui-fade-in var(--dur-base) var(--ease-out);
+}
+
+.ui-sheet__overlay[data-state='closed'] {
+  animation: ui-fade-out var(--dur-fast) var(--ease-in-out);
+}
+
+@keyframes ui-sheet-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes ui-sheet-out {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes ui-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes ui-fade-out {
+  to {
+    opacity: 0;
+  }
+}

@@ -1,15 +1,15 @@
 import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { Aurora } from './components/Aurora';
-import { Toaster } from './components/ui';
 import { Stack, Text } from './components/layout';
+import { Toaster } from './components/ui';
+import { Landing } from './routes/Landing';
 
 /**
  * Routing.
  *
  * Brick 0 to 2a had no product routes — the landing page, signup and app shell
  * all arrive in later bricks, so the only real routes were the dev pages.
- * Brick 3 adds `/` (Part C) and makes the dev pages load on demand.
+ * Brick 3 adds `/`, and the dev pages load on demand.
  *
  * Spec §12: dev pages sit behind a dev flag. They are on under `vite dev` and
  * can be forced on in a build with VITE_ENABLE_GALLERY.
@@ -58,26 +58,12 @@ function RouteFallback(): JSX.Element {
   );
 }
 
-function FoundationPlaceholder(): JSX.Element {
-  return (
-    <>
-      <Aurora />
-      <main className="layer-raised max-w-page mx-auto grid min-h-svh place-content-center px-4 text-center">
-        <p className="type-label text-text-muted">Harbour</p>
-        <h1 className="type-h2 text-text mt-3">Foundation in place</h1>
-        <p className="type-body text-text-muted mx-auto mt-3">
-          Bricks 0 to 2a ship the token layer, theme engine, fonts, aurora and
-          the shared components. The landing page arrives in Brick 3.
-        </p>
-      </main>
-    </>
-  );
-}
-
 export function App(): JSX.Element {
   return (
     <>
       <Routes>
+        <Route path="/" element={<Landing />} />
+
         {devPagesEnabled ? (
           <>
             <Route
@@ -106,17 +92,14 @@ export function App(): JSX.Element {
             />
           </>
         ) : null}
-        <Route
-          path="*"
-          element={
-            devPagesEnabled ? (
-              <Navigate to="/dev/gallery" replace />
-            ) : (
-              <FoundationPlaceholder />
-            )
-          }
-        />
+
+        {/* Signup, login and the app shell arrive in Bricks 5 to 9. Until then
+            an unknown path goes back to the landing page rather than to a dead
+            end. The dev routes above still win, because they are declared first
+            and match exactly. */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+
       {/* One Toaster for the whole app, so a toast never has two homes. */}
       <Toaster />
     </>

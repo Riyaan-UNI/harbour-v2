@@ -87,6 +87,18 @@
   }
 }
 
+/* A glass *bar*: the same recipe with the rounded corners and the inset
+   highlight taken off, for a surface that meets the edges of the viewport —
+   the landing nav. Declared after `.glass` so it wins on source order rather
+   than on specificity, which keeps both rules readable. */
+.glass--bar {
+  border-radius: 0;
+  border-block-start: 0;
+  border-inline: 0;
+  border-block-end: var(--hairline) solid var(--border);
+  box-shadow: none;
+}
+
 /* --------------------------------------------------------------------------
    Aurora — spec §4. One fixed layer behind content with three blurred blobs.
    Transform-only drift, paused while the tab is hidden, static under reduced
@@ -281,6 +293,15 @@
 .aurora-patch__content {
   position: relative;
   padding: var(--space-6);
+}
+
+/* Brick 3: the hero's patch. Hotter than either of the other two because it is
+   a different bargain — the only text on the bare patch is the display/H1
+   headline, which the 3:1 large-text allowance covers, and every other token in
+   the hero sits on the copy panel's glass. The cap is solved by
+   scripts/solve-aurora-cap.mjs under both rules at once. */
+.aurora-patch--hero .aurora-patch__blob {
+  opacity: var(--aurora-hero-opacity);
 }
 
 /* --------------------------------------------------------------------------

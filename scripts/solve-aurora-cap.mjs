@@ -123,6 +123,20 @@ const LARGE_TEXT_TOKENS = new Set(['text']);
  */
 const CARD_TEXT_TOKENS = ['text', 'text-muted', 'accent-text', 'gold-text'];
 
+/**
+ * The text tokens the hero carries, which is the same four — and the reason the
+ * hero patch can run hot.
+ *
+ * The hero is the one place the 3:1 large-text allowance is actually spent: the
+ * bare patch carries the display/H1 headline and nothing else, and the headline
+ * is at display and H1 sizes (44px and 36px at the top of each clamp), so 3:1
+ * is the correct requirement. Everything else in the hero — the eyebrow, the
+ * subhead, the buttons — sits on a glass panel over the patch, which is held to
+ * 4.5:1. The eyebrow in particular could never sit bare: it is 0.75rem, so it
+ * is small text, and no patch hot enough to be worth having would hold it.
+ */
+const HERO_TEXT_TOKENS = CARD_TEXT_TOKENS;
+
 const REQUIRED = 4.5;
 const REQUIRED_LARGE = 3;
 /** WCAG 1.4.11 — UI components, focus indicators and graphical objects. */
@@ -140,8 +154,10 @@ function readTheme(name, block) {
     glassTint: colour('glass-tint'),
     blobOpacity: Number.parseFloat(readToken(block, 'aurora-blob-opacity')),
     patchOpacity: Number.parseFloat(readToken(block, 'aurora-patch-opacity')),
+    heroOpacity: Number.parseFloat(readToken(block, 'aurora-hero-opacity')),
     spotlightAlpha: readPercent(block, 'spotlight-alpha'),
     overlayAlpha: readPercent(block, 'overlay-alpha'),
+    artTintAlpha: readPercent(block, 'art-tint-alpha'),
     blobs: [colour('aurora-1'), colour('aurora-2'), colour('aurora-3')],
     text: Object.fromEntries(TEXT_TOKENS.map((t) => [t, colour(t)])),
     // Component pairs.
@@ -303,6 +319,33 @@ const SURFACES = [
     soleBoundary: false,
   },
   { key: 'glass-overlay', label: 'glass/over', blobCap: null },
+  /* The hero patch, bare and under its copy panel. The bare row is held to
+     `--text` alone at 3:1 (the display/H1 allowance); the glass row is held to
+     the four tokens the hero carries at 4.5:1. Neither carries a flat Card, so
+     `--border-strong` is not in their domain. */
+  {
+    key: 'hero',
+    label: 'hero',
+    blobCap: 'hero',
+    tokens: ['text'],
+    soleBoundary: false,
+  },
+  {
+    key: 'glass-hero',
+    label: 'glass/hero',
+    blobCap: 'hero',
+    tokens: HERO_TEXT_TOKENS,
+    soleBoundary: false,
+  },
+  /* The empty art slot's placeholder: `--bg-elevated` under the peak tint of
+     its gradient. The whole plate is modelled at the peak, which is more
+     pessimistic than the gradient actually is. */
+  {
+    key: 'art-placeholder',
+    label: 'art/plate',
+    blobCap: null,
+    soleBoundary: false,
+  },
 ];
 
 /** Resolves a surface key to the colour actually painted. */
@@ -328,6 +371,14 @@ function surfaceColour(theme, key, tokenColour, forContrast) {
       return forContrast
         ? worstOverBlobs(theme, theme.patchOpacity, tokenColour, true).surface
         : null;
+    case 'hero':
+      return forContrast
+        ? worstOverBlobs(theme, theme.heroOpacity, tokenColour, false).surface
+        : null;
+    case 'glass-hero':
+      return forContrast
+        ? worstOverBlobs(theme, theme.heroOpacity, tokenColour, true).surface
+        : null;
     default:
       throw new Error(`unknown surface: ${key}`);
   }
@@ -352,6 +403,17 @@ function cell(theme, tokenColour, surface) {
   }
   if (surface.key === 'glass-overlay') {
     return worstOverlay(theme, tokenColour);
+  }
+  if (surface.key === 'hero') {
+    return worstOverBlobs(theme, theme.heroOpacity, tokenColour, false);
+  }
+  if (surface.key === 'glass-hero') {
+    return worstOverBlobs(theme, theme.heroOpacity, tokenColour, true);
+  }
+  if (surface.key === 'art-placeholder') {
+    // The placeholder plate, at the peak of its gradient.
+    const plate = composite(theme.bgElevated, theme.accentFill, theme.artTintAlpha);
+    return { ratio: contrast(tokenColour, plate) };
   }
   const backdrop = surfaceColour(theme, surface.key, tokenColour, false);
   const painted =
@@ -393,7 +455,9 @@ console.log(`   Required ${REQUIRED}:1 (3:1 allowed only at display and H1 sizes
 console.log('   Aurora and glass/aurora use --aurora-blob-opacity;');
 console.log('   glass/patch uses --aurora-patch-opacity (the gallery glass backdrop);');
 console.log('   glass/spot uses --spotlight-alpha and is held to the four tokens a');
-console.log('   card front can carry — a "~" marks a cell below 4.5:1 that is not gated.\n');
+console.log('   card front can carry; hero and glass/hero use --aurora-hero-opacity.');
+console.log('   A "~" marks a cell below its ratio that is not gated, and a "°" one');
+console.log('   that is rescued by the 3:1 large-text allowance.\n');
 
 for (const theme of THEMES) {
   console.log(`${theme.name}  (blob cap ${theme.blobOpacity}, patch cap ${theme.patchOpacity})`);
@@ -420,7 +484,13 @@ for (const theme of THEMES) {
             LARGE_TEXT_TOKENS.has(token) && ratio >= REQUIRED_LARGE,
         });
       }
-      const mark = fails ? (applies ? ' !' : ' ~') : '  ';
+      const mark = !fails
+        ? '  '
+        : !applies
+          ? ' ~'
+          : LARGE_TEXT_TOKENS.has(token) && ratio >= REQUIRED_LARGE
+            ? ' °'
+            : ' !';
       return `${ratio.toFixed(2)}${mark}`;
     });
     const large = LARGE_TEXT_TOKENS.has(token) ? 'yes' : '-';
@@ -447,10 +517,13 @@ function runPairs(theme, group) {
   const rows = [];
 
   for (const item of group.items) {
-    const cells = item.values.map((value) => {
+    const cells = item.values.map((value, index) => {
       const { ratio } = value;
+      // A column may be reported but not gated — the same `~` convention the
+      // text matrix uses, so the number stays visible.
+      const applies = group.columnRequired?.[index] ?? true;
       const fails = ratio < group.required;
-      if (fails) {
+      if (fails && applies) {
         failures.push({
           matrix: group.title,
           theme: theme.name,
@@ -459,7 +532,8 @@ function runPairs(theme, group) {
           required: group.required,
         });
       }
-      return `${ratio.toFixed(2)}${fails ? ' !' : '  '}`;
+      const mark = fails ? (applies ? ' !' : ' ~') : '  ';
+      return `${ratio.toFixed(2)}${mark}`;
     });
     rows.push([item.label, ...cells]);
   }
@@ -510,19 +584,22 @@ for (const theme of THEMES) {
   });
 
   /* 2c. Sole-boundary border against every surface — 3:1.
-     The spotlight surface is excluded: `--border-strong` is the token for a
-     border that is a surface's *only* boundary, and the only component that
-     uses it is the flat Card, which has no spotlight — the spotlight belongs to
-     the interactive (glass) variant. */
-  const boundarySurfaces = SURFACES.filter((s) => s.soleBoundary !== false);
+     `--border-strong` is the token for a border that is a surface's *only*
+     boundary, and the only component that uses it is the flat Card. So the
+     surfaces a flat Card cannot sit on are printed but not gated (a `~`): the
+     spotlight, the modal panel, and the hero patch and its copy panel. The hero
+     patch carries the display headline, and the copy panel over it is glass,
+     not flat. */
+  const boundaryRequired = SURFACES.map((s) => s.soleBoundary !== false);
   runPairs(theme, {
     title: 'border-strong on every surface (sole boundary)',
     required: REQUIRED_UI,
-    columns: boundarySurfaces.map((s) => s.label),
+    columns: SURFACES.map((s) => s.label),
+    columnRequired: boundaryRequired,
     items: [
       {
         label: 'border-strong',
-        values: boundarySurfaces.map((surface) =>
+        values: SURFACES.map((surface) =>
           cell(theme, theme.borderStrong, surface),
         ),
       },
@@ -604,6 +681,35 @@ function solveSpotlight(theme) {
   return null;
 }
 
+/**
+ * The highest hero-patch opacity that satisfies both of the hero's rules at
+ * once:
+ *
+ *   - the display/H1 headline on the BARE patch at 3:1 — the large-text
+ *     allowance, and the only place in the build where it is spent;
+ *   - every token the hero carries on glass over the patch at 4.5:1, which is
+ *     where the subhead, the eyebrow and the buttons live.
+ *
+ * Whichever binds first is the cap. Solved, not chosen.
+ */
+function solveHeroCap(theme) {
+  for (const cap of CAP_STEPS) {
+    const bare = worstOverBlobs(theme, cap, theme.text.text, false);
+    if (bare.ratio < REQUIRED_LARGE) continue;
+
+    let ok = true;
+    for (const token of HERO_TEXT_TOKENS) {
+      const { ratio } = worstOverBlobs(theme, cap, theme.text[token], true);
+      if (ratio < REQUIRED) {
+        ok = false;
+        break;
+      }
+    }
+    if (ok) return cap;
+  }
+  return null;
+}
+
 console.log('3. Highest cap at which every text token clears 4.5:1\n');
 console.log('theme  token                  current  solved');
 
@@ -611,13 +717,17 @@ const SOLVED = {};
 for (const theme of THEMES) {
   const blob = solveCap(theme, false);
   const patch = solveCap(theme, true);
+  const hero = solveHeroCap(theme);
   const spotlight = solveSpotlight(theme);
-  SOLVED[theme.name] = { blob, patch, spotlight };
+  SOLVED[theme.name] = { blob, patch, hero, spotlight };
   console.log(
     `${theme.name.padEnd(6)} ${'--aurora-blob-opacity'.padEnd(22)} ${String(theme.blobOpacity).padEnd(8)} ${blob}`,
   );
   console.log(
     `${''.padEnd(6)} ${'--aurora-patch-opacity'.padEnd(22)} ${String(theme.patchOpacity).padEnd(8)} ${patch}`,
+  );
+  console.log(
+    `${''.padEnd(6)} ${'--aurora-hero-opacity'.padEnd(22)} ${String(theme.heroOpacity).padEnd(8)} ${hero}`,
   );
   console.log(
     `${''.padEnd(6)} ${'--spotlight-alpha'.padEnd(22)} ${theme.spotlightAlpha.toFixed(2).padEnd(8)} ${spotlight}`,
@@ -659,6 +769,7 @@ const anySolvedBelowCurrent = THEMES.some(
   (t) =>
     SOLVED[t.name].blob < t.blobOpacity ||
     SOLVED[t.name].patch < t.patchOpacity ||
+    SOLVED[t.name].hero < t.heroOpacity ||
     SOLVED[t.name].spotlight < t.spotlightAlpha,
 );
 
@@ -676,7 +787,12 @@ console.log(
 );
 
 if (rescued.length === 0) {
+  const closest = Math.min(
+    ...THEMES.map(
+      (t) => worstOverBlobs(t, t.heroOpacity, t.text.text, false).ratio,
+    ),
+  );
   console.log(
-    `The ${REQUIRED_LARGE}:1 large-text allowance is unused: --text clears ${REQUIRED}:1 everywhere, so no size depends on it.`,
+    `The ${REQUIRED_LARGE}:1 large-text allowance is available on the bare hero patch but unused: --text clears ${REQUIRED}:1 everywhere (closest, on the hero patch: ${closest.toFixed(2)}:1), so no size depends on it. The hero cap is bound by the copy panel's glass, not by the headline.`,
   );
 }

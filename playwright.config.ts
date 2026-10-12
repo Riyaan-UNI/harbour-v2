@@ -1,3 +1,5 @@
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { defineConfig } from '@playwright/test';
 
 /**
@@ -8,6 +10,15 @@ import { defineConfig } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './e2e',
+
+  // Playwright empties this directory before every run. The workspace is on the
+  // mapped `R:` drive, where that cleanup goes through the OS trash and fails
+  // once the directory holds more than a few hundred files — which a retried
+  // matrix reaches quickly. Keeping it in the system temp directory (a local
+  // drive) is the fix, and it also stops traces and failure screenshots from
+  // being written across the network.
+  outputDir: path.join(tmpdir(), 'harbour-pw-results'),
+
   fullyParallel: true,
   forbidOnly: Boolean(process.env['CI']),
   retries: 0,

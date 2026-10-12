@@ -1,0 +1,176 @@
+/* ==========================================================================
+   Harbour — landing page (Brick 3)
+
+   Everything here is landing-specific: the sticky nav, the hero band, the
+   wave line, the art slot, the footer, and the four Lenis properties the
+   smooth-scroll library needs. Shared component CSS lives in ui.css.
+
+   Colours and sizes come only from tokens.css. The only numbers are geometry
+   (a block-size clamp, a stroke width, a blur radius), none of which is
+   spacing — Stylelint's spacing rule polices padding, margin, gap and inset,
+   and every one of those here is a token or zero.
+   ========================================================================== */
+
+/* --- Lenis (smooth scroll) -------------------------------------------------
+   Lenis adds `lenis` and `lenis-smooth` to <html> itself. These four rules are
+   the ones it documents as required; they are why the library can take over
+   wheel scrolling without breaking the document's own scrolling. */
+html.lenis,
+html.lenis body {
+  block-size: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* --- Skip link -------------------------------------------------------------
+   Visually hidden until it takes focus, then a real control at the top of the
+   page. `inset-block-start` and `inset-inline-start` are on the spacing scale. */
+.landing-skip {
+  position: fixed;
+  inset-block-start: var(--space-4);
+  inset-inline-start: var(--space-4);
+  z-index: var(--z-toast);
+  padding-block: var(--space-3);
+  padding-inline: var(--space-5);
+  border: var(--hairline) solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-elevated);
+  color: var(--text);
+  font-size: var(--type-small);
+  text-decoration: none;
+  transform: translateY(calc((100% + var(--space-6)) * -1));
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.landing-skip:focus {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-skip {
+    transition: none;
+  }
+}
+
+/* --- Nav ------------------------------------------------------------------ */
+.landing-nav {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: var(--z-nav);
+}
+
+.landing-nav__bar {
+  min-block-size: var(--touch-target);
+  padding-block: var(--space-3);
+}
+
+/* The wordmark. A placeholder until the brand lockup is wired up: the SVGs in
+   public/ are light-background lockups and are unreadable on the dark theme's
+   background, so Brick 3 sets the name in the heading face instead. */
+.landing-nav__wordmark {
+  font-family: var(--font-heading);
+  font-size: var(--type-h3);
+  font-weight: 700;
+  letter-spacing: var(--tracking-display);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.landing-nav__link {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--touch-target);
+  padding-inline: var(--space-2);
+  color: var(--text-muted);
+  font-size: var(--type-small);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.landing-nav__link:hover {
+  color: var(--text);
+}
+
+/* --- Hero ----------------------------------------------------------------- */
+.hero__wave {
+  block-size: clamp(5rem, 3rem + 9vw, 11rem);
+}
+
+.wave-line {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+/* Spec §7: a 0.125rem stroke with `vector-effect: non-scaling-stroke`, so the
+   line stays 2px however far the 1200x400 viewBox is stretched. */
+.wave-line__line {
+  fill: none;
+  stroke-width: 0.125rem;
+  stroke-linecap: round;
+}
+
+/* The soft glow copy behind the crisp line. */
+.wave-line__glow {
+  fill: none;
+  stroke-width: 0.5rem;
+  stroke-linecap: round;
+  opacity: 0.45;
+  filter: blur(0.375rem);
+}
+
+/* --- Art slot -------------------------------------------------------------
+   The box the concept art will live in. Empty, it is a token gradient plus the
+   shared grain, with the peak tint at `--art-tint-alpha` — a token, because it
+   is a surface text sits on and the contrast script checks it. */
+.art-slot {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+
+.art-slot--empty {
+  border: var(--hairline) solid var(--border-strong);
+  background-color: var(--bg-elevated);
+  background-image:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--accent-fill) var(--art-tint-alpha), transparent),
+      transparent 60%
+    ),
+    linear-gradient(
+      315deg,
+      color-mix(in srgb, var(--gold-fill) var(--art-tint-alpha), transparent),
+      transparent 60%
+    );
+}
+
+.art-slot__plate {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  text-align: center;
+}
+
+/* --- Footer --------------------------------------------------------------- */
+.landing-footer {
+  padding-block: var(--section-padding-block);
+  border-block-start: var(--hairline) solid var(--border);
+}

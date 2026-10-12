@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Aurora } from '../../components/Aurora';
 import { AuroraPatch } from '../../components/AuroraPatch';
+import { HeroCta } from '../../components/landing';
 import { ThemeToggle } from '../../components/ThemeToggle';
 import {
   Cluster,
@@ -384,6 +385,38 @@ export function Components(): JSX.Element {
               </Cluster>
             </Row>
           </Stack>
+        </Block>
+
+        <Block
+          title="HeroCta"
+          description="The hero's call to action in both states. `savedNickname` is a prop rather than a hook call, so both can be shown side by side without a profile store to fake — the landing passes whatever useSavedProfile returns, which is null until Brick 6."
+        >
+          <Grid min="md" gap={6}>
+            <Card variant="flat">
+              <CardHeader>
+                <CardTitle>New visitor — savedNickname is null</CardTitle>
+                <CardDescription>
+                  Create your profile, and a way to see how it works.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <HeroCta />
+              </CardContent>
+            </Card>
+
+            <Card variant="flat">
+              <CardHeader>
+                <CardTitle>Returning — a saved nickname</CardTitle>
+                <CardDescription>
+                  Continue as the nickname, plus a way out, because the landing
+                  page cannot know who is at the browser.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <HeroCta savedNickname="Mei" />
+              </CardContent>
+            </Card>
+          </Grid>
         </Block>
 
         <Block

@@ -48,6 +48,7 @@ export { EmptyState, type EmptyStateProps } from './empty-state';
 export { ErrorState, type ErrorStateProps } from './error-state';
 export { Toaster } from './toast';
 export { toast } from 'sonner';
+export { Sheet, type SheetProps } from './sheet';
 export { Avatar, type AvatarProps, type AvatarSize } from './avatar';
 export { initialsOf } from './initials';
 export {
