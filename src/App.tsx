@@ -1,11 +1,12 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Aurora } from './components/Aurora';
+import { Components } from './routes/dev/Components';
 import { Gallery } from './routes/dev/Gallery';
 import { Primitives } from './routes/dev/Primitives';
 
 /**
- * Brick 0 and Brick 1 have no product routes — the landing page, signup and app
- * shell all arrive in later bricks. The two real routes are the dev pages.
+ * Brick 0, 1 and 2a have no product routes — the landing page, signup and app
+ * shell all arrive in later bricks. The real routes are the dev pages.
  *
  * Spec §12: dev pages sit behind a dev flag. They are on under `vite dev` and
  * can be forced on in a build with VITE_ENABLE_GALLERY.
@@ -36,6 +37,7 @@ export function App(): JSX.Element {
         <>
           <Route path="/dev/gallery" element={<Gallery />} />
           <Route path="/dev/primitives" element={<Primitives />} />
+          <Route path="/dev/components" element={<Components />} />
         </>
       ) : null}
       <Route

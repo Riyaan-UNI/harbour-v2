@@ -284,18 +284,20 @@ export function Primitives(): JSX.Element {
               The element's rank and its visual size are separate. Below, each
               heading is an h{'{level}'} while the role sets the size — so the
               outline stays honest even when the type scale does not match it.
+              The levels start at 2 so the demo never skips a rank under the h2
+              that titles this section.
             </Text>
             <Stack gap={4}>
-              {([1, 2, 3, 4, 5, 6] as const).map((level) => (
+              {([2, 3, 4, 5, 6] as const).map((level) => (
                 <Heading key={level} level={level}>
                   Level {level}, default role
                 </Heading>
               ))}
-              <Heading level={3} role="display">
-                An h3 at display size
+              <Heading level={4} role="display">
+                An h4 at display size
               </Heading>
-              <Heading level={1} role="h3">
-                An h1 at h3 size
+              <Heading level={2} role="h3">
+                An h2 at h3 size
               </Heading>
             </Stack>
           </Stack>

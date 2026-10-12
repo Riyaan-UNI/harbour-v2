@@ -3,7 +3,7 @@
 Source of truth: `docs/DESIGN_SPEC.md` (Harbour Design Spec v1, 11 Oct 2026 — now the
 canonical copy in this repo, updated in Part A).
 Package manager: **npm**. Scaffold: Vite 7 + React 18.3.1 + TypeScript 5.9 strict.
-Branches: `brick-0-foundation` (done), **`brick-1-primitives`** (current).
+Branches: `brick-0-foundation` (done), `brick-1-primitives` (done), **`brick-2a-components`** (current).
 
 ---
 
@@ -168,155 +168,288 @@ table (§6); and both new gates by name (§12).
 
 ## Brick 1 — Layout primitives
 
-**Status: COMPLETE. All gates green.**
+**Status: COMPLETE.** `src/components/layout/` ships Container, Section, Stack, Cluster,
+Grid, Bento + BentoItem, Heading, Text, VisuallyHidden and Cq, all polymorphic,
+ref-forwarding and strict-typed, with the structural CSS in `src/styles/layout.css`.
+Spacing props are the ten spec §6 steps mapped to `var(--space-N)`, so a raw value does
+not type-check; nothing sets an outer margin, and only Heading and Text set a font size.
+React cannot express a generic `forwardRef`, so the cast is confined to one factory
+(`createPolymorphicComponent`) rather than repeated in ten files. `/dev/primitives` covers
+every variant plus the stress cases (unbroken words, a 20-item Grid, a Bento at every size,
+a Stack in a Cluster, and identical markup resolving to two vs three columns in a 28rem vs
+a 75rem container at the same viewport), and `/dev/gallery` was dogfooded onto the
+primitives. The full detail — including the two new spacing gates and the re-solved
+contrast matrix — is in the Brick 1 commit (`46dfd0b`) and Part A below.
+
+---
+
+## Brick 2a — Simple shared components
+
+**Status: COMPLETE. All gates green.** Branch **`brick-2a-components`** off
+`brick-1-primitives`. Three commits: **Part A** (tokens and the contrast matrix),
+**Part B** (shadcn/ui and the components), **Part C** (the gallery and the tests).
+
+Scope was exactly what Addendum 1 §8 lists as "Brick 2a (simple)". Combobox, Dialog,
+Sheet, Tabs, the progress ring and bar, and the interactive-card effects are **not** in
+this brick — they are Brick 2b.
+
+### Part A — light neutrals, and a contrast matrix that covers the components
+
+**A1 — the light neutrals move to the sea-glass values** proposed in Addendum 1 §6,
+replacing the warm ivory. Every text pair was re-checked; all 98 still clear 4.5:1 and
+neither aurora cap moved.
+
+| Token | Before | After | Note |
+| --- | --- | --- | --- |
+| `--bg` (light) | `#F7F3E9` | `#F2F7F6` | the warm ivory is gone |
+| `--on-accent` (light) | `#F7F3E9` | `#F2F7F6` | follows `--bg` |
+| `--glass-tint` (light) | `rgba(247,243,233,0.55)` | `rgba(242,247,246,0.55)` | follows `--bg` |
+| `--bg-elevated` (light) | `#FFFFFF` | `#FFFFFF` | unchanged |
+
+The light aurora tokens and the teal/gold roles are untouched. `--danger`, `--success`
+and `--text-subtle` were re-checked against the new `bg` and all improved slightly
+(`--text-subtle` on `bg` went 5.64 → 5.78; `--success` 5.65 → 5.79).
+
+**A2 — `scripts/solve-aurora-cap.mjs` now checks three matrices**, in both themes, and
+exits 1 on any miss:
+
+1. **Text** — the seven spec §3 text tokens against seven surface stacks (unchanged in
+   intent, now printed as matrix 1 of 3).
+2. **Component pairs** — new, and the point of A2:
+   - `on-accent` on `accent-fill`, `on-gold` on `gold-fill`, and (added in Part B, for the
+     danger Button) `on-accent` on `danger` — 4.5:1, because it is still text.
+   - `--focus-ring` against every surface — 3:1 (WCAG 1.4.11).
+   - `--border-strong` against every surface — 3:1, the sole-boundary case.
+   - `chart-1` … `chart-5` against `bg`, `bg-elevated` and glass — 3:1, graphical objects.
+3. **Caps** — the highest blob and patch opacity at which matrix 1 still clears 4.5:1.
+
+**The one thing that did not fit: the border.** `--border` is `rgba(255,255,255,0.14)` in
+dark and `rgba(11,57,53,0.14)` in light — a decorative divider, **1.51:1** and **1.29:1**
+against `bg`. That is correct for a hairline that is not the only thing identifying a
+surface, but the spec's flat Card *is* just a hairline, so a border used as the sole
+boundary must clear 3:1. Rather than raise `--border` (which would make every divider in
+the app a heavy line), a second token carries the case:
+
+| Token | Theme | Value | Worst surface | Ratio |
+| --- | --- | --- | --- | --- |
+| `--border-strong` | dark | `#74938F` | glass over the patch | **3.30:1** |
+| `--border-strong` | light | `#5F7A76` | the aurora | **3.42:1** |
+
+`--border` is printed by the script but **not** gated; `--border-strong` is gated on all
+seven surfaces. The two windows are opposite-signed and narrow — in dark the value must
+sit *above* every aurora luminance, in light *below* it — so the script rejects any future
+cap change that breaks the fit instead of letting it drift.
+
+The flat Card is the only consumer. Nothing else changed.
+
+### Part B — shadcn/ui, and the components
+
+**Initialisation, one pinned dependency at a time.** `class-variance-authority@0.7.1`,
+then `@radix-ui/react-slot@1.5.0`, then `sonner@2.0.8`. `components.json` is written for
+the Tailwind v4 style and the `@/` alias, which is why `tsconfig.json` and
+`vite.config.ts` gained that one alias (the project's own imports stay relative).
+
+**The palette bridge is the whole point.** `src/styles/shadcn.css` aliases every shadcn
+CSS variable onto a Harbour token (`--background: var(--bg)`, `--primary:
+var(--accent-fill)`, `--ring: var(--focus-ring)`, …) and exposes them as Tailwind
+utilities through `@theme inline`. Two deliberate omissions:
+
+- `--border` and `--chart-1` … `--chart-5` are **already** Harbour names, so they are not
+  redefined — redefining them would be self-referential.
+- The radius namespace is **never** touched. `rounded-md` therefore resolves to Harbour's
+  1rem, not shadcn's 0.375rem. A vendored shadcn component lands on Harbour's palette,
+  radii and spacing without a line of its own.
+
+**Icons are inline SVG, not lucide-react.** The spec's §2 dependency list does not include
+an icon library, so `src/components/ui/icons.tsx` hand-draws the eight glyphs the
+components need. Each inherits `currentColor` and is `aria-hidden` — an icon here is
+decoration beside a label, never the only carrier of meaning.
+
+**The components** (`src/components/ui/`):
+
+```
+button.tsx + button-variants.ts     primary / secondary / ghost / danger, 3 sizes, loading
+input.tsx, textarea.tsx             field-base.ts shares the fill, hairline and states
+form-field.tsx                      label above, hint, error + icon, aria-describedby
+card.tsx + card-variants.ts         static (glass) / interactive (glass) / flat (hairline)
+chip.tsx + chip-variants.ts         neutral / accent / gold, asChild for links
+status-badge.tsx                    red / amber / green / info — colour + icon + label
+demo-badge.tsx + …-variants.ts      SIMULATION / DEMO / SAMPLE, permanent
+disclaimer.tsx                      general information, not advice, not emergency
+skeleton.tsx                        calm shimmer, static under reduced motion
+empty-state.tsx, error-state.tsx    warm CTA slot; retry + offline-alternative slot
+toast.tsx                           Sonner, token-themed, 4s, polite live region
+avatar.tsx + initials.ts            initials on a 20% chart colour, text token on top
+university-logo.tsx                 white plate, 3 sizes, acronym fallback, no shift
+safety-rail.tsx + safety-contacts.ts  compact and expanded, real tel: links
+redaction-notice.tsx                the hidden-identifier count, and the caveat
+icons.tsx                           eight inline SVG icons
+```
+
+**Decisions taken while building, each recorded rather than assumed:**
+
+1. **`secondary` uses the glass *fill*, not the `.glass` surface.** Spec §8 says "glass
+   with border". Using the `.glass` class would force `--radius-lg` (1.5rem) on the
+   button and make it a pill, inconsistent with `primary`, and would count every
+   secondary button toward the three-glass-surfaces cap. `bg-glass-fill-strong` +
+   `border-border` is the same translucent fill with a hairline, at `radius-md`.
+2. **The danger button's label is `--on-accent`.** No `--on-danger` token exists; the
+   pairing is 7.48:1 in dark and 6.04:1 in light, and Part A2 now checks it by name.
+3. **`UniversityLogo`'s plate padding is `0.5rem` (`space-2`), not §8's `0.375rem`.**
+   0.375rem is not one of the ten §6 steps, and the spacing gate is absolute — the same
+   call Part A2 made for the aurora geometry. `0.5rem` is the nearer step, and the acronym
+   is sized in container units (`26cqw`) so a three-letter code still fits at 2rem.
+4. **The logo plate and its ink are tokens** (`--logo-plate` `#FFFFFF`, `--logo-plate-ink`
+   `#0B3935`, both themes) because §8 mandates a white plate and dark teal in *both*
+   themes, and builder rule 5 says every colour is a token with both values.
+5. **Badge surfaces are mixed, not invented.** `--badge-tone` is set inline from the tone
+   token and `ui.css` mixes a 14% tint for the surface and a 42% tint for the border, so
+   one semantic colour drives the whole badge and no per-tone colour pair is added.
+6. **Variant definitions live in sibling files** (`button-variants.ts`, `card-variants.ts`,
+   …) so every component file exports only a component. Without that, the react-refresh
+   rule would have shipped seven warnings where Brick 1 had none. Same reason
+   `SAFETY_CONTACTS`, `initialsOf` and `toast` moved out.
+7. **`Toaster`'s tokens are set inline**, because Sonner's own
+   `[data-sonner-toaster][data-theme=light]` selectors out-specify a class. Inline custom
+   properties are the one place that reliably wins, and they are token references, not
+   raw colours.
+
+**A real bug the browser caught.** The first build of `Button` returned a fragment with
+two children (the label span and the loading span) even in `asChild` mode, and Radix's
+`Slot` requires exactly one element child — the whole `/dev/components` page threw and
+rendered nothing. The fix is a separate return for `asChild`, which also drops the loading
+markup that a link cannot use. Typecheck, lint and build were all green with the bug
+present; only loading the page found it.
+
+**Safety numbers — provenance, and they are not verified.** Three of the four are copied
+from the previous build's constants in `Harbour/harbour/client/src/pages/Home.jsx` (the
+`emergency` array, lines 25–27): **999**, **18222** and **2824 6111**. The **Hospital
+Authority** line is *not* in that repo — Addendum 1 §2 names it, but the old build never
+held it — so the value used, **2300 6555**, comes from the Government Telephone Directory
+(`tel.directory.gov.hk/HA_ENG.html`) and is the one number here with no old-repo source.
+Every number is marked **UNVERIFIED** in `safety-contacts.ts` until it is confirmed
+against the official page.
+
+### Part C — the gallery and the tests
+
+**`/dev/components`** shows every component in every variant and state, in both themes,
+built from the layout primitives. Hover, active and focus-visible are live states, not
+pictures: the "interaction states" row holds real buttons the Playwright pass focuses and
+presses. The last `UniversityLogo` box points at `/logos/does-not-exist.svg` on purpose,
+so the acronym fallback is on screen rather than only asserted.
+
+**The page keeps to three glass surfaces.** The Card section is the only glass on the page
+— exactly the three the spec allows on screen at once — and every other demo uses the flat
+Card variant. That was originally not true: the first version wrapped a dozen demo cards in
+glass, which broke builder rule 4 *and* made the full-page screenshots pathological, since
+each one re-composites every backdrop-filter over the fixed aurora. Fixing the rule fixed
+the flakiness.
+
+**`/dev/primitives`'s heading-order warning is gone.** The Heading demo rendered an `h1`
+inside a section titled by an `h2`, which axe flags as a skipped rank (moderate). The demo
+now runs levels 2–6 in order and shows the decoupling with an `h4` at display size and an
+`h2` at h3 size. It was a simple fix, so it was fixed rather than reported.
+
+**`e2e/components.spec.ts`** adds 18 tests: the matrix at 320/360/390/768/1024/1440 in both
+themes (12), the reduced-motion pass (1), the three button heights read from the resolved
+box (1), the loading width (1), the keyboard pass over Button → Toast → Input → Card (1),
+the `UniversityLogo` image-error fallback with its no-shift assertion (1), and the alt-text
+assertion (1). The suite goes from 51 to **69 tests**.
+
+Full-page screenshots are taken at 360 and 1440 only (the two widths this brick reports
+on); overflow and axe run at all six. The page is ~9,700px tall at 320px, and capturing it
+at every width cost more than the matrix could afford on the mapped `R:` drive.
+
+### Gates
 
 | Gate | Command | Result |
 | --- | --- | --- |
 | Typecheck | `npm run typecheck` | pass (both TS projects) |
 | Lint | `npm run lint` | pass, 0 problems |
 | Lint CSS | `npm run lint:css` | pass, 0 problems |
-| Build | `npm run build` | pass — CSS 32.62 kB (gzip 7.56), JS 235.62 kB (gzip 76.00) |
-| E2E + axe | `npm run test:e2e` | **51/51 pass** |
+| Build | `npm run build` | pass — CSS 39.10 kB (gzip 8.81), JS 298.66 kB (gzip 93.95) |
+| E2E + axe | `npm run test:e2e` | **69/69 pass** |
+| Contrast | `node scripts/solve-aurora-cap.mjs` | exit 0 — 98 text pairs, every component pair |
 
-The 51 tests are: the gallery matrix (10), the gallery's reduced-motion, system-mode,
-keyboard and zoom passes (7), four glass-section close-ups, the primitives matrix at
-320/360/390/768/1024/1440 (12), ten Bento column-count assertions, one container-query
-assertion, the primitives' reduced-motion, zoom and text-size passes (7).
+The build's JS grew from 235.62 kB to 298.66 kB because Sonner, `@radix-ui/react-slot` and
+`class-variance-authority` are now in the graph. It is still well under the spec's 250 kB
+*gzipped* landing target at 93.95 kB gzip, but the number is not yet meaningful: there is
+no landing page, and the three dev pages are still statically imported, so a production
+build carries them. Code-splitting the dev pages is Brick 8's audit, not this brick's.
 
-### What Brick 1 delivers
+### Deviations and decisions — Brick 2a
 
-```
-src/components/layout/index.ts       one barrel
-src/components/layout/types.ts       the Space union, the polymorphic helpers, the factory
-src/components/layout/Container.tsx  page / measure / narrow
-src/components/layout/Section.tsx    padding-block + scroll-margin + optional Container
-src/components/layout/Stack.tsx      column, gap, align
-src/components/layout/Cluster.tsx    wrapping row, gap, justify, align
-src/components/layout/Grid.tsx       auto-fit, track minimum sm/md/lg, gap
-src/components/layout/Bento.tsx      Bento + BentoItem, every size, tall
-src/components/layout/Heading.tsx    level 1–6 decoupled from role display/h1/h2/h3
-src/components/layout/Text.tsx       role body/small/label × tone default/muted/subtle
-src/components/layout/VisuallyHidden.tsx
-src/components/layout/Cq.tsx         container-type: inline-size
-src/styles/layout.css                the structural CSS, in @layer components
-src/routes/dev/Primitives.tsx        /dev/primitives
-```
-
-Every primitive is polymorphic (`as`), forwards its ref, and is strict-typed. **Spacing
-props are the ten spec steps**: `gap={5}` is `var(--space-5)`, and `gap="1.5rem"` does not
-type-check. No primitive sets an outer margin, and only `Heading` and `Text` set a font
-size — they exist to own the type roles.
-
-React cannot express a generic `forwardRef`, so the cast is confined to one factory
-(`createPolymorphicComponent` in `types.ts`) instead of being repeated in ten files.
-
-`layout.css` sits in `@layer components`, so a Tailwind utility added by a caller still
-wins. The gap is not in the CSS at all — it comes from the typed prop and is written as
-`var(--space-N)` inline, which is why the spec's step numbers are the only values that
-can be expressed.
-
-### /dev/primitives
-
-Every primitive, every variant, plus the stress cases: three unbroken words (including a
-69-character Welsh place name) bare, in a Grid and in a Cluster; a 20-item Grid; a Bento
-carrying every size and a `tall` item; a Stack nested in a Cluster; a Container at each of
-its three widths; a Section with `contained` on and off; and one block of identical markup
-in a 28rem container and a 75rem container, which resolves to two columns and three
-columns respectively **at the same viewport**.
-
-### The gallery is dogfooded
-
-`/dev/gallery` now uses the primitives throughout and has no structural layout class left.
-Its nine blocks are `Section` → `Container` → `Stack`; every list, row and grid is a
-`Stack`, `Cluster` or `Grid`; every heading and paragraph is a `Heading` or `Text`. The
-only spacing utilities that remain are intrinsic padding on three demo widgets — the two
-glass cards' `p-6` and the motion button's `px-3` — which Brick 2 replaces with real Card
-and Button components. The chart and motion lists also moved from fixed column counts to
-`Grid`'s auto-fit, so the layout is the primitive's rather than a breakpoint's.
-
-### Deviations and decisions
-
-| # | Spec says | We do | Why |
+| # | Spec / addendum says | We do | Why |
 | --- | --- | --- | --- |
-| 1 | `.glass` background is `var(--glass-fill)` (§4, verbatim) | tint under sheen | Forced by the Brick 0 axe run. |
-| 2 | Aurora blobs painted at full strength (§4) | capped by `--aurora-blob-opacity`, **re-solved to 0.18** in dark | Forced by the axe run; Part A4 widened the check and re-solved it. |
-| 3 | px only for 1px hairlines (§0.2), but the focus ring is "2px ring, 2px offset" (§3) | focus ring is `0.125rem` | The two spec rules conflict; rem renders identically. |
-| 4 | Spacing is `space-1..space-10` (§6) | Tailwind's numeric scale is kept and the ten values are also exposed as `--space-1..--space-10` | The spec's ten values are exactly Tailwind's defaults at 1, 2, 3, 4, 6, 8, 12, 16, 24, 32. **The enforcement gap is now closed** — A2's two gates reject every off-scale step. |
-| 5 | Breakpoints 40 / 48 / 64 / 80 em (§6) | mapped to `sm`/`md`/`lg`/`xl` in **em**; Tailwind's `2xl` removed | Tailwind's defaults are the same numbers in rem, which diverge from em under a changed browser base size. The text-size test proves em media queries do not move when the root font size doubles. |
-| 6 | Radii 0.5 / 1 / 1.5 rem + pill (§6) | `sm` 0.5 / `md` 1 / `lg` 1.5 / `pill`; no `xl` | Settled by review (A1), superseding the Brick 0 proposal. `UniversityLogo` (§8) takes `radius md` = 1rem — see Brick 2. |
-| 7 | Noto Sans TC as CJK fallback (§5) | not imported until Brick 5 | A3: ~112 kB of CSS on every page, and no Cantonese copy before Brick 5. |
-| 8 | — | `server.host` pinned to `127.0.0.1` | Vite's default `localhost` bound to `[::1]` here, which hung Playwright. `npm run dev:lan` overrides it. |
-| 9 | — | aurora blob corner offsets are tokens | A2: the Stylelint spacing rule polices `inset`, so the values moved into `tokens.css` rather than exempting `base.css`. |
-| 10 | — | `--aurora-patch-opacity` added | A5: a contained patch is always under glass, so it can run hotter than the page aurora. Solved, not guessed. |
-| 11 | Spacing is `space-1..space-10` (§6) | the CSS rule does **not** police `scroll-margin-*` / `scroll-padding-*` | Those are scroll-snap offsets, not layout spacing. Named so the omission is deliberate rather than an oversight. |
-| 12 | — | Grid track minimums are 14 / 17 / 22 rem | Only 17rem is in the spec (§6). 14 and 22 are the steps the Grid primitive exposes, and they are tokens. |
-| 13 | — | `--section-scroll-margin` 5rem | The spec gives the landing nav a sticky glass bar but no height. PROPOSED. |
-| 14 | Heading level and role are separate | `Heading`'s default role follows the level (1→h1, 2→h2, 3+→h3) | The decoupling is still available through `role`; the default only spares the common case. |
-| 15 | — | the gallery's chart and motion lists use `Grid` auto-fit rather than 5 and 4 fixed columns | A fixed column count is a breakpoint decision the primitive is meant to remove. |
-| 16 | — | `extraHOCs: ['createPolymorphicComponent']` in the react-refresh rule | Without it the rule cannot see the factory's output as a component, and the brick would ship 11 warnings where Brick 0 had none. |
-| 17 | 3:1 for UI and graphics, 4.5:1 for text (§3) | 4.5:1 everywhere; the large-text allowance is unused | Every text token clears 4.5:1 on every surface, so no size depends on the looser rule. |
+| 18 | Button `secondary` is "glass with border" (§8) | glass *fill* + hairline, not the `.glass` class | Keeps `radius-md` (the `.glass` class forces `--radius-lg`), keeps the variant visually consistent with `primary`, and does not spend one of the three allowed glass surfaces on a button. |
+| 19 | Nothing named for a border as a sole boundary | new token `--border-strong`, gated at 3:1 | `--border` is a 0.14-alpha decorative divider (1.51:1 dark). The flat Card's border is its only boundary, so the spec's own 3:1 rule applies to it. |
+| 20 | `UniversityLogo` plate padding 0.375rem (§8) | `0.5rem` (`space-2`) | 0.375rem is not a §6 spacing step and the gate is absolute. The acronym is sized in `cqw` so it fits at every box size. |
+| 21 | — | `--logo-plate` and `--logo-plate-ink` tokens | §8 mandates a white plate and dark teal in both themes; builder rule 5 wants both values as tokens. |
+| 22 | — | danger button label uses `--on-accent` | No `--on-danger` exists; the pairing is 7.48:1 dark / 6.04:1 light and is now checked by the script. |
+| 23 | §2 lists no icon library | inline SVG icons in `icons.tsx` | lucide-react is not in the spec's dependency list; the eight glyphs needed are hand-drawn. |
+| 24 | — | `@/` alias added to tsconfig and vite | shadcn's `components.json` requires it; the project's own imports stay relative. |
+| 25 | — | StatusBadge surface/border mixed from `--badge-tone` | One semantic colour per tone, no second set of per-tone surface tokens. |
+| 26 | — | `toast` re-exported from the barrel, not from `toast.tsx` | Fast-refresh rule: `toast.tsx` exports only `Toaster`. |
+| 27 | Spec §12 wants a gallery page | three dev pages: `/dev/gallery`, `/dev/primitives`, `/dev/components` | One per brick, all behind the same dev flag. |
+| 28 | — | Playwright `timeout` raised 60s → 90s, and full-page screenshots taken at 360/1440 only | A full-page capture of the ~9,700px components page re-composites every glass surface over the fixed aurora and timed out on the mapped `R:` drive. No assertion changed — only the budget and which widths are captured. |
+| 29 | Builder rule 4: at most three glass surfaces on screen | the gallery's other demo cards use the flat variant | The first version of `/dev/components` had a dozen glass cards on screen at once, which broke the rule and made the screenshots pathological. The Card section now holds the page's only three. |
 
-### Token changes — the complete list for Brick 1's two commits
+### Token changes — Brick 2a
 
 | Token | Theme | Before | After | Commit |
 | --- | --- | --- | --- | --- |
-| `--radius-sm` | both | *did not exist* | `0.5rem` | A |
-| `--radius-md` | both | `0.5rem` | `1rem` | A |
-| `--radius-lg` | both | `1rem` | `1.5rem` | A |
-| `--radius-xl` | both | `1.5rem` | **removed** | A |
-| `--text-subtle` | dark | `#7f9e9a` | `#92aca9` | A |
-| `--text-subtle` | light | `#4f6e6a` | `#496662` | A |
-| `--success` | light | `#1b7a4b` | `#186e44` | A |
-| `--aurora-blob-opacity` | dark | `0.22` | `0.18` | A |
-| `--aurora-patch-opacity` | dark | *did not exist* | `0.29` | A |
-| `--aurora-patch-opacity` | light | *did not exist* | `1` | A |
-| `--aurora-blob-1-block-start` … `--aurora-blob-3-inline-start` | both | raw `%` in `base.css` | six tokens | A |
-| `--container-narrow` | both | *did not exist* | `28rem` | B |
-| `--section-scroll-margin` | both | *did not exist* | `5rem` | B |
-| `--grid-min-sm` / `-md` / `-lg` | both | *did not exist* | `14` / `17` / `22rem` | B |
+| `--bg` | light | `#f7f3e9` | `#f2f7f6` | A |
+| `--on-accent` | light | `#f7f3e9` | `#f2f7f6` | A |
+| `--glass-tint` | light | `rgba(247,243,233,0.55)` | `rgba(242,247,246,0.55)` | A |
+| `--border-strong` | dark | *did not exist* | `#74938f` | A |
+| `--border-strong` | light | *did not exist* | `#5f7a76` | A |
+| `--logo-plate` | both | *did not exist* | `#ffffff` | B |
+| `--logo-plate-ink` | both | *did not exist* | `#0b3935` | B |
 
-No pre-existing colour outside the three above was retuned. `--glass-tint` and
-`--mask-opaque` were Brick 0 additions and are already in the spec.
+No other colour moved. The aurora caps are unchanged at dark 0.18 / 0.29 and light 1 / 1,
+and both still sit at their solved maxima.
 
-### Residual risk
+### Residual risk — Brick 2a
 
-- **The dark aurora is dimmer than Brick 0's.** The cap is 0.18 rather than 0.22 because
-  the check now covers all seven text tokens, not two. The lever for a stronger aurora is
-  the aurora token *values* or the text tokens, never the cap — and `solve-aurora-cap.mjs`
-  will reject any cap above the solved maximum.
-- **The patch cap is tight.** 0.29 in dark is the highest value at which `--text-subtle`
-  still clears 4.5:1 on glass over the patch. If the patch needs to be more colourful, the
-  fix is a darker patch blob or a stronger glass tint, not a higher cap.
-- **`/dev/primitives` trips axe's `heading-order` (moderate).** The Heading demo renders
-  an `h1`, an `h2` and an `h3` inside a section to show the decoupling. The gate blocks
-  serious and critical violations, which is what the spec asks for; moderate is out of
-  scope by design, but it is worth knowing the page is not perfectly clean.
-- **Playwright's `test-results/` and `screenshots/` are on `R:`.** The trash operation
-  fails on that drive, so `--output` must point at a local path (e.g.
-  `C:/Users/<you>/AppData/Local/Temp/...`). `.gitignore` covers `/.pw-run*/` and `/.tmp-*/`.
+- **`--border-strong` sits in a narrow window.** In dark it must be brighter than every
+  aurora stack and in light darker than every one; the two windows are opposite-signed.
+  The values above clear 3:1 with only 0.30 and 0.42 of headroom on their worst surface.
+  The script gates them, so a future aurora change fails loudly rather than drifting.
+- **The safety numbers are unverified.** Three come from the old repo, one from the
+  Government Telephone Directory. None has been confirmed by the user, and a wrong
+  emergency number is worse than no rail.
+- **`pointer: coarse` cannot be tested here.** Playwright has no media emulation for
+  pointer type, so the "small button is 2.25rem only on a fine pointer" rule is asserted
+  for the fine case (36px) and left unasserted for the coarse case, where the CSS falls
+  back to the 2.75rem touch target.
+- **The dev pages are still in the production bundle.** Three routes' worth of components
+  ship to production. Fine for now, and inside the gzip target, but Brick 8 should
+  code-split them.
+- **`/dev/primitives` and `/dev/components` are long pages.** At 320px the components page
+  is ~9,700px tall. Full-page screenshots are therefore taken at 360 and 1440 only; the
+  matrix is still heavy on a networked drive.
+- **Sonner's error toast uses `role="alert"`, not a polite region.** The spec asks for
+  polite; Sonner escalates errors, which is the better behaviour for a failure that
+  changes what you can do next, but it is a deviation worth knowing.
 
-### What Brick 2 needs
+### What Brick 2b needs
 
-1. **Reuse `ThemeToggle`.** It is the real three-state control the spec asks for in §8 and
-   is already covered by tests.
-2. **`UniversityLogo` and the new radius names.** §8 says the logo box takes "radius md",
-   which is now 1rem. At the 2rem size that is a circle-ish squircle; `--radius-sm` may
-   read better. Decide per size and record it rather than silently picking one.
-3. **Card variants and container queries.** `Cq` and the `@sm:`/`@md:`/`@lg:` variants are
-   in place and proven by an assertion. The interactive card's spotlight (`--mx`/`--my` in
-   a rAF-throttled pointermove), its ≤6° tilt behind `(hover: hover) and (pointer: fine)`,
-   and its Motion `layoutId` expand are Brick 2's.
-4. **Cards must not nest glass**, and at most three glass surfaces may be on screen. The
-   gallery enforces this by example; Brick 2 should keep it true.
-5. **`z-dropdown`, `z-modal`, `z-toast` now exist.** The combobox popover, the modal
-   backdrop and the toaster should use them instead of raw `z-*`.
-6. **The spacing gates will bite on copied shadcn code.** Expect `p-5`, `gap-7` and
-   friends in anything vendored from shadcn, and fix them to the §6 table rather than
-   disabling the rule.
-7. **shadcn/ui is deferred to Brick 2.** Add it one dependency at a time, pinned, and
-   bridge its CSS variables onto the tokens rather than letting it carry its own palette.
-8. **`--touch-target` (2.75rem) and the button heights** (2.75 / 3.25 / 2.25rem) are
-   tokens already; `min-h-11` in `ThemeToggle` is the interim spelling of the same value.
-9. **Noto Sans TC is still absent.** Fine until Brick 5; do not re-add it early.
-10. **Cantonese strings still need a native-speaker check** (spec §14), and they have not
-    been written yet.
+1. **The bridge is ready.** `src/styles/shadcn.css` already carries every variable a
+   vendored shadcn component expects, so `Dialog`, `Tabs` and the rest land on Harbour's
+   palette with no extra work. `components.json` and the `@/` alias are in place.
+2. **`z-dropdown` and `z-modal` now exist** — the combobox popover and the dialog backdrop
+   should use them rather than a raw `z-*`.
+3. **The interactive card is half-built.** `card.tsx`'s `interactive` variant has the hover
+   and focus-visible lift; 2b adds the pointer spotlight (`--mx`/`--my` in a rAF-throttled
+   `pointermove`), the ≤6° tilt behind `(hover: hover) and (pointer: fine)`, and the
+   `layoutId` expand.
+4. **`Cq` and the `@sm:`/`@md:`/`@lg:` variants are proven** — the combobox's container
+   behaviour can use them.
+5. **The spacing gates will bite on copied shadcn code.** Expect `p-5`, `gap-7` and
+   friends; fix them to the §6 table, never disable the rule. Part B hit none, because the
+   components were written rather than pasted, but `npx shadcn add` output will.
+6. **`--radius-xl` does not exist.** A vendored component that uses `rounded-xl` will fall
+   back to Tailwind's default 0.75rem, which is off-spec. Replace it with `rounded-md` or
+   `rounded-lg` on sight.
+7. **The safety numbers still need the user's confirmation**, and the Cantonese strings for
+   Brick 5 still need a native-speaker check.

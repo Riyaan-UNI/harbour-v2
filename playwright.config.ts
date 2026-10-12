@@ -14,8 +14,11 @@ export default defineConfig({
   // The matrix takes a full-page screenshot of a long page at every viewport.
   // On a slow or networked filesystem that is heavy enough that context
   // teardown can exceed a 30s budget, so give each test room and keep the
-  // worker count modest.
-  timeout: 60_000,
+  // worker count modest. Brick 2a raised this from 60s to 90s: the components
+  // page is ~7,400px tall at 1024px and the PNG write to a mapped drive
+  // occasionally took longer than 60s on its own. The assertions are unchanged
+  // — only the budget.
+  timeout: 90_000,
   workers: 2,
   reporter: [['list'], ['html', { open: 'never' }]],
 
