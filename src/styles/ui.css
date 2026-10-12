@@ -110,30 +110,133 @@
 }
 
 /* --------------------------------------------------------------------------
-   Interactive card — hover and focus-visible only. Brick 2b adds the pointer
-   spotlight (--mx / --my), the <=6 degree tilt and the layoutId expand.
+   Interactive card — spec §8. Brick 3 completes it: the hover and
+   focus-visible lift, the pointer spotlight (--mx / --my), the <=6 degree tilt
+   and the expand-in-place.
 
    Unlayered on purpose: `.glass` is unlayered too, so a `hover:border-*`
    utility (which lives in @layer utilities) would lose the cascade. Declaring
    this here lets the interactive card deepen its own border, and the lift is a
    transform so it never fights the glass fill.
+
+   Three details that matter:
+
+   1. `overflow: hidden` keeps the spotlight inside the rounded corner. It does
+      not clip the card's own focus outline, only its descendants.
+   2. The spotlight is a `::before` at z-index auto, and the content wrapper is
+      `position: relative` and comes after it in tree order — so both paint in
+      the positioned-descendants phase and the content wins. No z-index, and so
+      no z-* utility, is needed.
+   3. `perspective()` only appears once `data-tilt` is set. A 3D transform on
+      every interactive card would promote it to its own layer and can soften
+      its text, so it is left off when there is no tilt.
+
+   The `.ui-card-hit` rules are the ones `InteractiveCard` relies on. That
+   wrapper is never transformed, so the pointer's hit area stays put while the
+   card lifts and rotates — without it, a pointer a few pixels inside an edge
+   falls outside the card the moment it tilts, which fires `pointerleave`, which
+   levels the card, which puts the pointer back inside: a flicker at the edges.
+   Both sets of rules are kept, so a bare `Card variant="interactive"` still
+   behaves on its own.
    -------------------------------------------------------------------------- */
 
 .ui-card--interactive {
+  position: relative;
+  overflow: hidden;
+  transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
   transition:
     transform var(--dur-fast) var(--ease-out),
     border-color var(--dur-fast) var(--ease-out);
 }
 
+.ui-card--interactive::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: radial-gradient(
+    60% 60% at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--accent-text) var(--spotlight-alpha), transparent),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+  pointer-events: none;
+}
+
+.ui-card--interactive:hover::before,
+.ui-card--interactive:focus-within::before,
+.ui-card-hit:hover .ui-card--interactive::before,
+.ui-card-hit:focus-within .ui-card--interactive::before {
+  opacity: 1;
+}
+
 .ui-card--interactive:hover,
-.ui-card--interactive:focus-within {
-  transform: translateY(calc(var(--space-1) * -1));
+.ui-card--interactive:focus-within,
+.ui-card-hit:hover .ui-card--interactive,
+.ui-card-hit:focus-within .ui-card--interactive {
   border-color: var(--border-strong);
+  transform: translateY(calc(var(--space-1) * -1));
+}
+
+/* The tilt, only while the pointer is fine and motion is allowed — the
+   component sets `data-tilt` from a media query, so a touch device never
+   reaches these rules. */
+.ui-card--interactive[data-tilt='true'] {
+  transform:
+    perspective(var(--tilt-perspective))
+    rotateX(var(--tilt-x, 0deg))
+    rotateY(var(--tilt-y, 0deg));
+}
+
+.ui-card--interactive[data-tilt='true']:hover,
+.ui-card--interactive[data-tilt='true']:focus-within,
+.ui-card-hit:hover .ui-card--interactive[data-tilt='true'],
+.ui-card-hit:focus-within .ui-card--interactive[data-tilt='true'] {
+  transform:
+    perspective(var(--tilt-perspective))
+    rotateX(var(--tilt-x, 0deg))
+    rotateY(var(--tilt-y, 0deg))
+    translateY(calc(var(--space-1) * -1));
 }
 
 @media (prefers-reduced-motion: reduce) {
   .ui-card--interactive:hover,
-  .ui-card--interactive:focus-within {
+  .ui-card--interactive:focus-within,
+  .ui-card--interactive[data-tilt='true']:hover,
+  .ui-card--interactive[data-tilt='true']:focus-within,
+  .ui-card-hit:hover .ui-card--interactive,
+  .ui-card-hit:focus-within .ui-card--interactive,
+  .ui-card-hit:hover .ui-card--interactive[data-tilt='true'],
+  .ui-card-hit:focus-within .ui-card--interactive[data-tilt='true'] {
     transform: none;
   }
+}
+
+/* The whole-card trigger for an expandable card. It is a real <button> filling
+   the card, so a tap expands it and nothing depends on hover; the content
+   stays in the accessibility tree underneath it. */
+.ui-card__trigger {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  cursor: pointer;
+}
+
+/* The expanded panel. It is a Radix dialog, so it lands at --z-modal. */
+.ui-card__panel {
+  inline-size: 100%;
+  max-inline-size: var(--container-narrow);
+  max-block-size: 85svh;
+  overflow-y: auto;
+}
+
+/* The modal backdrop. Written here rather than as a Tailwind opacity modifier
+   so the alpha comes from the token the contrast script reads. */
+.ui-overlay {
+  background-color: color-mix(
+    in srgb,
+    var(--bg) var(--overlay-alpha),
+    transparent
+  );
 }

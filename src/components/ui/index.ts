@@ -30,6 +30,10 @@ export {
   type CardTitleProps,
 } from './card';
 export { cardVariants, type CardVariant } from './card-variants';
+export {
+  InteractiveCard,
+  type InteractiveCardProps,
+} from './interactive-card';
 export { Chip, type ChipProps } from './chip';
 export { chipVariants } from './chip-variants';
 export { StatusBadge, type StatusBadgeProps, type StatusTone } from './status-badge';

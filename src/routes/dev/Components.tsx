@@ -26,6 +26,7 @@ import {
   ErrorState,
   FormField,
   Input,
+  InteractiveCard,
   RedactionNotice,
   SafetyRail,
   Skeleton,
@@ -248,52 +249,82 @@ export function Components(): JSX.Element {
 
         <Block
           title="Card"
-          description="Static is glass, interactive is glass with a hover and a focus-visible lift, flat is a hairline with no glass — which is why flat uses the border-strong token, held to 3:1 because the border is its only boundary. A card never sits inside a card, and these three are the page's only glass surfaces: three is the maximum the spec allows on screen at once, so every other demo on this page uses the flat variant."
+          description="Static is glass, interactive is glass with the full spec section 8 behaviour, flat is a hairline with no glass — which is why flat uses the border-strong token, held to 3:1 because the border is its only boundary. A card never sits inside a card, and the three glass cards here are the maximum the spec allows on screen at once, so every other demo on this page uses the flat variant."
         >
           <AuroraPatch>
-            <Grid min="md" gap={6}>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Static</CardTitle>
-                  <CardDescription>
-                    The plain glass card, over its own colour field.
-                  </CardDescription>
-                </CardHeader>
-                <CardFooter>
-                  <Chip>SAMPLE</Chip>
-                </CardFooter>
-              </Card>
+            <Stack gap={6}>
+              <Grid min="md" gap={6}>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Static</CardTitle>
+                    <CardDescription>
+                      The plain glass card, over its own colour field.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardFooter>
+                    <Chip>SAMPLE</Chip>
+                  </CardFooter>
+                </Card>
 
-              <Card variant="interactive">
-                <CardHeader>
-                  <CardTitle>Interactive</CardTitle>
-                  <CardDescription>
-                    Hover it, or Tab to the link inside — the card lifts and its
-                    border deepens.
-                  </CardDescription>
-                </CardHeader>
-                <CardFooter>
-                  <Button variant="secondary" size="small">
-                    Focusable child
-                  </Button>
-                </CardFooter>
-              </Card>
-
-              <Card variant="flat">
-                <CardHeader>
-                  <CardTitle>Flat</CardTitle>
-                  <CardDescription>
-                    A hairline and nothing else. The border is the whole
-                    surface, so it clears 3:1.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
+                <InteractiveCard
+                  title="Interactive card"
+                  description="Hover it, or Tab to the trigger — the card lifts, its border deepens and the spotlight follows the pointer."
+                  footer={<Chip>SAMPLE</Chip>}
+                  details={
+                    <>
+                      <Text role="small" tone="muted">
+                        This is the expanded state. It is a Radix dialog, so
+                        Escape closes it, focus is trapped inside and then
+                        returned to the card, and the page behind cannot
+                        scroll. Motion&apos;s shared layout is what makes it
+                        read as the same card growing rather than a second one
+                        appearing.
+                      </Text>
+                      <Text role="small" tone="muted">
+                        On a touch device a tap does the same thing, and the
+                        tilt is off: it is only enabled while
+                        <code className="text-text"> (hover: hover)</code> and
+                        <code className="text-text"> (pointer: fine)</code>
+                        both match and motion is allowed.
+                      </Text>
+                    </>
+                  }
+                >
                   <Text role="small" tone="muted">
-                    No glass, no shadow, no fill.
+                    Click or tap anywhere on the card to expand it in place.
+                    Nothing here depends on hover.
                   </Text>
-                </CardContent>
-              </Card>
-            </Grid>
+                </InteractiveCard>
+
+                <Card variant="flat">
+                  <CardHeader>
+                    <CardTitle>Flat</CardTitle>
+                    <CardDescription>
+                      A hairline and nothing else. The border is the whole
+                      surface, so it clears 3:1.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Text role="small" tone="muted">
+                      No glass, no shadow, no fill.
+                    </Text>
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              <Row label="interactive, without the expand — spotlight and tilt only">
+                <InteractiveCard
+                  title="Interactive card without details"
+                  description="Omitting `details` leaves the spotlight and the tilt and drops the expand."
+                >
+                  <Text role="small" tone="muted">
+                    Move the pointer across this card to see the spotlight
+                    follow it. With a fine pointer the card tilts by at most
+                    six degrees, the cap held in the `--tilt-max` token.
+                  </Text>
+                </InteractiveCard>
+              </Row>
+            </Stack>
           </AuroraPatch>
         </Block>
 

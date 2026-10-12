@@ -19,18 +19,33 @@
  *        chart palette       chart-1..5 against bg, bg-elevated and glass
  *                            (3:1 — graphical objects)
  *   3. CAPS — the highest aurora blob and patch opacity at which matrix 1
- *      still clears 4.5:1.
+ *      still clears 4.5:1, and the highest spotlight alpha at which the card's
+ *      own text still does.
  *
  * Surfaces (a glass surface is composited exactly as `.glass` paints it — the
  * tint under the white sheen — over whatever is behind):
  *
  *   bg · bg-elevated · the page aurora (worst-case stack of all three blobs) ·
  *   glass over bg · glass over bg-elevated · glass over the aurora ·
- *   glass over the gallery patch
+ *   glass over the gallery patch · glass under the pointer spotlight ·
+ *   glass over the modal overlay
  *
  * The aurora worst case is every non-empty subset of the three blobs, painted
  * in DOM order — the only safe assumption, since text can land anywhere on the
  * fixed layer.
+ *
+ * The two Brick 3 surfaces are the interactive card's (spec §8):
+ *
+ *   - `glass/spot` is the card's glass with `--spotlight-alpha` of
+ *     `--accent-text` painted over it. The gradient runs from the peak alpha to
+ *     transparent, and text can sit anywhere in the card, so the peak is the
+ *     only safe case to check. The card can be over the page aurora or over a
+ *     contained patch, so both are composited.
+ *   - `glass/over` is the modal panel: the backdrop is `--bg` at
+ *     `--overlay-alpha` over whatever is behind it. What is behind it is page
+ *     content, and the brightest pixel page content can be is a text token — so
+ *     the backdrops include the text tokens themselves, which is pessimistic on
+ *     purpose.
  *
  * Run: node scripts/solve-aurora-cap.mjs
  * Exits 1 if any cell fails, so it can gate a build.
@@ -57,6 +72,14 @@ function readToken(block, name) {
   const match = block.match(new RegExp(`(?:^|[\\s;])--${name}:\\s*([^;]+);`));
   if (!match) throw new Error(`token not found: --${name}`);
   return match[1].trim();
+}
+
+/** Reads a token that holds a percentage (`18%`) as a 0-to-1 alpha. */
+function readPercent(block, name) {
+  const raw = readToken(block, name);
+  const value = Number.parseFloat(raw);
+  if (!Number.isFinite(value)) throw new Error(`not a percentage: --${name}`);
+  return raw.endsWith('%') ? value / 100 : value;
 }
 
 function parseColour(value) {
@@ -87,6 +110,19 @@ const TEXT_TOKENS = [
 /** Used at display and H1 sizes, where 3:1 is allowed instead of 4.5:1. */
 const LARGE_TEXT_TOKENS = new Set(['text']);
 
+/**
+ * The text tokens an interactive card's front can carry. `--text-subtle` is a
+ * caption tone and `--danger` / `--success` are result tones; none of the three
+ * belongs on a card front, and none is used there.
+ *
+ * This matters because `text-subtle` on glass over the patch sits at 4.55:1 —
+ * 0.05 of headroom — so holding the spotlight to it would need an alpha near
+ * zero, and the effect would not exist. The same trade was recorded in Part A4
+ * when the aurora cap was re-solved. The other three tokens are printed for the
+ * spotlight surface but marked `~`, not gated.
+ */
+const CARD_TEXT_TOKENS = ['text', 'text-muted', 'accent-text', 'gold-text'];
+
 const REQUIRED = 4.5;
 const REQUIRED_LARGE = 3;
 /** WCAG 1.4.11 — UI components, focus indicators and graphical objects. */
@@ -104,10 +140,13 @@ function readTheme(name, block) {
     glassTint: colour('glass-tint'),
     blobOpacity: Number.parseFloat(readToken(block, 'aurora-blob-opacity')),
     patchOpacity: Number.parseFloat(readToken(block, 'aurora-patch-opacity')),
+    spotlightAlpha: readPercent(block, 'spotlight-alpha'),
+    overlayAlpha: readPercent(block, 'overlay-alpha'),
     blobs: [colour('aurora-1'), colour('aurora-2'), colour('aurora-3')],
     text: Object.fromEntries(TEXT_TOKENS.map((t) => [t, colour(t)])),
     // Component pairs.
     accentFill: colour('accent-fill'),
+    accentText: colour('accent-text'),
     onAccent: colour('on-accent'),
     goldFill: colour('gold-fill'),
     onGold: colour('on-gold'),
@@ -184,6 +223,64 @@ function worstOverBlobs(theme, cap, tokenColour, withGlass) {
   return worst;
 }
 
+/**
+ * The backdrops an interactive card can sit on: the page aurora, a contained
+ * patch, and the two flat surfaces. Both aurora caps are used, because the card
+ * is glass over whichever colour field it happens to be on.
+ */
+function cardBackdrops(theme) {
+  return [
+    theme.bg,
+    theme.bgElevated,
+    ...blobBackdrops(theme, theme.blobOpacity),
+    ...blobBackdrops(theme, theme.patchOpacity),
+  ];
+}
+
+/**
+ * The interactive card's surface under the pointer spotlight, at its peak
+ * alpha. The gradient fades to transparent at the edges, and text can sit
+ * anywhere in the card, so the peak is the only safe case.
+ */
+function worstSpotlight(theme, tokenColour, alpha) {
+  let worst = null;
+  for (const backdrop of cardBackdrops(theme)) {
+    const glass = glassOver(theme, backdrop);
+    const surface = composite(glass, theme.accentText, alpha);
+    const ratio = contrast(tokenColour, surface);
+    if (worst === null || ratio < worst.ratio) worst = { ratio, surface };
+  }
+  return worst;
+}
+
+/**
+ * The backdrops the modal panel sits over: the overlay is `--bg` at
+ * `--overlay-alpha`, and behind the overlay is page content. The brightest
+ * pixel page content can put there is a text token, so those are included as
+ * backdrops — pessimistic on purpose.
+ */
+function overlayBackdrops(theme) {
+  const bases = [
+    theme.bg,
+    theme.bgElevated,
+    ...blobBackdrops(theme, theme.blobOpacity),
+    ...blobBackdrops(theme, theme.patchOpacity),
+    ...TEXT_TOKENS.map((token) => theme.text[token]),
+  ];
+  return bases.map((base) => composite(base, theme.bg, theme.overlayAlpha));
+}
+
+/** The modal panel's surface: glass over the overlay over the backdrop. */
+function worstOverlay(theme, tokenColour) {
+  let worst = null;
+  for (const backdrop of overlayBackdrops(theme)) {
+    const surface = glassOver(theme, backdrop);
+    const ratio = contrast(tokenColour, surface);
+    if (worst === null || ratio < worst.ratio) worst = { ratio, surface };
+  }
+  return worst;
+}
+
 /* --- the surface list ---------------------------------------------------- */
 
 const SURFACES = [
@@ -194,6 +291,18 @@ const SURFACES = [
   { key: 'glass-elevated', label: 'glass/elev', blobCap: null },
   { key: 'glass-aurora', label: 'glass/aurora', blobCap: 'blob' },
   { key: 'glass-patch', label: 'glass/patch', blobCap: 'patch' },
+  /* Brick 3 — the interactive card's spotlight, and the modal panel.
+     The spotlight carries only the tokens a card front can actually hold (see
+     CARD_TEXT_TOKENS), and it is never drawn on a flat Card, so `--border-strong`
+     — the sole-boundary token — is not in its domain. */
+  {
+    key: 'glass-spotlight',
+    label: 'glass/spot',
+    blobCap: 'patch',
+    tokens: CARD_TEXT_TOKENS,
+    soleBoundary: false,
+  },
+  { key: 'glass-overlay', label: 'glass/over', blobCap: null },
 ];
 
 /** Resolves a surface key to the colour actually painted. */
@@ -238,6 +347,12 @@ function cell(theme, tokenColour, surface) {
   if (surface.key === 'glass-patch') {
     return worstOverBlobs(theme, theme.patchOpacity, tokenColour, true);
   }
+  if (surface.key === 'glass-spotlight') {
+    return worstSpotlight(theme, tokenColour, theme.spotlightAlpha);
+  }
+  if (surface.key === 'glass-overlay') {
+    return worstOverlay(theme, tokenColour);
+  }
   const backdrop = surfaceColour(theme, surface.key, tokenColour, false);
   const painted =
     tokenColour.a < 1
@@ -276,7 +391,9 @@ console.log('========================\n');
 console.log('1. Text tokens over every surface');
 console.log(`   Required ${REQUIRED}:1 (3:1 allowed only at display and H1 sizes).`);
 console.log('   Aurora and glass/aurora use --aurora-blob-opacity;');
-console.log('   glass/patch uses --aurora-patch-opacity (the gallery glass backdrop).\n');
+console.log('   glass/patch uses --aurora-patch-opacity (the gallery glass backdrop);');
+console.log('   glass/spot uses --spotlight-alpha and is held to the four tokens a');
+console.log('   card front can carry — a "~" marks a cell below 4.5:1 that is not gated.\n');
 
 for (const theme of THEMES) {
   console.log(`${theme.name}  (blob cap ${theme.blobOpacity}, patch cap ${theme.patchOpacity})`);
@@ -287,8 +404,12 @@ for (const theme of THEMES) {
   for (const token of TEXT_TOKENS) {
     const cells = SURFACES.map((surface) => {
       const { ratio } = cell(theme, theme.text[token], surface);
+      // A surface may narrow which tokens it is held to; the ratio is still
+      // printed so the number is visible, but it is not a gate.
+      const applies =
+        surface.tokens === undefined || surface.tokens.includes(token);
       const fails = ratio < REQUIRED;
-      if (fails) {
+      if (fails && applies) {
         failures.push({
           matrix: 'text',
           theme: theme.name,
@@ -299,7 +420,8 @@ for (const theme of THEMES) {
             LARGE_TEXT_TOKENS.has(token) && ratio >= REQUIRED_LARGE,
         });
       }
-      return `${ratio.toFixed(2)}${fails ? ' !' : '  '}`;
+      const mark = fails ? (applies ? ' !' : ' ~') : '  ';
+      return `${ratio.toFixed(2)}${mark}`;
     });
     const large = LARGE_TEXT_TOKENS.has(token) ? 'yes' : '-';
     rows.push([token, ...cells, large]);
@@ -387,15 +509,20 @@ for (const theme of THEMES) {
     ],
   });
 
-  /* 2c. Sole-boundary border against every surface — 3:1. */
+  /* 2c. Sole-boundary border against every surface — 3:1.
+     The spotlight surface is excluded: `--border-strong` is the token for a
+     border that is a surface's *only* boundary, and the only component that
+     uses it is the flat Card, which has no spotlight — the spotlight belongs to
+     the interactive (glass) variant. */
+  const boundarySurfaces = SURFACES.filter((s) => s.soleBoundary !== false);
   runPairs(theme, {
     title: 'border-strong on every surface (sole boundary)',
     required: REQUIRED_UI,
-    columns: SURFACES.map((s) => s.label),
+    columns: boundarySurfaces.map((s) => s.label),
     items: [
       {
         label: 'border-strong',
-        values: SURFACES.map((surface) =>
+        values: boundarySurfaces.map((surface) =>
           cell(theme, theme.borderStrong, surface),
         ),
       },
@@ -454,6 +581,29 @@ function solveCap(theme, withGlass) {
   return null;
 }
 
+/**
+ * The highest spotlight alpha at which the card's own text still clears 4.5:1.
+ * The spotlight is painted on the card, so it is a surface the card's text sits
+ * on — solved, not chosen.
+ */
+const SPOTLIGHT_STEPS = [];
+for (let a = 0.6; a >= 0.02; a -= 0.01) SPOTLIGHT_STEPS.push(Number(a.toFixed(2)));
+
+function solveSpotlight(theme) {
+  for (const alpha of SPOTLIGHT_STEPS) {
+    let ok = true;
+    for (const token of CARD_TEXT_TOKENS) {
+      const { ratio } = worstSpotlight(theme, theme.text[token], alpha);
+      if (ratio < REQUIRED) {
+        ok = false;
+        break;
+      }
+    }
+    if (ok) return alpha;
+  }
+  return null;
+}
+
 console.log('3. Highest cap at which every text token clears 4.5:1\n');
 console.log('theme  token                  current  solved');
 
@@ -461,12 +611,16 @@ const SOLVED = {};
 for (const theme of THEMES) {
   const blob = solveCap(theme, false);
   const patch = solveCap(theme, true);
-  SOLVED[theme.name] = { blob, patch };
+  const spotlight = solveSpotlight(theme);
+  SOLVED[theme.name] = { blob, patch, spotlight };
   console.log(
     `${theme.name.padEnd(6)} ${'--aurora-blob-opacity'.padEnd(22)} ${String(theme.blobOpacity).padEnd(8)} ${blob}`,
   );
   console.log(
     `${''.padEnd(6)} ${'--aurora-patch-opacity'.padEnd(22)} ${String(theme.patchOpacity).padEnd(8)} ${patch}`,
+  );
+  console.log(
+    `${''.padEnd(6)} ${'--spotlight-alpha'.padEnd(22)} ${theme.spotlightAlpha.toFixed(2).padEnd(8)} ${spotlight}`,
   );
 }
 
@@ -504,7 +658,8 @@ if (blocking.length > 0) {
 const anySolvedBelowCurrent = THEMES.some(
   (t) =>
     SOLVED[t.name].blob < t.blobOpacity ||
-    SOLVED[t.name].patch < t.patchOpacity,
+    SOLVED[t.name].patch < t.patchOpacity ||
+    SOLVED[t.name].spotlight < t.spotlightAlpha,
 );
 
 if (anySolvedBelowCurrent) {

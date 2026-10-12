@@ -199,6 +199,26 @@
   /* Motion spring values are read by the Motion library as numbers. */
   --spring-stiffness: 260;
   --spring-damping: 24;
+
+  /* --- §7 Interactive card (spec §8) -----------------------------------
+     The pointer tilt is capped at 6 degrees, and the perspective is what makes
+     a 6-degree rotation read as a tilt rather than a skew. Both are geometry,
+     not colour, so they sit with the other geometry tokens; the cap is read by
+     the component so the number exists once. */
+  --tilt-max: 6deg;
+  --tilt-perspective: 60rem;
+
+  /* ADDED. The pointer spotlight's peak alpha. It is painted on top of the
+     card's own glass surface, so it is a surface the text sits on and is held
+     to 4.5:1 by scripts/solve-aurora-cap.mjs — solved, not guessed. The solver
+     reaches 0.12 in dark and 0.18 in light; the tighter value is used in both,
+     so the effect looks the same in either theme. */
+  --spotlight-alpha: 12%;
+
+  /* ADDED. The modal backdrop: the page background at 80% over whatever is
+     behind it. Also a surface text can sit on (through the panel's glass), so
+     the script composites it too. Solved, not guessed. */
+  --overlay-alpha: 80%;
 }
 
 /* --------------------------------------------------------------------------
@@ -254,6 +274,12 @@
      4.62 for --text-subtle, so the cap is a no-op in this theme. */
   --aurora-blob-opacity: 1;
   --aurora-patch-opacity: 1;
+
+  /* ADDED in Brick 3, same value as dark — see the dark block. The solver
+     would allow 0.18 here, but one value for both themes keeps the effect
+     looking the same in either. */
+  --spotlight-alpha: 12%;
+  --overlay-alpha: 80%;
 }
 
 /* --------------------------------------------------------------------------
