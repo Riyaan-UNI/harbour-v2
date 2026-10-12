@@ -367,13 +367,13 @@ at every width cost more than the matrix could afford on the mapped `R:` drive.
 | Typecheck | `npm run typecheck` | pass (both TS projects) |
 | Lint | `npm run lint` | pass, 0 problems |
 | Lint CSS | `npm run lint:css` | pass, 0 problems |
-| Build | `npm run build` | pass — CSS 39.10 kB (gzip 8.81), JS 298.66 kB (gzip 93.95) |
+| Build | `npm run build` | pass — CSS 39.10 kB (gzip 8.81), JS 299.15 kB (gzip 94.05) |
 | E2E + axe | `npm run test:e2e` | **69/69 pass** |
 | Contrast | `node scripts/solve-aurora-cap.mjs` | exit 0 — 98 text pairs, every component pair |
 
-The build's JS grew from 235.62 kB to 298.66 kB because Sonner, `@radix-ui/react-slot` and
+The build's JS grew from 235.62 kB to 299.15 kB because Sonner, `@radix-ui/react-slot` and
 `class-variance-authority` are now in the graph. It is still well under the spec's 250 kB
-*gzipped* landing target at 93.95 kB gzip, but the number is not yet meaningful: there is
+*gzipped* landing target at 94.05 kB gzip, but the number is not yet meaningful: there is
 no landing page, and the three dev pages are still statically imported, so a production
 build carries them. Code-splitting the dev pages is Brick 8's audit, not this brick's.
 
