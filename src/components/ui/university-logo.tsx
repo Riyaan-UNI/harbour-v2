@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { cn } from '../../lib/cn';
+import { GraduationCap } from './icons';
+import { universityById, type UniversityId } from './university-logos';
 
 /**
  * UniversityLogo — spec §8.
@@ -8,14 +10,18 @@ import { cn } from '../../lib/cn';
  * 2rem and 2.5rem. The image is contained, lazily loaded, and its alt text is
  * the full institution name.
  *
- * On a load error — or with no `src` at all — the box shows the acronym in
- * Geist Mono 600 in dark teal on the plate, so there is no layout shift and no
- * broken-image icon. The acronym scales with the box, so a three-letter code
- * still fits at the smallest size.
+ * **Where the file comes from.** Pass `id` and the name, acronym and path are
+ * resolved from the typed manifest in `university-logos.ts`, so a signup
+ * dropdown cannot drift out of step with the spec's table. Passing `src`,
+ * `name` and `acronym` directly is still supported for a one-off box (the
+ * gallery uses that form to show the error case on purpose).
  *
- * The real logos are not bundled yet. Point `src` at `/logos/<id>.svg` once
- * they are: the acronym fallback already covers a missing file, which is what
- * the gallery's error case proves.
+ * **Three fallbacks, all without a layout shift.** A load error, or no `src` at
+ * all, swaps the image for the acronym in Geist Mono 600, dark teal on the
+ * plate. An entry with no acronym (`other`) shows a generic graduation-cap mark
+ * instead. Both fallbacks are sized in container units, so a three-letter code
+ * fits at 2rem and at 3rem without a per-size font size, and the box never
+ * changes size when the swap happens.
  */
 export type UniversityLogoSize = 'sm' | 'md' | 'lg';
 
@@ -26,18 +32,25 @@ const SIZE: Record<UniversityLogoSize, { box: string; radius: string }> = {
   lg: { box: 'size-12', radius: 'rounded-md' },
 };
 
-export type UniversityLogoProps = {
-  /** e.g. `/logos/hku.svg`. Omit to render the acronym fallback directly. */
-  src?: string;
-  /** The institution's full name. Used as the alt text. */
-  name: string;
-  /** The short code shown when the image cannot be shown. */
-  acronym: string;
+type SharedProps = {
   size?: UniversityLogoSize;
   className?: string;
 };
 
+/**
+ * Either name an institution by id, or spell out the three fields. `id` alone
+ * is the common case; `name` + `acronym` is the escape hatch. A box with
+ * neither a name nor an id cannot be built, which is what keeps `alt` from
+ * silently becoming empty.
+ */
+export type UniversityLogoProps = SharedProps &
+  (
+    | { id: UniversityId; src?: string; name?: string; acronym?: string }
+    | { id?: undefined; src?: string; name: string; acronym: string }
+  );
+
 export function UniversityLogo({
+  id,
   src,
   name,
   acronym,
@@ -46,12 +59,18 @@ export function UniversityLogo({
 }: UniversityLogoProps): JSX.Element {
   const [failed, setFailed] = useState(false);
 
+  const entry = id === undefined ? undefined : universityById(id);
+
+  const resolvedName = name ?? entry?.name ?? '';
+  const resolvedAcronym = acronym ?? entry?.acronym ?? '';
+  const resolvedSrc = src ?? entry?.logo ?? undefined;
+
   // A new source deserves a fresh attempt.
   useEffect(() => {
     setFailed(false);
-  }, [src]);
+  }, [resolvedSrc]);
 
-  const showFallback = failed || !src;
+  const showFallback = failed || !resolvedSrc;
 
   return (
     <span
@@ -63,13 +82,22 @@ export function UniversityLogo({
         className,
       )}
       data-size={size}
+      data-university-id={id}
     >
       {showFallback ? (
-        <span className="ui-logo__acronym text-logo-plate-ink">{acronym}</span>
+        resolvedAcronym ? (
+          <span className="ui-logo__acronym text-logo-plate-ink">
+            {resolvedAcronym}
+          </span>
+        ) : (
+          <span className="ui-logo__mark text-logo-plate-ink">
+            <GraduationCap className="size-full" />
+          </span>
+        )
       ) : (
         <img
-          src={src}
-          alt={name}
+          src={resolvedSrc}
+          alt={resolvedName}
           loading="lazy"
           decoding="async"
           className="size-full object-contain"

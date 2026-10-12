@@ -1,4 +1,4 @@
-import type { HTMLAttributes, ReactNode } from 'react';
+import type { ComponentType, HTMLAttributes, ReactNode } from 'react';
 import { cn } from '../../lib/cn';
 import {
   demoBadgeVariants,
@@ -24,10 +24,7 @@ export type DemoBadgeProps = HTMLAttributes<HTMLSpanElement> & {
   children?: ReactNode;
 };
 
-const ICONS: Record<
-  DemoBadgeVariant,
-  (props: { className?: string }) => JSX.Element
-> = {
+const ICONS: Record<DemoBadgeVariant, ComponentType<{ className?: string }>> = {
   simulation: EyeOff,
   demo: InfoCircle,
   sample: InfoCircle,

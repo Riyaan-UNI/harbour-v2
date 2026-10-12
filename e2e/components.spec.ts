@@ -241,11 +241,111 @@ test('UniversityLogo falls back to the acronym on an image error', async ({
   expect(box?.height).toBeCloseTo(48, 0);
 });
 
-/** The logo image that does load keeps its alt text as the accessible name. */
-test('UniversityLogo exposes the full name as alt text', async ({ page }) => {
+/* -------------------------------------------------------------------------- */
+/* The university manifest — spec §10                                          */
+/* -------------------------------------------------------------------------- */
+
+/** Spec §10's table, verbatim. This is the list the manifest must match. */
+const SPEC_UNIVERSITIES = [
+  { id: 'hku', acronym: 'HKU', name: 'The University of Hong Kong' },
+  {
+    id: 'cuhk',
+    acronym: 'CUHK',
+    name: 'The Chinese University of Hong Kong',
+  },
+  {
+    id: 'hkust',
+    acronym: 'HKUST',
+    name: 'The Hong Kong University of Science and Technology',
+  },
+  {
+    id: 'polyu',
+    acronym: 'PolyU',
+    name: 'The Hong Kong Polytechnic University',
+  },
+  { id: 'cityu', acronym: 'CityU', name: 'City University of Hong Kong' },
+  { id: 'hkbu', acronym: 'HKBU', name: 'Hong Kong Baptist University' },
+  { id: 'lingnan', acronym: 'LU', name: 'Lingnan University' },
+  {
+    id: 'eduhk',
+    acronym: 'EdUHK',
+    name: 'The Education University of Hong Kong',
+  },
+] as const;
+
+/** A 1x1 PNG, so a stubbed logo always reports `naturalWidth === 1`. */
+const STUB_PNG =
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+
+/**
+ * Every id in the manifest is wired to a real box on the page. No university
+ * logo file is bundled in the repo, so what is on screen is the acronym
+ * fallback — asserted, not assumed, because it is the honest current state.
+ */
+test('university manifest: all nine ids render, and each falls back to its acronym', async ({
+  page,
+}) => {
   await openComponents(page, 'dark', 1024);
 
-  const image = page.getByAltText('The University of Hong Kong');
-  await image.scrollIntoViewIfNeeded();
-  await expect(image).toBeVisible();
+  for (const { id, acronym } of SPEC_UNIVERSITIES) {
+    const box = page.locator(`[data-testid="uni-logo-${id}"] .ui-logo`);
+    await box.scrollIntoViewIfNeeded();
+    await expect(box).toBeVisible();
+    await expect(box).toContainText(acronym);
+    // The plate is a fixed square at every size, so the fallback never shifts.
+    const measured = await box.boundingBox();
+    expect(measured?.width).toBeCloseTo(40, 0); // md = 2.5rem
+    expect(measured?.height).toBeCloseTo(40, 0);
+  }
+
+  // `other` is not an institution: it has no acronym and shows the generic mark.
+  const other = page.locator('[data-testid="uni-logo-other"] .ui-logo');
+  await other.scrollIntoViewIfNeeded();
+  await expect(other.locator('.ui-logo__mark')).toBeVisible();
+  await expect(other.locator('.ui-logo__acronym')).toHaveCount(0);
+});
+
+/**
+ * "Test that each loads": the manifest path is the one the browser actually
+ * requests, and the full name is the image's alt text. The eight files are not
+ * in the repo yet, so the requests are stubbed with a 1x1 PNG — this proves the
+ * wiring, and `university manifest: all nine ids render` above records that the
+ * real files are missing.
+ */
+test('university manifest: each logo path is requested and carries the full name as alt', async ({
+  page,
+}) => {
+  const requested: string[] = [];
+
+  // Only the eight manifest paths are stubbed. `/logos/does-not-exist.svg` is
+  // deliberately left alone, so the error-fallback demo further up the page
+  // still 404s and still proves the acronym swap.
+  await page.route(/\/logos\/(?:hku|cuhk|hkust|polyu|cityu|hkbu|lingnan|eduhk)\.svg$/, async (route) => {
+    requested.push(new URL(route.request().url()).pathname);
+    await route.fulfill({
+      status: 200,
+      contentType: 'image/png',
+      body: Buffer.from(STUB_PNG, 'base64'),
+    });
+  });
+
+  await openComponents(page, 'dark', 1024);
+
+  for (const { id, name } of SPEC_UNIVERSITIES) {
+    const image = page.locator(`[data-testid="uni-logo-${id}"] img`);
+    await image.scrollIntoViewIfNeeded();
+    await expect(image).toHaveAttribute('alt', name);
+    // `naturalWidth > 0` is the only proof the file actually loaded rather than
+    // erroring into the fallback.
+    await expect
+      .poll(() => image.evaluate((el) => (el as HTMLImageElement).naturalWidth))
+      .toBeGreaterThan(0);
+    await expect(
+      page.locator(`[data-testid="uni-logo-${id}"] .ui-logo__acronym`),
+    ).toHaveCount(0);
+  }
+
+  expect([...requested].sort()).toEqual(
+    SPEC_UNIVERSITIES.map(({ id }) => `/logos/${id}.svg`).sort(),
+  );
 });

@@ -1,4 +1,4 @@
-import type { CSSProperties, HTMLAttributes, ReactNode } from 'react';
+import type { ComponentType, CSSProperties, HTMLAttributes, ReactNode } from 'react';
 import { cn } from '../../lib/cn';
 import { AlertTriangle, CheckCircle, InfoCircle, ShieldAlert } from './icons';
 
@@ -22,7 +22,7 @@ export type StatusTone = 'red' | 'amber' | 'green' | 'info';
 
 const TONES: Record<
   StatusTone,
-  { token: string; Icon: (props: { className?: string }) => JSX.Element; label: string }
+  { token: string; Icon: ComponentType<{ className?: string }>; label: string }
 > = {
   red: { token: 'var(--danger)', Icon: ShieldAlert, label: 'High risk' },
   amber: { token: 'var(--gold-text)', Icon: AlertTriangle, label: 'Caution' },

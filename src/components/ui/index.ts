@@ -51,6 +51,15 @@ export {
   type UniversityLogoProps,
   type UniversityLogoSize,
 } from './university-logo';
+export {
+  UNIVERSITIES,
+  UNIVERSITY_IDS,
+  UNIVERSITY_LOGO_IDS,
+  isUniversityId,
+  universityById,
+  type University,
+  type UniversityId,
+} from './university-logos';
 export { SafetyRail, type SafetyRailProps } from './safety-rail';
 export {
   SAFETY_CONTACTS,

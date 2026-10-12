@@ -54,9 +54,11 @@ export default tseslint.config(
         'warn',
         {
           allowConstantExport: true,
-          // The layout primitives are built by a factory, so the rule cannot
-          // see them as components without being told.
-          extraHOCs: ['createPolymorphicComponent'],
+          // Two factories build components without the rule being able to see
+          // it: the layout primitives (`createPolymorphicComponent`) and the
+          // lucide icon wrapper (`createIcon`). Without naming them here, every
+          // export they produce is reported as a non-component export.
+          extraHOCs: ['createPolymorphicComponent', 'createIcon'],
         },
       ],
     },

@@ -92,6 +92,15 @@
     text-align: center;
     text-transform: uppercase;
   }
+
+  /* The generic mark, for an entry with no acronym (`other`). Sized in
+     container units like the acronym, so it fits every box size from one rule. */
+  .ui-logo__mark {
+    display: grid;
+    place-items: center;
+    inline-size: 52cqw;
+    block-size: 52cqw;
+  }
 }
 
 @keyframes ui-skeleton-sweep {

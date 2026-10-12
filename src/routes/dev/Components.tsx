@@ -31,7 +31,7 @@ import {
   Skeleton,
   StatusBadge,
   Textarea,
-  Toaster,
+  UNIVERSITIES,
   UniversityLogo,
   toast,
 } from '../../components/ui';
@@ -97,7 +97,6 @@ export function Components(): JSX.Element {
   return (
     <>
       <Aurora />
-      <Toaster />
 
       <main className="layer-raised">
         <Section>
@@ -476,37 +475,47 @@ export function Components(): JSX.Element {
 
         <Block
           title="UniversityLogo"
-          description="A square box on a white plate in both themes, radius md at 3rem and sm at 2rem and 2.5rem. The last box points at a missing file, so it proves the acronym fallback: Geist Mono 600, dark teal, no layout shift."
+          description="A square box on a white plate in both themes, radius md at 3rem and sm at 2rem and 2.5rem. The nine boxes below are built from the typed manifest, so the ids, names and acronyms are spec section 10's table. No logo file is bundled yet — a search of public/, src/assets/ and the previous build found no university artwork — so every box falls back to its acronym with no layout shift, which is the behaviour the last box proves on purpose."
         >
-          <Cluster gap={6} align="center">
-            <UniversityLogo
-              src="/harbour-mark.svg"
-              name="The University of Hong Kong"
-              acronym="HKU"
-              size="sm"
-            />
-            <UniversityLogo
-              src="/harbour-mark.svg"
-              name="The Chinese University of Hong Kong"
-              acronym="CUHK"
-              size="md"
-            />
-            <UniversityLogo
-              src="/harbour-mark.svg"
-              name="The Hong Kong University of Science and Technology"
-              acronym="HKUST"
-              size="lg"
-            />
-            <span data-testid="logo-missing" className="inline-flex">
-              <UniversityLogo
-                src="/logos/does-not-exist.svg"
-                name="City University of Hong Kong"
-                acronym="CityU"
-                size="lg"
-              />
-            </span>
-            <UniversityLogo name="Lingnan University" acronym="LU" size="md" />
-          </Cluster>
+          <Stack gap={6}>
+            <Row label="all nine, from the manifest (spec §10)">
+              <Cluster gap={4} align="center">
+                {UNIVERSITIES.map((university) => (
+                  <span
+                    key={university.id}
+                    data-testid={`uni-logo-${university.id}`}
+                    className="inline-flex"
+                  >
+                    <UniversityLogo id={university.id} size="md" />
+                  </span>
+                ))}
+              </Cluster>
+            </Row>
+
+            <Row label="sizes — 2rem / 2.5rem / 3rem">
+              <Cluster gap={6} align="center">
+                <UniversityLogo id="hku" size="sm" />
+                <UniversityLogo id="cuhk" size="md" />
+                <UniversityLogo id="hkust" size="lg" />
+              </Cluster>
+            </Row>
+
+            <Row label="error fallback, on purpose">
+              <Cluster gap={6} align="center">
+                <span data-testid="logo-missing" className="inline-flex">
+                  <UniversityLogo
+                    src="/logos/does-not-exist.svg"
+                    name="City University of Hong Kong"
+                    acronym="CityU"
+                    size="lg"
+                  />
+                </span>
+                <span data-testid="logo-generic" className="inline-flex">
+                  <UniversityLogo id="other" size="lg" />
+                </span>
+              </Cluster>
+            </Row>
+          </Stack>
         </Block>
 
         <Block
