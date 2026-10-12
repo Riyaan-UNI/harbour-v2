@@ -103,7 +103,17 @@ html.lenis body {
   color: var(--text);
 }
 
-/* --- Hero ----------------------------------------------------------------- */
+/* --- Hero -----------------------------------------------------------------
+   Brick 3b: the hero section has no padding — the AuroraPatch is full-bleed,
+   so the padding lives on the content inside it instead. */
+.hero__section {
+  padding-block: 0;
+}
+
+.hero__content {
+  padding-block: var(--section-padding-block);
+}
+
 .hero__wave {
   block-size: clamp(5rem, 3rem + 9vw, 11rem);
 }

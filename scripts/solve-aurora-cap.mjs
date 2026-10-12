@@ -140,6 +140,18 @@ const CARD_TEXT_TOKENS = ['text', 'text-muted', 'accent-text', 'gold-text'];
  */
 const HERO_TEXT_TOKENS = CARD_TEXT_TOKENS;
 
+/**
+ * The tokens the hero's copy column carries, on the bare field: the eyebrow,
+ * the subhead and the ghost button's label. All three are small text, so all
+ * three need 4.5:1 — which is why the field has to fall off from the art
+ * column to the copy column at all.
+ *
+ * `--accent-text` and `--gold-text` are not in the list because nothing in the
+ * hero's copy column uses them. `--text-subtle` is not either: it is a caption
+ * tone and no caption sits on the bare field.
+ */
+const HERO_COPY_TEXT_TOKENS = ['text', 'text-muted'];
+
 const REQUIRED = 4.5;
 const REQUIRED_LARGE = 3;
 /** WCAG 1.4.11 — UI components, focus indicators and graphical objects. */
@@ -158,6 +170,9 @@ function readTheme(name, block) {
     blobOpacity: Number.parseFloat(readToken(block, 'aurora-blob-opacity')),
     patchOpacity: Number.parseFloat(readToken(block, 'aurora-patch-opacity')),
     heroOpacity: Number.parseFloat(readToken(block, 'aurora-hero-opacity')),
+    heroCopyOpacity: Number.parseFloat(
+      readToken(block, 'aurora-hero-copy-opacity'),
+    ),
     spotlightAlpha: readPercent(block, 'spotlight-alpha'),
     overlayAlpha: readPercent(block, 'overlay-alpha'),
     artTintAlpha: readPercent(block, 'art-tint-alpha'),
@@ -340,6 +355,20 @@ const SURFACES = [
     tokens: HERO_TEXT_TOKENS,
     soleBoundary: false,
   },
+  /* Brick 3b — the copy column of the boxless hero, on the bare field at
+     `--aurora-hero-copy-opacity`. The field falls off from the art column to
+     the copy column, so the copy sits on much less colour than the headline
+     does; this row is what makes that falloff a solved value rather than a
+     shape. Held to the two tokens the copy column actually carries — the
+     eyebrow, the subhead and the ghost button's label — at 4.5:1, because all
+     three are small text. */
+  {
+    key: 'hero-copy',
+    label: 'hero/copy',
+    blobCap: 'hero-copy',
+    tokens: HERO_COPY_TEXT_TOKENS,
+    soleBoundary: false,
+  },
   /* The empty art slot's placeholder: `--bg-elevated` under the peak tint of
      its gradient. The whole plate is modelled at the peak, which is more
      pessimistic than the gradient actually is. */
@@ -382,6 +411,11 @@ function surfaceColour(theme, key, tokenColour, forContrast) {
       return forContrast
         ? worstOverBlobs(theme, theme.heroOpacity, tokenColour, true).surface
         : null;
+    case 'hero-copy':
+      return forContrast
+        ? worstOverBlobs(theme, theme.heroCopyOpacity, tokenColour, false)
+            .surface
+        : null;
     default:
       throw new Error(`unknown surface: ${key}`);
   }
@@ -412,6 +446,9 @@ function cell(theme, tokenColour, surface) {
   }
   if (surface.key === 'glass-hero') {
     return worstOverBlobs(theme, theme.heroOpacity, tokenColour, true);
+  }
+  if (surface.key === 'hero-copy') {
+    return worstOverBlobs(theme, theme.heroCopyOpacity, tokenColour, false);
   }
   if (surface.key === 'art-placeholder') {
     // The placeholder plate, at the peak of its gradient.
@@ -750,6 +787,30 @@ function solveHeroCap(theme) {
   return null;
 }
 
+/**
+ * The highest opacity the hero's colour field may have over the copy column.
+ *
+ * Brick 3b took the glass panel off the hero, so the eyebrow, the subhead and
+ * the ghost button's label now sit on the bare field. All three are small text
+ * and all three need 4.5:1, so the field has to be much weaker there than
+ * behind the art — this is the value that makes that true, and it is solved
+ * rather than chosen. It is always at or below `--aurora-hero-opacity`.
+ */
+function solveHeroCopyCap(theme) {
+  for (const cap of CAP_STEPS) {
+    let ok = true;
+    for (const token of HERO_COPY_TEXT_TOKENS) {
+      const { ratio } = worstOverBlobs(theme, cap, theme.text[token], false);
+      if (ratio < REQUIRED) {
+        ok = false;
+        break;
+      }
+    }
+    if (ok) return cap;
+  }
+  return null;
+}
+
 console.log('3. Highest cap at which every text token clears 4.5:1\n');
 console.log('theme  token                  current  solved');
 
@@ -758,19 +819,23 @@ for (const theme of THEMES) {
   const blob = solveCap(theme, false);
   const patch = solveCap(theme, true);
   const hero = solveHeroCap(theme);
+  const heroCopy = solveHeroCopyCap(theme);
   const spotlight = solveSpotlight(theme);
-  SOLVED[theme.name] = { blob, patch, hero, spotlight };
+  SOLVED[theme.name] = { blob, patch, hero, heroCopy, spotlight };
   console.log(
-    `${theme.name.padEnd(6)} ${'--aurora-blob-opacity'.padEnd(22)} ${String(theme.blobOpacity).padEnd(8)} ${blob}`,
+    `${theme.name.padEnd(6)} ${'--aurora-blob-opacity'.padEnd(26)} ${String(theme.blobOpacity).padEnd(8)} ${blob}`,
   );
   console.log(
-    `${''.padEnd(6)} ${'--aurora-patch-opacity'.padEnd(22)} ${String(theme.patchOpacity).padEnd(8)} ${patch}`,
+    `${''.padEnd(6)} ${'--aurora-patch-opacity'.padEnd(26)} ${String(theme.patchOpacity).padEnd(8)} ${patch}`,
   );
   console.log(
-    `${''.padEnd(6)} ${'--aurora-hero-opacity'.padEnd(22)} ${String(theme.heroOpacity).padEnd(8)} ${hero}`,
+    `${''.padEnd(6)} ${'--aurora-hero-opacity'.padEnd(26)} ${String(theme.heroOpacity).padEnd(8)} ${hero}`,
   );
   console.log(
-    `${''.padEnd(6)} ${'--spotlight-alpha'.padEnd(22)} ${theme.spotlightAlpha.toFixed(2).padEnd(8)} ${spotlight}`,
+    `${''.padEnd(6)} ${'--aurora-hero-copy-opacity'.padEnd(26)} ${String(theme.heroCopyOpacity).padEnd(8)} ${heroCopy}`,
+  );
+  console.log(
+    `${''.padEnd(6)} ${'--spotlight-alpha'.padEnd(26)} ${theme.spotlightAlpha.toFixed(2).padEnd(8)} ${spotlight}`,
   );
 }
 
@@ -810,6 +875,7 @@ const anySolvedBelowCurrent = THEMES.some(
     SOLVED[t.name].blob < t.blobOpacity ||
     SOLVED[t.name].patch < t.patchOpacity ||
     SOLVED[t.name].hero < t.heroOpacity ||
+    SOLVED[t.name].heroCopy < t.heroCopyOpacity ||
     SOLVED[t.name].spotlight < t.spotlightAlpha,
 );
 

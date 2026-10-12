@@ -304,6 +304,43 @@
   opacity: var(--aurora-hero-opacity);
 }
 
+/* Brick 3b: the boxless hero. The patch is full-bleed (no radius) and the
+   content padding is removed so the Container primitive can manage it. The
+   colour field falls off from the art column to the copy column: on the copy
+   side the blobs run at --aurora-hero-copy-opacity (0.28 in dark), which is
+   the highest value at which the eyebrow, subhead and ghost-button label still
+   clear 4.5:1. On the art side they run at the full --aurora-hero-opacity
+   (0.59). The mask scales the left side down by the ratio of the two caps.
+   On narrow viewports the layout stacks, so the whole field stays at the copy
+   cap — every token on screen needs 4.5:1. */
+.aurora-patch--hero {
+  border-radius: 0;
+}
+
+.aurora-patch--hero .aurora-patch__content {
+  padding: 0;
+}
+
+.aurora-patch--hero .aurora-patch__blobs {
+  opacity: var(--aurora-hero-copy-opacity);
+}
+
+@media (width >= 64em) {
+  .aurora-patch--hero .aurora-patch__blobs {
+    opacity: var(--aurora-hero-opacity);
+    -webkit-mask-image: linear-gradient(
+      to right,
+      var(--aurora-hero-mask-start) 0%,
+      black 55%
+    );
+    mask-image: linear-gradient(
+      to right,
+      var(--aurora-hero-mask-start) 0%,
+      black 55%
+    );
+  }
+}
+
 /* --------------------------------------------------------------------------
    Typographic roles — spec §5. Exposed as Tailwind utilities so they compose
    with variants, and so no component ever hand-writes a font size.
@@ -316,6 +353,7 @@
   line-height: var(--leading-display);
   letter-spacing: var(--tracking-display);
   max-inline-size: var(--measure-display);
+  text-wrap: balance;
 }
 
 @utility type-h1 {

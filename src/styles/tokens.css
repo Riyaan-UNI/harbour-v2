@@ -102,6 +102,17 @@
      on a glass panel over the patch. Solved by scripts/solve-aurora-cap.mjs
      under both rules at once, never guessed. */
   --aurora-hero-opacity: 0.59;
+
+  /* ADDED in Brick 3b. The copy column of the boxless hero sits on the bare
+     colour field, not on a glass panel, so its opacity has to be much lower
+     than the art column's. Solved by scripts/solve-aurora-cap.mjs, not guessed. */
+  --aurora-hero-copy-opacity: 0.28;
+
+  /* ADDED in Brick 3b. The mask-image that fades the hero's colour field from
+     the art column to the copy column scales the blob opacity down by this
+     ratio on the copy side. It is derived from the two caps, not guessed. */
+  --aurora-hero-mask-start: rgba(0, 0, 0, 0.47);
+
   --aurora-noise-opacity: 0.035; /* PROPOSED — spec says "3 to 4%" */
   --aurora-grid-opacity: 0.04; /* PROPOSED — spec says "about 4%" */
   --aurora-grid-size: 4rem; /* PROPOSED — spec gives no cell size */
@@ -141,7 +152,7 @@
   --tracking-display: -0.02em;
   --tracking-label: 0.08em;
 
-  --measure-display: 16ch;
+  --measure-display: 20ch;
   --measure-body: 65ch;
 
   /* --- §6 Spacing scale ------------------------------------------------
@@ -290,6 +301,14 @@
   /* ADDED in Brick 3 — see the dark block. Light clears 4.5:1 at full strength
      on every surface, so the hero patch is a no-op here too. */
   --aurora-hero-opacity: 1;
+
+  /* ADDED in Brick 3b — see the dark block. Light also clears 4.5:1 at full
+     strength on every surface, so the copy field is a no-op here too. */
+  --aurora-hero-copy-opacity: 1;
+
+  /* ADDED in Brick 3b — see the dark block. In light the ratio is 1, so the
+     mask is uniformly opaque (equivalent to no mask at all). */
+  --aurora-hero-mask-start: black;
 
   /* ADDED in Brick 3, same value as dark — see the dark block. The solver
      would allow 0.18 here, but one value for both themes keeps the effect

@@ -10,6 +10,9 @@ import { Disclaimer, HarbourLogo, SafetyRail } from '../ui';
  * this prototype is. The numbers come from `SAFETY_CONTACTS`, which is still
  * marked UNVERIFIED — the rail says so on screen rather than quietly shipping
  * a number nobody has checked.
+ *
+ * Brick 3b deduplicated the legal disclaimer: the `Disclaimer` component covers
+ * the same ground the extra paragraph did, so the paragraph is gone.
  */
 export function LandingFooter(): JSX.Element {
   return (
@@ -26,20 +29,16 @@ export function LandingFooter(): JSX.Element {
           <Disclaimer />
 
           <Text role="small" tone="subtle">
-            Harbour is guidance, not an emergency service, and not legal,
-            financial or medical advice. It does not verify any listing, person
-            or message. In an emergency, call 999.
-          </Text>
-
-          <Text role="small" tone="subtle">
             This is a prototype. There are no accounts and no passwords: a
             profile lives on this device only, and nothing here sends your text
             anywhere until you ask it to.
           </Text>
 
-          <Text role="label" tone="subtle">
-            Harbour · Brick 3 · landing page in progress
-          </Text>
+          {import.meta.env.DEV && (
+            <Text role="label" tone="subtle">
+              Harbour · Brick 3b · landing page in progress
+            </Text>
+          )}
         </Stack>
       </Container>
     </footer>

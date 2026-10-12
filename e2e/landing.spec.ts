@@ -264,27 +264,30 @@ async function bringWaveIntoView(page: Page): Promise<void> {
   await page.locator('.wave-line').scrollIntoViewIfNeeded();
 }
 
-test('wave line: settles once on first scroll-in, then holds at 0.06', async ({
+test('wave line: settles via the hero timeline, then holds at 0.06', async ({
   page,
 }) => {
   await openLanding(page, 'dark', 1024);
 
   const line = page.locator('.wave-line');
   await expect(line).toBeVisible();
-  await expect(line).toHaveAttribute('data-paused', 'true');
 
-  // The settle starts when the line first enters the viewport, not before.
-  await bringWaveIntoView(page);
-  await expect.poll(() => readAmplitude(page), { timeout: 5000 }).toBe(0.06);
+  // Brick 3b: the settle is triggered by the hero's GSAP timeline, not by
+  // scrolling into view. The timeline waits for fonts, then animates the
+  // headline, the copy and finally the wave — so the settle may take a few
+  // seconds to complete.
+  await expect.poll(() => readAmplitude(page), { timeout: 8000 }).toBe(0.06);
 
   // And it never loops: the amplitude holds, and so does the path.
   await page.waitForTimeout(1500);
   expect(await readAmplitude(page)).toBe(0.06);
 
   const d = await line.locator('.wave-line__line').getAttribute('d');
-  // 96 points, and `A` is the only thing that moves: the path changes with the
-  // amplitude and stops changing once the settle is over.
-  expect(d?.match(/[ML]/g)?.length).toBe(96);
+  // Brick 3b: point count derives from rendered width (one per ~12 px).
+  // Verify the count matches the attribute the component writes.
+  const pointCount = Number(await line.getAttribute('data-points'));
+  expect(pointCount).toBeGreaterThanOrEqual(48);
+  expect(d?.match(/[ML]/g)?.length).toBe(pointCount);
 
   await page.waitForTimeout(400);
   expect(await line.locator('.wave-line__line').getAttribute('d')).toBe(d);
@@ -293,18 +296,30 @@ test('wave line: settles once on first scroll-in, then holds at 0.06', async ({
 test('wave line: the ticker pauses when the line leaves the viewport', async ({
   page,
 }) => {
-  await openLanding(page, 'dark', 1024);
+  // At 600 px height the hero wave is below the fold, so the same
+  // scroll-in / scroll-out cycle the original test used still works.
+  await page.setViewportSize({ width: 1024, height: 600 });
+  await page.addInitScript((mode) => {
+    window.localStorage.setItem('harbour:theme', mode);
+  }, 'dark');
+  await page.goto(LANDING_PATH);
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 
   const line = page.locator('.wave-line');
+
+  // Wave starts off-screen, so the ticker is paused.
+  await expect(line).toHaveAttribute('data-paused', 'true');
 
   await bringWaveIntoView(page);
   await expect(line).toHaveAttribute('data-paused', 'false');
 
+  // Scroll back to the top — the wave leaves the viewport and pauses again.
   await page.evaluate(() => {
     window.scrollTo(0, 0);
   });
   await expect(line).toHaveAttribute('data-paused', 'true');
 
+  // Scroll back down and the ticker resumes.
   await bringWaveIntoView(page);
   await expect(line).toHaveAttribute('data-paused', 'false');
 });
