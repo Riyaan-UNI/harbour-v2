@@ -37,6 +37,11 @@ const Components = lazy(() =>
     default: module.Components,
   })),
 );
+const DevHub = lazy(() =>
+  import('./routes/dev/DevHub').then((module) => ({
+    default: module.DevHub,
+  })),
+);
 
 /**
  * A calm placeholder while a lazily loaded route arrives. It is deliberately
@@ -66,6 +71,14 @@ export function App(): JSX.Element {
 
         {devPagesEnabled ? (
           <>
+            <Route
+              path="/dev"
+              element={
+                <Suspense fallback={<RouteFallback />}>
+                  <DevHub />
+                </Suspense>
+              }
+            />
             <Route
               path="/dev/gallery"
               element={

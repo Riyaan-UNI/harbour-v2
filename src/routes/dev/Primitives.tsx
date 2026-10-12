@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import { Aurora } from '../../components/Aurora';
 import {
   Bento,
@@ -73,6 +74,12 @@ export function Primitives(): JSX.Element {
               a Cluster, and one block that answers to its container rather than
               the viewport.
             </Text>
+            <Link
+              to="/dev"
+              className="text-accent-text hover:text-text inline-flex items-center text-sm font-medium transition-colors"
+            >
+              ← Dev hub
+            </Link>
           </Stack>
         </Section>
 

@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import { Aurora } from '../../components/Aurora';
 import { AuroraPatch } from '../../components/AuroraPatch';
 import { ThemeToggle } from '../../components/ThemeToggle';
@@ -228,6 +229,12 @@ export function Gallery(): JSX.Element {
                 <strong className="text-text font-semibold">{resolved}</strong>{' '}
                 theme.
               </Text>
+              <Link
+                to="/dev"
+                className="text-accent-text hover:text-text inline-flex items-center text-sm font-medium transition-colors"
+              >
+                ← Dev hub
+              </Link>
             </Stack>
             <ThemeToggle />
           </Cluster>
