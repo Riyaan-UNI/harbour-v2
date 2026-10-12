@@ -30,6 +30,13 @@
   --glass-fill: rgba(255, 255, 255, 0.06);
   --glass-fill-strong: rgba(255, 255, 255, 0.1);
   --border: rgba(255, 255, 255, 0.14);
+
+  /* ADDED in Part A2. `--border` is a decorative hairline — at 0.14 alpha it is
+     about 1.5:1 against `--bg`, which is correct for a divider that is not the
+     only thing identifying a surface. Where a border IS the sole boundary (the
+     flat Card variant), 3:1 is required, so this token exists and is held to it
+     by scripts/solve-aurora-cap.mjs. Solved, not guessed. */
+  --border-strong: #74938f;
   --text: #eaf5f3;
   --text-muted: #a9c4c0;
   --text-subtle: #92aca9;
@@ -192,17 +199,23 @@
    -------------------------------------------------------------------------- */
 
 :root[data-theme='light'] {
-  /* --- §3 Colour ------------------------------------------------------- */
-  --bg: #f7f3e9;
+  /* --- §3 Colour -------------------------------------------------------
+     Part A1: the light neutrals are the cooler sea-glass values proposed in
+     Addendum 1 §6, replacing the warm ivory #F7F3E9. `bg-elevated` was already
+     #FFFFFF. Teal and gold keep their roles. */
+  --bg: #f2f7f6;
   --bg-elevated: #ffffff;
   --glass-fill: rgba(255, 255, 255, 0.62);
   --glass-fill-strong: rgba(255, 255, 255, 0.82);
   --border: rgba(11, 57, 53, 0.14);
+
+  /* ADDED in Part A2 — see the dark block for why. */
+  --border-strong: #5f7a76;
   --text: #0b2b28;
   --text-muted: #3f5f5b;
   --text-subtle: #496662;
   --accent-fill: #0b3935;
-  --on-accent: #f7f3e9;
+  --on-accent: #f2f7f6;
   --accent-text: #09675f;
   --gold-fill: #f1c96f;
   --on-gold: #2b2000;
@@ -224,7 +237,7 @@
   /* --- §4 Glass supporting tokens -------------------------------------- */
   --glass-highlight: rgba(255, 255, 255, 0.9);
   --shadow-glass: 0 1.5rem 3rem -1rem rgba(11, 57, 53, 0.18);
-  --glass-tint: rgba(247, 243, 233, 0.55);
+  --glass-tint: rgba(242, 247, 246, 0.55);
 
   /* Light clears 4.5:1 at full strength: the worst-case stack bottoms out at
      4.62 for --text-subtle, so the cap is a no-op in this theme. */
@@ -319,6 +332,7 @@
   --color-glass-fill: var(--glass-fill);
   --color-glass-fill-strong: var(--glass-fill-strong);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-text: var(--text);
   --color-text-muted: var(--text-muted);
   --color-text-subtle: var(--text-subtle);

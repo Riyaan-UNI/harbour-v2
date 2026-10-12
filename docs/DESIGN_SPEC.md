@@ -43,7 +43,7 @@ Dark is the default theme. Dark and light are designed separately, not auto-inve
 
 | Token | Dark | Light | Use |
 | --- | --- | --- | --- |
-| bg | #061B1A | #F7F3E9 | page background |
+| bg | #061B1A | #F2F7F6 | page background |
 | bg-elevated | #0B2624 | #FFFFFF | menus, sheets, solid fallbacks |
 | glass-fill | rgba(255,255,255,0.06) | rgba(255,255,255,0.62) | glass cards |
 | glass-fill-strong | rgba(255,255,255,0.10) | rgba(255,255,255,0.82) | fields, hover, modals |
@@ -52,7 +52,7 @@ Dark is the default theme. Dark and light are designed separately, not auto-inve
 | text-muted | #A9C4C0 | #3F5F5B | secondary text |
 | text-subtle | #92ACA9 | #496662 | captions only |
 | accent-fill | #4FE3D0 | #0B3935 | primary buttons, key fills |
-| on-accent | #04201D | #F7F3E9 | text on accent-fill |
+| on-accent | #04201D | #F2F7F6 | text on accent-fill |
 | accent-text | #4FE3D0 | #09675F | links, highlights |
 | gold-fill | #F1C96F | #F1C96F | highlights |
 | on-gold | #2B2000 | #2B2000 | text on gold-fill |
@@ -78,16 +78,23 @@ Contrast targets are 4.5:1 for text and 3:1 for UI and graphics. These values we
 
 Nothing else moved. The dark aurora cap also came down (see §4); `--danger` and every other pair cleared 4.5:1 once the cap was re-solved.
 
+**Part A2 widened the same script to the component pairs** the 3:1 rule in this section covers but nothing was checking: `on-accent` on `accent-fill` and `on-gold` on `gold-fill` (still text, so 4.5:1); `--focus-ring`, `--border-strong` and `chart-1` to `chart-5` against every surface (3:1). It reports the full matrix and exits 1 on any miss. `--border` is printed but not gated: at 0.14 alpha it is a decorative divider, never the only boundary of a surface — `--border-strong` is the token for that case.
+
 ### Added tokens
 
 Not in the original colour table. All live in `src/styles/tokens.css`.
 
 | Token | Dark | Light | Use |
 | --- | --- | --- | --- |
-| `--glass-tint` | `rgba(6,27,26,0.55)` | `rgba(247,243,233,0.55)` | painted under the white sheen, so glass is legible over anything |
+| `--glass-tint` | `rgba(6,27,26,0.55)` | `rgba(242,247,246,0.55)` | painted under the white sheen, so glass is legible over anything |
 | `--aurora-blob-opacity` | `0.18` | `1` | cap on the page aurora blobs, so bare text over them stays legible |
 | `--aurora-patch-opacity` | `0.29` | `1` | cap on a *contained* aurora patch, which is always covered by glass |
+| `--border-strong` | `#74938F` | `#5F7A76` | a hairline that is the *only* boundary of a surface (the flat Card), so it is held to 3:1 by the contrast script; `--border` stays a decorative divider |
 | `--mask-opaque` | `#000` | `#000` | the opaque end of the aurora grid's mask gradient; never painted |
+
+### Light neutrals (Part A1)
+
+The light neutrals moved from the warm ivory `#F7F3E9` to cooler sea-glass values, per Addendum 1 §6. `bg` is now `#F2F7F6`, `on-accent` is now `#F2F7F6`, and `--glass-tint` is now `rgba(242,247,246,0.55)`. `bg-elevated` was already `#FFFFFF`. Teal and gold keep their roles; every contrast pair was re-checked and the aurora caps did not move.
 
 ### Chart and avatar palette
 

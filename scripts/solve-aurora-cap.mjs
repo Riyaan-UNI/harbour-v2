@@ -4,32 +4,33 @@
  * Brick 0 only checked `--text` and `--text-muted` against a stack of blobs.
  * Review found that too narrow: it never checked the other five text tokens,
  * and it never checked text *inside a glass surface*, which is where the glass
- * section actually puts it.
+ * section actually puts it. Part A2 widened it again, to the component pairs
+ * the spec's "3:1 for UI and graphics" rule covers but nothing was checking.
  *
- * This script now checks:
+ * This script checks three matrices, in both themes, and exits 1 on any miss:
  *
- *   text tokens  — text, text-muted, text-subtle, accent-text, gold-text,
- *                  danger, success   (every text token in spec §3)
- *   surfaces     — bg
- *                  bg-elevated
- *                  the page aurora (worst-case stack of all three blobs)
- *                  glass over bg
- *                  glass over bg-elevated
- *                  glass over the page aurora
- *                  glass over the gallery patch
- *   themes       — dark and light, separately, because they are designed
- *                  separately and not inverted.
+ *   1. TEXT — every text token in spec §3 against every surface stack,
+ *      required 4.5:1.
+ *   2. COMPONENT PAIRS —
+ *        text on a fill      on-accent on accent-fill, on-gold on gold-fill
+ *                            (4.5:1 — it is still text)
+ *        focus ring          against every surface (3:1)
+ *        sole-boundary border against every surface (3:1)
+ *        chart palette       chart-1..5 against bg, bg-elevated and glass
+ *                            (3:1 — graphical objects)
+ *   3. CAPS — the highest aurora blob and patch opacity at which matrix 1
+ *      still clears 4.5:1.
  *
- * A glass surface is composited exactly as `.glass` paints it: the tint
- * (`--glass-tint`) under the white sheen (`--glass-fill`), over whatever is
- * behind. The aurora worst case is every non-empty subset of the three blobs,
- * painted in DOM order — the only safe assumption, since text can land
- * anywhere on the fixed layer.
+ * Surfaces (a glass surface is composited exactly as `.glass` paints it — the
+ * tint under the white sheen — over whatever is behind):
  *
- * Required: 4.5:1. WCAG's 3:1 large-text allowance applies to display and H1
- * sizes; only `--text` is ever painted at those sizes, and it is also used at
- * body sizes, so it is held to 4.5 too. The 3:1 column is reported for
- * information only.
+ *   bg · bg-elevated · the page aurora (worst-case stack of all three blobs) ·
+ *   glass over bg · glass over bg-elevated · glass over the aurora ·
+ *   glass over the gallery patch
+ *
+ * The aurora worst case is every non-empty subset of the three blobs, painted
+ * in DOM order — the only safe assumption, since text can land anywhere on the
+ * fixed layer.
  *
  * Run: node scripts/solve-aurora-cap.mjs
  * Exits 1 if any cell fails, so it can gate a build.
@@ -88,6 +89,10 @@ const LARGE_TEXT_TOKENS = new Set(['text']);
 
 const REQUIRED = 4.5;
 const REQUIRED_LARGE = 3;
+/** WCAG 1.4.11 — UI components, focus indicators and graphical objects. */
+const REQUIRED_UI = 3;
+
+const CHART_TOKENS = ['chart-1', 'chart-2', 'chart-3', 'chart-4', 'chart-5'];
 
 function readTheme(name, block) {
   const colour = (token) => parseColour(readToken(block, token));
@@ -101,6 +106,15 @@ function readTheme(name, block) {
     patchOpacity: Number.parseFloat(readToken(block, 'aurora-patch-opacity')),
     blobs: [colour('aurora-1'), colour('aurora-2'), colour('aurora-3')],
     text: Object.fromEntries(TEXT_TOKENS.map((t) => [t, colour(t)])),
+    // Component pairs.
+    accentFill: colour('accent-fill'),
+    onAccent: colour('on-accent'),
+    goldFill: colour('gold-fill'),
+    onGold: colour('on-gold'),
+    focusRing: colour('focus-ring'),
+    border: colour('border'),
+    borderStrong: colour('border-strong'),
+    charts: Object.fromEntries(CHART_TOKENS.map((t) => [t, colour(t)])),
   };
 }
 
@@ -137,10 +151,6 @@ function contrast(a, b) {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-function rgb(colour) {
-  return `rgb(${Math.round(colour.r)}, ${Math.round(colour.g)}, ${Math.round(colour.b)})`;
-}
-
 /** `.glass` paints the tint, then the sheen, over whatever is behind. */
 function glassOver(theme, backdrop) {
   const tinted = composite(backdrop, theme.glassTint, theme.glassTint.a);
@@ -173,7 +183,7 @@ function worstOverBlobs(theme, cap, tokenColour, withGlass) {
   return worst;
 }
 
-/* --- the matrix ---------------------------------------------------------- */
+/* --- the surface list ---------------------------------------------------- */
 
 const SURFACES = [
   { key: 'bg', label: 'bg', blobCap: null },
@@ -185,55 +195,105 @@ const SURFACES = [
   { key: 'glass-patch', label: 'glass/patch', blobCap: 'patch' },
 ];
 
-function cell(theme, token, surface) {
-  const colour = theme.text[token];
-  switch (surface.key) {
+/** Resolves a surface key to the colour actually painted. */
+function surfaceColour(theme, key, tokenColour, forContrast) {
+  switch (key) {
     case 'bg':
-      return { ratio: contrast(colour, theme.bg) };
+      return theme.bg;
     case 'bg-elevated':
-      return { ratio: contrast(colour, theme.bgElevated) };
+      return theme.bgElevated;
     case 'glass-bg':
-      return { ratio: contrast(colour, glassOver(theme, theme.bg)) };
+      return glassOver(theme, theme.bg);
     case 'glass-elevated':
-      return { ratio: contrast(colour, glassOver(theme, theme.bgElevated)) };
+      return glassOver(theme, theme.bgElevated);
     case 'aurora':
-      return worstOverBlobs(theme, theme.blobOpacity, colour, false);
+      return forContrast
+        ? worstOverBlobs(theme, theme.blobOpacity, tokenColour, false).surface
+        : null;
     case 'glass-aurora':
-      return worstOverBlobs(theme, theme.blobOpacity, colour, true);
+      return forContrast
+        ? worstOverBlobs(theme, theme.blobOpacity, tokenColour, true).surface
+        : null;
     case 'glass-patch':
-      return worstOverBlobs(theme, theme.patchOpacity, colour, true);
+      return forContrast
+        ? worstOverBlobs(theme, theme.patchOpacity, tokenColour, true).surface
+        : null;
     default:
-      throw new Error(`unknown surface: ${surface.key}`);
+      throw new Error(`unknown surface: ${key}`);
   }
 }
 
+/**
+ * The contrast of `tokenColour` against a surface, compositing the token over
+ * the surface first when it is semi-transparent (which `--border` is).
+ */
+function cell(theme, tokenColour, surface) {
+  if (surface.key === 'aurora') {
+    return worstOverBlobs(theme, theme.blobOpacity, tokenColour, false);
+  }
+  if (surface.key === 'glass-aurora') {
+    return worstOverBlobs(theme, theme.blobOpacity, tokenColour, true);
+  }
+  if (surface.key === 'glass-patch') {
+    return worstOverBlobs(theme, theme.patchOpacity, tokenColour, true);
+  }
+  const backdrop = surfaceColour(theme, surface.key, tokenColour, false);
+  const painted =
+    tokenColour.a < 1
+      ? composite(backdrop, tokenColour, tokenColour.a)
+      : tokenColour;
+  return { ratio: contrast(painted, backdrop) };
+}
+
+/* --- shared reporting ---------------------------------------------------- */
+
 const failures = [];
 
-console.log('Harbour contrast matrix — every text token over every surface');
-console.log(`Required ${REQUIRED}:1 (3:1 allowed only at display and H1 sizes)`);
-console.log('Aurora and glass/aurora use --aurora-blob-opacity.');
-console.log('glass/patch uses --aurora-patch-opacity (the gallery glass backdrop).\n');
+function printMatrix({ title, note, rows, headers, widths }) {
+  console.log(title);
+  if (note) console.log(note);
+  const line = (cells) =>
+    cells.map((c, i) => String(c).padEnd(widths[i])).join('  ');
+  console.log(line(headers));
+  console.log(widths.map((w) => '-'.repeat(w)).join('  '));
+  for (const row of rows) console.log(line(row));
+  console.log('');
+}
+
+function computeWidths(headers, rows) {
+  return headers.map((h, i) =>
+    Math.max(h.length, ...rows.map((r) => String(r[i]).length)),
+  );
+}
+
+/* ======================================================================== */
+/* Matrix 1 — text tokens over every surface                                */
+/* ======================================================================== */
+
+console.log('Harbour contrast matrix');
+console.log('========================\n');
+console.log('1. Text tokens over every surface');
+console.log(`   Required ${REQUIRED}:1 (3:1 allowed only at display and H1 sizes).`);
+console.log('   Aurora and glass/aurora use --aurora-blob-opacity;');
+console.log('   glass/patch uses --aurora-patch-opacity (the gallery glass backdrop).\n');
 
 for (const theme of THEMES) {
-  console.log(
-    `${theme.name}  (blob cap ${theme.blobOpacity}, patch cap ${theme.patchOpacity})\n`,
-  );
+  console.log(`${theme.name}  (blob cap ${theme.blobOpacity}, patch cap ${theme.patchOpacity})`);
 
-  const header = ['token', ...SURFACES.map((s) => s.label), '3:1'];
+  const headers = ['token', ...SURFACES.map((s) => s.label), '3:1'];
   const rows = [];
 
   for (const token of TEXT_TOKENS) {
     const cells = SURFACES.map((surface) => {
-      const { ratio } = cell(theme, token, surface);
+      const { ratio } = cell(theme, theme.text[token], surface);
       const fails = ratio < REQUIRED;
       if (fails) {
         failures.push({
+          matrix: 'text',
           theme: theme.name,
-          token,
-          surface: surface.label,
+          label: `${token} on ${surface.label}`,
           ratio,
-          // WCAG's large-text allowance only rescues the tokens that are ever
-          // painted at display or H1 sizes.
+          required: REQUIRED,
           rescuedByLargeText:
             LARGE_TEXT_TOKENS.has(token) && ratio >= REQUIRED_LARGE,
         });
@@ -244,38 +304,130 @@ for (const theme of THEMES) {
     rows.push([token, ...cells, large]);
   }
 
-  const widths = header.map((h, i) =>
-    Math.max(h.length, ...rows.map((r) => r[i].length)),
-  );
-  const line = (cells) =>
-    cells.map((c, i) => c.padEnd(widths[i])).join('  ');
-
-  console.log(line(header));
-  console.log(widths.map((w) => '-'.repeat(w)).join('  '));
-  for (const row of rows) console.log(line(row));
-
-  // Diagnostics: what the worst-case backdrop actually resolves to.
-  const worstDirect = worstOverBlobs(
-    theme,
-    theme.blobOpacity,
-    theme.text['text-muted'],
-    false,
-  );
-  const worstGlass = worstOverBlobs(
-    theme,
-    theme.patchOpacity,
-    theme.text['text-muted'],
-    true,
-  );
-  console.log(
-    `\n  worst aurora backdrop for --text-muted: ${rgb(worstDirect.surface)} (${worstDirect.ratio.toFixed(2)}:1)`,
-  );
-  console.log(
-    `  worst patch+glass surface for --text-muted: ${rgb(worstGlass.surface)} (${worstGlass.ratio.toFixed(2)}:1)\n`,
-  );
+  printMatrix({
+    title: '',
+    rows,
+    headers,
+    widths: computeWidths(headers, rows),
+  });
 }
 
-/* --- solving the two caps ------------------------------------------------ */
+/* ======================================================================== */
+/* Matrix 2 — component pairs                                               */
+/* ======================================================================== */
+
+console.log('2. Component pairs\n');
+
+/** Runs one labelled group of pairs and prints it as a table. */
+function runPairs(theme, group) {
+  const headers = ['pair', ...group.columns];
+  const rows = [];
+
+  for (const item of group.items) {
+    const cells = item.values.map((value) => {
+      const { ratio } = value;
+      const fails = ratio < group.required;
+      if (fails) {
+        failures.push({
+          matrix: group.title,
+          theme: theme.name,
+          label: item.label,
+          ratio,
+          required: group.required,
+        });
+      }
+      return `${ratio.toFixed(2)}${fails ? ' !' : '  '}`;
+    });
+    rows.push([item.label, ...cells]);
+  }
+
+  printMatrix({
+    title: `   ${theme.name} — ${group.title} (required ${group.required}:1)`,
+    rows,
+    headers,
+    widths: computeWidths(headers, rows),
+  });
+}
+
+for (const theme of THEMES) {
+  /* 2a. Text on a fill — still text, so 4.5:1. */
+  runPairs(theme, {
+    title: 'text on fill',
+    required: REQUIRED,
+    columns: ['fill', 'ratio'],
+    items: [
+      {
+        label: 'on-accent on accent-fill',
+        values: [{ ratio: contrast(theme.onAccent, theme.accentFill) }],
+      },
+      {
+        label: 'on-gold on gold-fill',
+        values: [{ ratio: contrast(theme.onGold, theme.goldFill) }],
+      },
+    ],
+  });
+
+  /* 2b. Focus ring against every surface — 3:1 (WCAG 1.4.11). */
+  runPairs(theme, {
+    title: 'focus-ring on every surface',
+    required: REQUIRED_UI,
+    columns: SURFACES.map((s) => s.label),
+    items: [
+      {
+        label: 'focus-ring',
+        values: SURFACES.map((surface) => cell(theme, theme.focusRing, surface)),
+      },
+    ],
+  });
+
+  /* 2c. Sole-boundary border against every surface — 3:1. */
+  runPairs(theme, {
+    title: 'border-strong on every surface (sole boundary)',
+    required: REQUIRED_UI,
+    columns: SURFACES.map((s) => s.label),
+    items: [
+      {
+        label: 'border-strong',
+        values: SURFACES.map((surface) =>
+          cell(theme, theme.borderStrong, surface),
+        ),
+      },
+    ],
+  });
+
+  /* 2d. Chart palette against the three surfaces it is drawn on — 3:1. */
+  const chartSurfaces = SURFACES.filter((s) =>
+    ['bg', 'bg-elevated', 'glass-bg'].includes(s.key),
+  );
+  runPairs(theme, {
+    title: 'chart palette on its surfaces',
+    required: REQUIRED_UI,
+    columns: chartSurfaces.map((s) => s.label),
+    items: CHART_TOKENS.map((token) => ({
+      label: token,
+      values: chartSurfaces.map((surface) => cell(theme, theme.charts[token], surface)),
+    })),
+  });
+}
+
+/* The decorative hairline is reported, not required: at 0.14 alpha it is a
+   divider, never the only thing identifying a surface. Printed so the value is
+   visible and any drift is noticed. */
+console.log('   Decorative hairline `--border` (reported only, not a gate):');
+for (const theme of THEMES) {
+  const ratios = SURFACES.map(
+    (surface) => cell(theme, theme.border, surface).ratio,
+  );
+  const worst = Math.min(...ratios);
+  console.log(
+    `     ${theme.name.padEnd(6)} worst ${worst.toFixed(2)}:1 across ${SURFACES.length} surfaces`,
+  );
+}
+console.log('');
+
+/* ======================================================================== */
+/* Matrix 3 — solving the two caps                                          */
+/* ======================================================================== */
 
 const CAP_STEPS = [];
 for (let c = 1; c >= 0.04; c -= 0.01) CAP_STEPS.push(Number(c.toFixed(2)));
@@ -295,7 +447,7 @@ function solveCap(theme, withGlass) {
   return null;
 }
 
-console.log('Highest cap at which every text token clears 4.5:1\n');
+console.log('3. Highest cap at which every text token clears 4.5:1\n');
 console.log('theme  token                  current  solved');
 
 const SOLVED = {};
@@ -311,7 +463,9 @@ for (const theme of THEMES) {
   );
 }
 
-/* --- verdict ------------------------------------------------------------- */
+/* ======================================================================== */
+/* Verdict                                                                  */
+/* ======================================================================== */
 
 console.log('');
 
@@ -321,7 +475,7 @@ const rescued = failures.filter((f) => f.rescuedByLargeText);
 const describe = (list) => {
   for (const f of list) {
     console.log(
-      `  ${f.theme.padEnd(6)} ${f.token.padEnd(12)} ${f.surface.padEnd(14)} ${f.ratio.toFixed(2)}:1`,
+      `  ${f.theme.padEnd(6)} ${f.label.padEnd(38)} ${f.ratio.toFixed(2)}:1 (need ${f.required}) [${f.matrix}]`,
     );
   }
 };
@@ -353,8 +507,10 @@ if (anySolvedBelowCurrent) {
   process.exit(1);
 }
 
+const textPairs = THEMES.length * TEXT_TOKENS.length * SURFACES.length;
+console.log(`All ${textPairs} text pairs clear ${REQUIRED}:1 at the current caps.`);
 console.log(
-  `All ${THEMES.length * TEXT_TOKENS.length * SURFACES.length} pairs clear ${REQUIRED}:1 at the current caps.`,
+  `Every component pair clears its required ratio (text on fill ${REQUIRED}:1, ring / border / chart ${REQUIRED_UI}:1).`,
 );
 
 if (rescued.length === 0) {
