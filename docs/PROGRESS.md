@@ -4,8 +4,10 @@ Source of truth: `docs/DESIGN_SPEC.md` (Harbour Design Spec v1, 11 Oct 2026 — 
 canonical copy in this repo, updated in Brick 0 Part A) and
 `docs/SPEC_ADDENDUM_1.md` (product alignment, 12 Oct 2026).
 Package manager: **npm**. Scaffold: Vite 7 + React 18.3.1 + TypeScript 5.9 strict.
-Branches: `brick-0-foundation`, `brick-1-primitives`, `brick-2a-components` (all done),
-**`brick-3-landing-top`** (current).
+Branches: `brick-0-foundation`, `brick-1-primitives`, `brick-2a-components`,
+`brick-3-landing-top`, `brick-3b-polish` (all done). The full build — porting every old
+feature onto the new design system — starts on **`brick-4-landing-sections`**; the audit,
+the four user decisions and the B4–B13 plan are at the bottom of this file.
 
 ---
 
@@ -458,3 +460,99 @@ import, and the reason is now a comment in `WaveLine.tsx`.
    `var(--section-scroll-margin)` (5rem), which clears the 4.25rem nav bar.
 7. **Still open, and now on the landing page:** the safety numbers, the Cantonese strings
    for Brick 5, and whether the dark hero patch is too hot.
+
+---
+
+## The full build — audit, decisions and plan
+
+**Status: PLAN APPROVED (12 Oct 2026). Brick 4 starts next.** The master prompt at
+`docs/full-build-prompt.md` was run end to end: the old build was audited from its code,
+the inventory below was verified against it, four decisions were put to the user in plain
+English and answered, and the B4–B13 plan was approved. This section is the record.
+
+### Decisions (the user's picks)
+
+| Topic | Decision | Consequence |
+| --- | --- | --- |
+| Backend | **Hybrid** | Offline rule engines everywhere (ported from the old build's deterministic code), plus **one live AI feature** — Ask Harbour — added behind a pluggable answer source when a server exists. Provider and API key are confirmed with the user at that brick (old build: Google Gemini first, Groq backup). Every data screen still ships the four states (empty / loading / result / error). |
+| Loading screen | **Storm settling into calm** | New screen: the WaveLine settles choppy → calm beside the Harbour mark, ≤1.6s, reduced-motion = static calm frame, skippable, theme pre-applied. Concept re-sketch and re-confirm before building (Brick 6). The old build's arrival/portal animation stays banned. |
+| Old extras | **Leave them out** | Bunny garden, prototype-notes modal, `/profile/:userId` as its own route: not rebuilt (the sample profile view folds into People at Brick 13). |
+| Hero art | **Art near the end** | The honest `ArtSlot` placeholder stays through the build; the reimagined harbour-terrace concept lands in the final polish. Ask before generating any art. |
+
+### The audit — old Harbour, verified from code (never trusted blindly)
+
+Old app root: `Harbour-oldbuild/Harbour/harbour/` (React 18 plain JSX, react-router 6;
+Express server on port 5000, proxied by the old Vite dev server). Old build is read-only:
+functionality carries over, its visuals, bunny, garden and portal never do.
+
+| Old route | What it does (verified) | New route | What must change |
+| --- | --- | --- | --- |
+| `/` Welcome | Marketing landing; reads a local profile; prototype-notes modal | `/` | Rebuilt in the new language. Hero/nav/footer done (Bricks 3–3b); sections below hero = Brick 4 |
+| `/login` | "Continue as {name}" against a device-local profile; no accounts | `/login` | Picker + honesty line ("no real accounts in this prototype"); both profile-found and profile-absent states; AppGuard sends `/app*` here |
+| `/onboarding` | One form: name, country, university, optional socials | `/signup` | Three steps (nickname + privacy line; country; optional university with Other/skip). Socials move to Profile edit. Route-home completion scene per Design §7 Scene B (abstract marker → destination node) |
+| `/home` | Greeting, live weather (Open-Meteo), 4 tool cards, 7-day recharts chart, previews, emergency cards | `/app` | App shell; safety rail always reachable; weather with loading/success/retry and graceful offline hide; preview strip labelled |
+| `/shield` | **Scam X-ray** (paste ≤8000 chars, client+server redaction, AI analyse with keyword fallback) + **Scam Drill** (4 scenarios × 4 turns × 3 options, resilience score, bands) | `/app/scam` | Tabs; deterministic keyword screen ported and labelled "basic keyword check"; redaction shown via RedactionNotice; result offers a checklist follow-up |
+| `/rental` | **Listing check** (9 regex flag rules, red/amber/green), **Lease X-ray** (12 clause rules, .txt upload ≤1MB), **first-hour playbook** (6 steps) | `/app/rental` | Three tabs; rules ported verbatim incl. verify links and disclaimers; licence/land adapters stay honest mocks ("could not verify") |
+| `/translate` | **Translate** (Baidu yue, Web Speech listen zh-HK, 12-phrase offline bank) + **Counter card** (6 canned bilingual scenarios, 25-term glossary, card travels as a base64url URL fragment — the server stores nothing) | `/app/helper` | Phrase bank primary (human-checked copy beats machine output for learners); live translation only when a server exists, behind ErrorState + offline alternative; fragment share and print kept |
+| `/checklist` | Country-aware list (5 groups; "mainland" is CN-only), localStorage persistence, daily progress history, custom lists, confetti, offline fallback | `/app/checklist` | Ported; history writer feeds the Home chart; receives the X-ray follow-up handoff |
+| `/chat` | Single-turn Q&A, 3 suggestion chips, offline fallback links | `/app/ask` | Chips + labelled guidance answers + offline links; live AI path behind the same interface (hybrid decision) |
+| `/dashboard` | Metric tiles (checklist steps / tide points / friends), 7-day bar chart, friends pills, ImpactPanel (4 counters, SDG 10/11/16, min display 5) | `/app/dashboard` | Impact panel labelled DEMO until a real source; sub-threshold counts hidden, not small |
+| `/profile` | Edit name/country/university, photo ≤1.5MB data URL, socials, friends, log out of device | `/app/profile` | Same, under the new shell; logout clears all `harbour:v1:*` keys |
+| `/people` | 4 hardcoded sample profiles + friends (localStorage) | `/app/people` | SAMPLE labels; no live-matching claims (the old "12 students nearby" card is sample copy, labelled) |
+| `/community` | 3 hardcoded sample events, type filter, in-memory save | `/app/community` | SAMPLE labels; filter and saved events persist locally |
+| `/tide-bank` | Simulated credits, session ledger, localStorage balance | `/app/tide-bank` | DEMO; balance masked by default; "no monetary value" copy |
+| `/voice-sos` | Click mockup: listening → connected, fictional volunteer modal, tel:999 | `/app/voice-sos` | SIMULATION + a **failed state** (addendum §3 requires one) + 999 always shown |
+| `/bunny-garden` | Decorative breather | — | Dropped (user decision) |
+| Server (`server/**`) | Gemini → Groq → Baidu behind `MOCK_AI`; deterministic services (drill bank, rental rules, counter-card scripts, checklist data, playbook, glossary); in-memory drill sessions + impact counters; rate limits; server-side redaction | — | Deterministic logic ports to front-end engines (below); redaction becomes client-side and *shown* (addendum rule 5); live AI only for Ask Harbour, later |
+
+Old-build facts worth remembering: safety numbers live in `client/src/pages/Home.jsx`
+(999 / 18222 / 2824 6111) and `server/data/services.json` (+2300 6555) — all unverified.
+Cantonese copy: `client/src/data/essentialCantonesePhrases.js`,
+`server/services/counterCardService.js`, `server/data/glossary.json` — all need a
+native-speaker check. The arrival transition is PROTECTED and banned.
+
+### Data layer — backend-agnostic (built inside each brick, not before)
+
+Pure engines under `src/lib/features/`, each returning the shape a future server route
+would return, so a server can be swapped in without touching screens or tests: `redact.ts`,
+`scam/keywordScreen.ts`, `scam/drillBank.ts`, `rental/listingRules.ts`,
+`rental/leaseRules.ts`, `rental/playbookData.ts`, `helper/phraseBank.ts`,
+`helper/counterCard.ts`, `helper/glossary.ts`, `checklist/checklistData.ts`,
+`checklist/history.ts`, `ask/knowledge.ts`, `people/sampleProfiles.ts`, `community/events.ts`,
+`tide/balance.ts`, `voice/script.ts`, plus `src/lib/countries.ts` (the HK/Macao/Taiwan
+override in ONE module + a unit test — addendum rule 10).
+
+Storage: `harbour:v1:profiles`, `harbour:v1:activeProfileId`, `harbour:theme` stay exactly
+as specced (format changes only with the user's OK). New: `harbour:v1:checklist`,
+`harbour:v1:checklist-lists`, `harbour:v1:progress-history`, `harbour:v1:tide-balance`.
+
+### The brick plan
+
+| Brick | Branch | Scope |
+| --- | --- | --- |
+| 4 | `brick-4-landing-sections` | Landing sections below the hero: four tools (bento, varied spans, SAMPLE outputs), problem cards, live demo (DEMO), practice teaser, preview strip (Voice SOS SIMULATION / Tide Bank DEMO / Community SAMPLE), rental band, how it works, trust band, final call. Creates the reserved ids `#tools`, `#how-it-works`, `#trust`. New component: **ProgressRing** |
+| 5 | `brick-5-profiles-auth` | Profile store (zod, contexts replacing the `useSavedProfile` stub, storage-blocked fallback), `/login`, `/signup` (3 steps + Route-home scene), `src/lib/countries.ts` + unit test. New components: **Combobox, CountryCombobox**. Deps: zod, i18n-iso-countries, vitest |
+| 6 | `brick-6-loading` | The new loading screen (concept re-confirmed first), once per cold boot, handoff `/app` or `/`, reduced-motion static, skippable, axe-clean, zero new bundle weight |
+| 7 | `brick-7-app-shell-home` | AppShell (Ask Harbour button everywhere, theme toggle, profile menu), bottom tabs + More sheet, AppGuard, Home (greeting, weather 4 states, tool cards, 7-day chart, preview strip, safety rail). New component: **Dialog**. Dep: recharts (lazy) |
+| 8 | `brick-8-checklist` | Settle-in list: country-aware data port, persistence, custom lists, celebration, history writer. New component: **ProgressBar** |
+| 9 | `brick-9-scam-shield` | Scam Shield: X-ray + Drill tabs, client-side redaction, keyword fallback labelled, checklist handoff. New component: **Tabs** (reused by 10/11) |
+| 10 | `brick-10-helper-ask` | Cantonese helper (Translate + Counter card) and Ask Harbour (chips, guidance answers, offline fallback; live AI path confirmed with the user here) |
+| 11 | `brick-11-rental-shield` | Rental Shield: three tabs, rule engines ported verbatim, disclaimers, internal handoffs |
+| 12 | `brick-12-dashboard-profile` | Dashboard (metrics, chart reuse, DEMO impact panel) and Profile (edit, photo, friends, logout of device) |
+| 13 | `brick-13-sample-pages` | People / Community / Tide Bank / Voice SOS (all permanently badged; Voice SOS failed state + 999), the Design §13 audit pass, then the hero art |
+
+Order follows the addendum's proposed order with auth and the shell pulled forward as hard
+dependencies. Tabs/Combobox/Dialog/ProgressRing/ProgressBar land with their first consumer,
+never speculatively. Each brick: branch off the previous, small commits with explicit paths,
+the full definition of done, PROGRESS.md + the daily memory log updated, a report with
+screenshots, and the user's go-ahead before the next brick.
+
+### Standing flags (until resolved — not blockers to building)
+
+- **Emergency numbers unverified**: 999 / 18222 / 2824 6111 / Hospital Authority 2300 6555 stay behind the UNVERIFIED marker; an official-source check is required before shipping.
+- **All Cantonese strings + jyutping** need a native-speaker check before release.
+- **Loading-screen concept** approved in shape only — re-sketch at Brick 6.
+- **Weather endpoint** (HKO vs Open-Meteo): verify before wiring in Brick 7.
+- **Live AI**: provider + key settled at Brick 10.
+- **Taiwan flag**: no glyph per addendum §9 (HK/Macao SAR flags allowed) — revisit if the team decides otherwise.
+- **Bundle budget**: main chunk ≤250 kB gzip; recharts and the CJK font ride their routes, not the landing chunk.
