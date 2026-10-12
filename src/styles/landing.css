@@ -78,14 +78,12 @@ html.lenis body {
   padding-block: var(--space-3);
 }
 
-/* The wordmark. A placeholder until the brand lockup is wired up: the SVGs in
-   public/ are light-background lockups and are unreadable on the dark theme's
-   background, so Brick 3 sets the name in the heading face instead. */
+/* The wordmark slot. Brick 3 set the name in the heading face here as a
+   placeholder; Brick 3b puts the real lockup in it — the mark plus the name in
+   the same heading face, so the nav and the footer share one component. The
+   type now comes from `.brand-lockup__word` in ui.css, so this rule only has to
+   be the link. */
 .landing-nav__wordmark {
-  font-family: var(--font-heading);
-  font-size: var(--type-h3);
-  font-weight: 700;
-  letter-spacing: var(--tracking-display);
   color: var(--text);
   text-decoration: none;
 }

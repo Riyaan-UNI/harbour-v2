@@ -101,6 +101,57 @@
     inline-size: 52cqw;
     block-size: 52cqw;
   }
+
+  /* --- Brand lockup ----------------------------------------------------
+     HarbourLogo. The mark is sized by the box and the name by the size class,
+     so the two never drift apart and neither number is written twice.
+
+     `live` is the chosen variant: the mark plus the name in the heading face.
+     `supplied` is the handed-over lockup — one SVG, 510x128 — scaled by its
+     block size and its own aspect ratio. */
+  .brand-lockup {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .brand-lockup__mark {
+    flex: none;
+    inline-size: var(--brand-mark-size);
+    block-size: var(--brand-mark-size);
+  }
+
+  .brand-lockup__word {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: var(--brand-word-size);
+    line-height: 1;
+    letter-spacing: var(--tracking-display);
+  }
+
+  .brand-lockup--sm {
+    --brand-mark-size: 1.5rem;
+    --brand-word-size: 1rem;
+  }
+
+  .brand-lockup--md {
+    --brand-mark-size: 2rem;
+    --brand-word-size: var(--type-h3);
+  }
+
+  .brand-lockup--lg {
+    --brand-mark-size: 3rem;
+    --brand-word-size: var(--type-h2);
+  }
+
+  .brand-lockup__supplied {
+    display: block;
+    block-size: var(--brand-mark-size);
+    inline-size: auto;
+    aspect-ratio: 510 / 128;
+  }
 }
 
 @keyframes ui-skeleton-sweep {

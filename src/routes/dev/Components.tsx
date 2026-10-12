@@ -26,6 +26,8 @@ import {
   EmptyState,
   ErrorState,
   FormField,
+  HarbourLogo,
+  HarbourMark,
   Input,
   InteractiveCard,
   RedactionNotice,
@@ -36,6 +38,7 @@ import {
   UNIVERSITIES,
   UniversityLogo,
   toast,
+  type HarbourLogoVariant,
 } from '../../components/ui';
 import { AlertTriangle, CheckCircle, InfoCircle, ShieldAlert } from '../../components/ui/icons';
 import { useResolvedTheme } from '../../theme/useTheme';
@@ -92,6 +95,54 @@ const BUTTON_VARIANTS = ['primary', 'secondary', 'ghost', 'danger'] as const;
 const BUTTON_SIZES = ['default', 'large', 'small'] as const;
 const STATUS_TONES = ['red', 'amber', 'green', 'info'] as const;
 const DEMO_VARIANTS = ['simulation', 'demo', 'sample'] as const;
+const LOGO_SIZES = ['sm', 'md', 'lg'] as const;
+
+/**
+ * One lockup, shown where it actually has to work: on the nav's glass bar, on
+ * the footer's plain surface, and at the three sizes the size class defines.
+ * `testId` namespaces the boxes so a test can measure each one.
+ */
+function LogoSample({
+  variant,
+  testId,
+}: {
+  variant: HarbourLogoVariant;
+  testId: string;
+}): JSX.Element {
+  return (
+    <Stack gap={4}>
+      <div className="glass glass--bar px-4">
+        <Cluster justify="between" align="center" gap={4} className="py-3">
+          <span data-testid={`${testId}-nav`}>
+            <HarbourLogo variant={variant} />
+          </span>
+          <Text role="label" tone="muted">
+            over the nav glass
+          </Text>
+        </Cluster>
+      </div>
+
+      <div className="border-border border-t px-4 pt-4">
+        <Cluster justify="between" align="center" gap={4}>
+          <span data-testid={`${testId}-footer`}>
+            <HarbourLogo variant={variant} />
+          </span>
+          <Text role="label" tone="muted">
+            over the footer
+          </Text>
+        </Cluster>
+      </div>
+
+      <Cluster gap={6} align="end">
+        {LOGO_SIZES.map((size) => (
+          <span key={size} data-testid={`${testId}-${size}`}>
+            <HarbourLogo variant={variant} size={size} />
+          </span>
+        ))}
+      </Cluster>
+    </Stack>
+  );
+}
 
 export function Components(): JSX.Element {
   const resolved = useResolvedTheme();
@@ -118,6 +169,59 @@ export function Components(): JSX.Element {
             <ThemeToggle />
           </Cluster>
         </Section>
+
+        <Block
+          title="Harbour logo"
+          description="Two candidates, each shown on the nav's glass bar, on the footer's plain surface, and at 1.5 / 2 / 3rem. Candidate 1 is the mark plus the name in the heading face; candidate 2 is the supplied 510x128 lockup, inlined with its viewBox kept and its five baked colours mapped onto tokens. Candidate 1 is the one the product uses, because the supplied wordmark is a Georgia serif and the rest of the product is set in Bricolage Grotesque — a serif lockup beside a grotesque heading is two voices in one bar. Both variants are token-driven, so both follow the theme. The sun is the one colour that could not be kept gold: see the note under the samples."
+        >
+          <Stack gap={8}>
+            <Row label="candidate 1 — the mark plus a live wordmark in the heading face (chosen)">
+              <LogoSample variant="live" testId="logo-live" />
+            </Row>
+
+            <Row label="candidate 2 — the supplied lockup, kept as a variant">
+              <LogoSample variant="supplied" testId="logo-supplied" />
+            </Row>
+
+            <Row label="the mark alone, named and decorative">
+              <Cluster gap={6} align="center">
+                <span data-testid="logo-mark-named">
+                  <HarbourMark label="Harbour" className="size-12" />
+                </span>
+                <HarbourMark className="size-6" />
+                <Text role="small" tone="muted">
+                  Left: the mark with a name, so it is announced. Right: the
+                  same mark with no name, which is how it sits beside a visible
+                  wordmark — hidden from assistive technology, not repeated.
+                </Text>
+              </Cluster>
+            </Row>
+
+            <Card variant="flat">
+              <CardHeader>
+                <CardTitle>The sun is not gold any more, and it cannot be</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Text role="small" tone="muted">
+                  The disc has to be <code className="text-text">--accent-fill</code>:
+                  it is the only token that is dark on the light theme&apos;s
+                  nav glass and light on the dark theme&apos;s, so it is the
+                  only way one mark clears 3:1 on both. Its ink is therefore{' '}
+                  <code className="text-text">--on-accent</code>, the same
+                  pairing the Button uses. That leaves the sun, and gold fails
+                  on it: <code className="text-text">--gold-fill</code> is{' '}
+                  <code className="text-text">#F1C96F</code> in both themes, so
+                  on the dark theme&apos;s disc it measures 1.01:1. No other
+                  disc rescues it either — the disc needs a luminance of at
+                  least 0.19 to clear 3:1 against the dark nav glass, and gold
+                  needs it at most 0.172 to clear 3:1 on the disc. The two are
+                  mutually exclusive, so the sun takes the disc&apos;s ink. The
+                  gold survives in the archived original and nowhere else.
+                </Text>
+              </CardContent>
+            </Card>
+          </Stack>
+        </Block>
 
         <Block
           title="Button"

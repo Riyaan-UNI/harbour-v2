@@ -72,4 +72,11 @@ export {
   type SafetyRailVariant,
 } from './safety-contacts';
 export { RedactionNotice, type RedactionNoticeProps } from './redaction-notice';
+export { HarbourMark, type HarbourMarkProps } from './harbour-mark';
+export {
+  HarbourLogo,
+  type HarbourLogoProps,
+  type HarbourLogoSize,
+  type HarbourLogoVariant,
+} from './harbour-logo';
 export * from './icons';

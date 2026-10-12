@@ -1,6 +1,6 @@
 import { ThemeToggle } from '../ThemeToggle';
 import { Container, Cluster, Stack, Text } from '../layout';
-import { Disclaimer, SafetyRail } from '../ui';
+import { Disclaimer, HarbourLogo, SafetyRail } from '../ui';
 
 /**
  * The landing footer — Addendum 1 §4.
@@ -17,7 +17,7 @@ export function LandingFooter(): JSX.Element {
       <Container>
         <Stack gap={6}>
           <Cluster justify="between" align="center" gap={4}>
-            <span className="landing-nav__wordmark">Harbour</span>
+            <HarbourLogo size="md" />
             <ThemeToggle />
           </Cluster>
 

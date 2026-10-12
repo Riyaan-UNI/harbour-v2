@@ -443,6 +443,176 @@ test('UniversityLogo falls back to the acronym on an image error', async ({
 });
 
 /* -------------------------------------------------------------------------- */
+/* The brand lockup — Brick 3b Part A                                          */
+/* -------------------------------------------------------------------------- */
+
+const LOGO_VARIANTS = ['logo-live', 'logo-supplied'] as const;
+const LOGO_PLACES = ['nav', 'footer', 'sm', 'md', 'lg'] as const;
+
+/** The three sizes the size class defines, as the mark's rendered box. */
+const MARK_SIZES = { sm: 24, md: 32, lg: 48 } as const;
+
+/**
+ * Both candidates are shown where they have to work: on the nav's glass bar, on
+ * the footer's plain surface, and at 1.5 / 2 / 3rem. Nothing here asserts which
+ * one is prettier — that is a design call recorded in PROGRESS.md — only that
+ * both render at every size on both surfaces.
+ */
+test('logo: both candidates render on the nav glass, the footer and at three sizes', async ({
+  page,
+}) => {
+  await openComponents(page, 'dark', 1024);
+
+  for (const variant of LOGO_VARIANTS) {
+    for (const place of LOGO_PLACES) {
+      const box = page.locator(`[data-testid="${variant}-${place}"]`);
+      await box.scrollIntoViewIfNeeded();
+      await expect(box).toBeVisible();
+
+      const measured = await box.evaluate((el) => {
+        const rect = el.getBoundingClientRect();
+        return { width: rect.width, height: rect.height };
+      });
+      expect(measured.width).toBeGreaterThan(0);
+      expect(measured.height).toBeGreaterThan(0);
+    }
+  }
+});
+
+/**
+ * The chosen variant is the mark plus *live text*, which is the whole reason it
+ * was chosen: the supplied wordmark is a Georgia serif `<text>` element and the
+ * rest of the product is set in Bricolage Grotesque. So the live variant must
+ * carry no SVG text at all, and the supplied one must keep its two text nodes.
+ */
+test('logo: the chosen variant sets the name as live text, the supplied one as SVG text', async ({
+  page,
+}) => {
+  await openComponents(page, 'dark', 1024);
+
+  const live = page.locator('[data-testid="logo-live-nav"]');
+  await expect(live.locator('svg text')).toHaveCount(0);
+  await expect(live.locator('.brand-lockup__word')).toHaveText('Harbour');
+
+  // The wordmark is in the heading face, not the supplied serif.
+  const word = live.locator('.brand-lockup__word');
+  const font = await word.evaluate((el) => getComputedStyle(el).fontFamily);
+  expect(font).toContain('Bricolage Grotesque');
+
+  const supplied = page.locator('[data-testid="logo-supplied-nav"]');
+  await expect(supplied.locator('svg text')).toHaveCount(2);
+  const serif = await supplied
+    .locator('svg text')
+    .first()
+    .evaluate((el) => getComputedStyle(el).fontFamily);
+  expect(serif).toContain('Georgia');
+});
+
+/**
+ * Every fill is a token, so the mark repaints with the theme without a second
+ * asset. The disc is `--accent-fill` — the only token that is dark on the light
+ * theme's nav glass and light on the dark theme's — and the ink on it is
+ * `--on-accent`, the same pairing the Button uses.
+ */
+test('logo: every fill is a token, and the mark follows the theme', async ({
+  page,
+}) => {
+  const seen = new Set<string>();
+
+  for (const theme of THEMES) {
+    await openComponents(page, theme, 1024);
+
+    const disc = page
+      .locator('[data-testid="logo-live-nav"] svg circle')
+      .first();
+    const ink = page
+      .locator('[data-testid="logo-live-nav"] svg circle')
+      .nth(1);
+
+    // Resolve the tokens from the page rather than hard-coding the values, so
+    // this test stays true if a token moves — and fails if the component stops
+    // reading one.
+    const resolved = await page.evaluate(() => {
+      const probe = document.createElement('span');
+      document.body.appendChild(probe);
+      const read = (name: string): string => {
+        probe.style.color = `var(${name})`;
+        return getComputedStyle(probe).color;
+      };
+      const value = {
+        accentFill: read('--accent-fill'),
+        onAccent: read('--on-accent'),
+        aurora1: read('--aurora-1'),
+      };
+      probe.remove();
+      return value;
+    });
+
+    await expect(disc).toHaveCSS('fill', resolved.accentFill);
+    await expect(ink).toHaveCSS('fill', resolved.onAccent);
+    // The outer wave is the one stroke that is not the disc's ink.
+    await expect(
+      page.locator('[data-testid="logo-live-nav"] svg path').nth(2),
+    ).toHaveCSS('stroke', resolved.aurora1);
+
+    seen.add(resolved.accentFill);
+  }
+
+  // Dark and light are designed separately, so the disc really does move.
+  expect(seen.size).toBe(2);
+});
+
+/** The supplied lockup keeps its 510:128 shape at every size, so nothing shifts. */
+test('logo: the supplied lockup keeps its aspect ratio at every size', async ({
+  page,
+}) => {
+  await openComponents(page, 'dark', 1024);
+
+  for (const size of ['sm', 'md', 'lg'] as const) {
+    const svg = page.locator(`[data-testid="logo-supplied-${size}"] svg`);
+    await svg.scrollIntoViewIfNeeded();
+
+    const box = await svg.boundingBox();
+    expect(box?.height).toBeCloseTo(MARK_SIZES[size], 0);
+    expect((box?.width ?? 0) / (box?.height ?? 1)).toBeCloseTo(510 / 128, 2);
+  }
+});
+
+/** Beside a visible wordmark the mark is decoration; on its own it is named. */
+test('logo: the mark is hidden beside the wordmark, and named on its own', async ({
+  page,
+}) => {
+  await openComponents(page, 'dark', 1024);
+
+  const decorative = page.locator('[data-testid="logo-live-nav"] svg');
+  await expect(decorative).toHaveAttribute('aria-hidden', 'true');
+  await expect(decorative).not.toHaveAttribute('role', 'img');
+
+  const named = page.locator('[data-testid="logo-mark-named"] svg');
+  await named.scrollIntoViewIfNeeded();
+  await expect(named).toHaveAttribute('role', 'img');
+  await expect(named).toHaveAttribute('aria-label', 'Harbour');
+});
+
+/**
+ * The two candidates side by side, in both themes, as the review artefact —
+ * the full-page shots in the matrix above are the gate, these are the
+ * comparison. Written to the same gitignored `screenshots/` directory.
+ */
+for (const theme of THEMES) {
+  test(`logo · ${theme} · the two candidates`, async ({ page }) => {
+    await openComponents(page, theme, 1024);
+
+    const section = page.locator('section:has([data-testid="logo-live-nav"])');
+    await expect(section).toBeVisible();
+
+    await section.screenshot({
+      path: `${SCREENSHOT_DIR}/logo-candidates-${theme}.png`,
+    });
+  });
+}
+
+/* -------------------------------------------------------------------------- */
 /* The university manifest — spec §10                                          */
 /* -------------------------------------------------------------------------- */
 

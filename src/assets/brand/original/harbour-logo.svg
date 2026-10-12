@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="510" height="128" viewBox="0 0 510 128" role="img" aria-labelledby="title">
+  <!-- Colours are spec §3 token values, baked rather than currentColor: the lockup is a
+       fixed brand asset, not a themed illustration (spec §11).
+         #0B3935  accent-fill (light)
+         #F1C96F  gold-fill
+         #F7F3E9  bg / on-accent (light)
+         #BFE5E2  aurora-1 (light)
+         #496662  text-subtle (light) -->
+  <title id="title">Harbour — Your safe harbour in Hong Kong</title>
+  <circle cx="64" cy="64" r="61" fill="#0B3935"/>
+  <circle cx="64" cy="31" r="7" fill="#F1C96F"/>
+  <path d="M39 43v35M89 43v35" fill="none" stroke="#F7F3E9" stroke-linecap="round" stroke-width="7"/>
+  <path d="M39 60c8-5 16-7 25-7s17 2 25 7" fill="none" stroke="#F7F3E9" stroke-linecap="round" stroke-width="7"/>
+  <path d="M22 84c13-8 27-8 42 0s29 8 42 0" fill="none" stroke="#BFE5E2" stroke-linecap="round" stroke-width="6"/>
+  <path d="M31 99c10-5 21-5 33 0s23 5 33 0" fill="none" stroke="#F7F3E9" stroke-linecap="round" stroke-width="4" opacity=".85"/>
+  <text x="151" y="73" fill="#0B3935" font-family="Georgia, 'Times New Roman', serif" font-size="55" font-weight="600" letter-spacing="-2">Harbour</text>
+  <text x="155" y="101" fill="#496662" font-family="Arial, sans-serif" font-size="11" font-weight="500" letter-spacing="0.4">Your safe harbour in Hong Kong</text>
+</svg>

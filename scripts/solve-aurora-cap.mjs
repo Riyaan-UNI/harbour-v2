@@ -18,6 +18,9 @@
  *        sole-boundary border against every surface (3:1)
  *        chart palette       chart-1..5 against bg, bg-elevated and glass
  *                            (3:1 — graphical objects)
+ *        brand mark          the mark's disc against the nav glass and the
+ *                            footer, and its outer wave on the disc
+ *                            (3:1 — graphical objects)
  *   3. CAPS — the highest aurora blob and patch opacity at which matrix 1
  *      still clears 4.5:1, and the highest spotlight alpha at which the card's
  *      own text still does.
@@ -618,6 +621,43 @@ for (const theme of THEMES) {
       label: token,
       values: chartSurfaces.map((surface) => cell(theme, theme.charts[token], surface)),
     })),
+  });
+
+  /* 2e. The brand mark — 3:1, a graphical object (WCAG 1.4.11).
+     The mark is a filled disc with ink drawn on it. The disc is
+     `--accent-fill`, and the only two surfaces it is ever drawn on are the
+     nav's glass bar and the footer's flat surface — each of which can itself
+     sit over the page aurora, so both are composited. `--accent-fill` is the
+     only token that works: it is dark on the light theme's nav glass and light
+     on the dark theme's, which is what one mark needs to clear 3:1 in both. */
+  const logoSurfaces = SURFACES.filter((s) =>
+    ['bg', 'aurora', 'glass-bg', 'glass-aurora'].includes(s.key),
+  );
+  runPairs(theme, {
+    title: 'brand mark — the disc on the nav glass and the footer',
+    required: REQUIRED_UI,
+    columns: logoSurfaces.map((s) => s.label),
+    items: [
+      {
+        label: 'accent-fill',
+        values: logoSurfaces.map((surface) => cell(theme, theme.accentFill, surface)),
+      },
+    ],
+  });
+
+  /* 2f. The mark's own ink. `--on-accent` on the disc is already gated at
+     4.5:1 by the text-on-fill group above; this is the outer wave, which is a
+     graphic rather than text and so is held to 3:1. */
+  runPairs(theme, {
+    title: 'brand mark — the outer wave on the disc',
+    required: REQUIRED_UI,
+    columns: ['accent-fill'],
+    items: [
+      {
+        label: 'aurora-1',
+        values: [{ ratio: contrast(theme.blobs[0], theme.accentFill) }],
+      },
+    ],
   });
 }
 

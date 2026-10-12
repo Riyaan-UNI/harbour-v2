@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Container, Cluster, Stack } from '../layout';
-import { Button, MenuIcon, Sheet } from '../ui';
+import { Button, HarbourLogo, MenuIcon, Sheet } from '../ui';
 
 /**
  * The landing nav — spec §6.
@@ -10,10 +10,11 @@ import { Button, MenuIcon, Sheet } from '../ui';
  * Log in as a ghost button and Get started as the primary. Below 48em the link
  * row collapses into a sheet, and every row in it is a 2.75rem touch target.
  *
- * The wordmark is a placeholder. The brand SVGs in `public/` are
- * light-background lockups — the `#0B3935` wordmark is unreadable on the dark
- * theme's `#061B1A` — so Brick 3 sets the name in the heading face and leaves
- * the lockup for whoever wires it up with a dark variant.
+ * The wordmark is the real lockup from Brick 3b — `HarbourLogo variant="live"`,
+ * the mark plus the name in the heading face. Brick 3 set the name as text on
+ * its own because the supplied lockup was a light-background asset with a serif
+ * wordmark; now that the mark is token-mapped and the name is live text, both
+ * halves work in both themes.
  *
  * The three anchors point at `#tools`, `#how-it-works` and `#trust`, which
  * Brick 4 creates. Until then they are honest dead ends rather than wrong ones.
@@ -39,7 +40,7 @@ export function LandingNav(): JSX.Element {
             className="landing-nav__bar"
           >
             <a href="#top" className="landing-nav__wordmark">
-              Harbour
+              <HarbourLogo size="md" />
             </a>
 
             <div className="hidden md:block">
