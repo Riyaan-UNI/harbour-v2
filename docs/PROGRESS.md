@@ -301,7 +301,7 @@ pair rescued by the 3:1 large-text allowance.
 | Typecheck | `npm run typecheck` | pass (both TS projects) |
 | Lint | `npm run lint` | pass, 0 problems |
 | Lint CSS | `npm run lint:css` | pass, 0 problems |
-| Build | `npm run build` | pass — CSS 45.24 kB (gzip 9.87), main JS 414.44 kB (gzip 139.39) |
+| Build | `npm run build` | pass — CSS 46.66 kB (gzip 10.17), main JS 425.54 kB (gzip 143.46) |
 | E2E + axe | `npm run test:e2e` | **105/105 pass** — landing 29, components 25, primitives 27, gallery 24 |
 | Contrast | `node scripts/solve-aurora-cap.mjs` | exit 0 — 168 text pairs, every component pair |
 
@@ -310,6 +310,99 @@ now pulls GSAP, Lenis and Radix Dialog into the initial graph. The spec's landin
 "at or under 250 KB gzipped"; 139.39 kB is inside it, with the dev pages still in their own
 chunks. `motion` is **not** in the main chunk — it is only in the `/dev/components` chunk,
 because only that page renders an `InteractiveCard`.
+
+---
+
+## Brick 3b — polish: the lockup, the boxless hero, and the dev hub
+
+**Status: COMPLETE. All gates green.** Branch **`brick-3b-polish`** off
+`brick-3-landing-top`. Three commits: **Part A** (the Harbour lockup), **Part B**
+(the boxless hero and motion), **Part C** (the dev hub).
+
+### Part A — the Harbour lockup
+
+**The original SVGs were archived, inspected, and replaced with token-mapped React
+components.** `public/harbour-logo.svg`, `public/harbour-mark.svg` and `public/favicon.svg`
+were light-background lockups with hard dimensions and baked colours. The originals are now
+in `src/assets/brand/original/`; the public favicon was overwritten with a theme-aware
+version using `prefers-color-scheme`.
+
+`HarbourMark` inlines the mark geometry, keeps the `viewBox`, drops hard dimensions, and
+maps every fill and stroke to semantic CSS custom properties. The sun is **not** the
+original gold (`#F1C96F`) because it fails 3:1 on the dark theme's disc (1.01:1); the disc
+must be `--accent-fill`, which forces the sun to `--on-accent`.
+
+`HarbourLogo` has two variants: `live` (mark + live text in the heading face, chosen) and
+`supplied` (the exact inlined lockup, for comparison). The live variant is chosen because
+the supplied lockup uses Georgia serif while the product uses Bricolage Grotesque — two
+voices in one bar. Three sizes (`sm/md/lg`), token-mapped, selectable and searchable.
+
+Wired into `LandingNav` and `LandingFooter`; the contrast script gained two brand-mark
+pair groups (disc on glass at 3:1, outer wave on disc at 3:1).
+
+### Part B — the boxless hero
+
+**B1 — headline text-wrap.** `text-wrap: balance` and `max-inline-size: 20ch` on the
+display utility. At 1440px the headline breaks to two lines; the 20ch measure keeps the
+second line from being a single short word.
+
+**B2 — eyebrow above the h1.** The eyebrow (`role="label"`) now sits outside the copy
+panel, directly above the `h1`, because the boxless hero has no panel boundary to put it
+inside.
+
+**B3 — boxless hero with mask-image falloff.** The glass copy panel is removed. The copy
+column sits on the bare colour field at `--aurora-hero-copy-opacity` (0.28 in dark, 1 in
+light), much lower than the art column's `--aurora-hero-opacity` (0.59). A `mask-image`
+linear gradient fades the left edge of the hero patch into the page background. The
+`--mask-fade-start` token holds the gradient's start opacity (derived from the two cap
+ratios), keeping `rgba()` out of component CSS.
+
+**B4 — WaveLine responsive geometry.** `ResizeObserver` (debounced to 150 ms) measures the
+rendered width and derives `pointCount` (one per ~12 px) and `amplitudeBase` (15.5 % of
+height) from the measured dimensions. The calm state looks consistent across viewport
+widths; the `data-points` attribute lets tests assert the count matches the rendered width.
+
+**B5 — GSAP SplitText headline reveal.** A sequenced timeline in `Hero.tsx`: SplitText on
+lines (0.6 s, 0.08 s stagger, ease-out), then the CTAs fade up, then the WaveLine settles.
+`useGSAP` handles cleanup; reduced motion shows the final state immediately via
+`prefers-reduced-motion`. The `useReducedMotion` hook was added to `src/lib/useReducedMotion.ts`.
+
+**B6 — footer deduplication.** The footer no longer duplicates content; a dev-only brick
+label appears when `import.meta.env.DEV` is true.
+
+### Part C — the dev hub
+
+**`/dev` lists every route** from `src/routes/route-config.ts`, grouped as Production and
+Dev, with descriptions and brick numbers. `ThemeToggle` is present. `vite.config.ts` sets
+`server.open: '/dev'`. Every dev page header (`Gallery`, `Primitives`, `Components`)
+gains a "Dev hub →" link. Added to the Playwright matrix as `e2e/dev-hub.spec.ts`.
+
+### Token changes — Brick 3b
+
+| Token | Theme | Before | After | Commit |
+| --- | --- | --- | --- | --- |
+| `--aurora-hero-copy-opacity` | dark | *did not exist* | `0.28` | B |
+| `--aurora-hero-copy-opacity` | light | *did not exist* | `1` | B |
+| `--mask-fade-start` | both | *did not exist* | `0.475` dark / `1` light | B |
+
+The contrast script gained a fifth solver, `solveHeroCopyCap`, which holds the copy column's
+text tokens (`text`, `text-muted`) against the bare colour field at 4.5:1. It reports 0.28
+in dark and 1 in light.
+
+### Gates — Brick 3b
+
+| Gate | Command | Result |
+| --- | --- | --- |
+| Typecheck | `npm run typecheck` | pass |
+| Lint | `npm run lint` | pass, 0 problems |
+| Lint CSS | `npm run lint:css` | pass, 0 problems |
+| Build | `npm run build` | pass — CSS 46.66 kB (gzip 10.17), main JS 425.54 kB (gzip 143.46) |
+| E2E + axe | `npm run test:e2e` | **117/117 pass** |
+| Contrast | `node scripts/solve-aurora-cap.mjs` | exit 0 — 182 text pairs, every component pair |
+
+The main JS grew slightly (425.54 kB) because `route-config.ts` is now in the initial
+chunk and the hero imports `SplitText` and `useGSAP`. Still well under the 250 KB gzipped
+target at 143.46 kB.
 
 ### A bug only the browser could find
 
