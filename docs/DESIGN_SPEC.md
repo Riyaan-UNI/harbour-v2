@@ -28,7 +28,7 @@ The old LandIn Three.js animation and the bunny game are dropped. This is a fres
 
 ## 2. Stack
 
-- React 18 + Vite (existing), Tailwind CSS v4 with tokens in CSS, shadcn/ui (Radix) copied into the repo.
+- React 18 + Vite (existing), Tailwind CSS v4 with tokens in CSS, shadcn/ui (Radix) copied into the repo. shadcn is vendored, not adopted wholesale: its CSS variables are aliased onto the Harbour tokens in `src/styles/shadcn.css` and its radii are left to the `@theme` block, so a copied shadcn component brings no palette, radius or spacing of its own. Off-scale spacing in vendored code (`p-5`, `gap-7`) is fixed to the §6 table, never excused from the gate.
 - GSAP with ScrollTrigger, SplitText, DrawSVG and MotionPath (all free), Lenis, Motion (motion/react).
 - react-hook-form + zod, Zustand with persist, i18n-iso-countries + flag-icons, Fontsource, Recharts.
 - Playwright + @axe-core/playwright, Stylelint, ESLint.
@@ -90,6 +90,8 @@ Not in the original colour table. All live in `src/styles/tokens.css`.
 | `--aurora-blob-opacity` | `0.18` | `1` | cap on the page aurora blobs, so bare text over them stays legible |
 | `--aurora-patch-opacity` | `0.29` | `1` | cap on a *contained* aurora patch, which is always covered by glass |
 | `--border-strong` | `#74938F` | `#5F7A76` | a hairline that is the *only* boundary of a surface (the flat Card), so it is held to 3:1 by the contrast script; `--border` stays a decorative divider |
+| `--logo-plate` | `#FFFFFF` | `#FFFFFF` | the white plate behind a university logo, in both themes (§8) |
+| `--logo-plate-ink` | `#0B3935` | `#0B3935` | the dark teal acronym shown on the plate when a logo image fails (§8) |
 | `--mask-opaque` | `#000` | `#000` | the opaque end of the aurora grid's mask gradient; never painted |
 
 ### Light neutrals (Part A1)
@@ -231,6 +233,10 @@ Rules: animate transform and opacity (and SVG path data in the two scenes). Scro
 - **UniversityLogo:** a square box (aspect-ratio 1) on a white plate in both themes, radius md, padding 0.375rem, sizes 2rem, 2.5rem and 3rem. The image uses object-fit contain, lazy loading and the full name as alt text. On load error, the box shows the acronym in Geist Mono weight 600 in dark teal text on the plate, so there is no layout shift.
 - **ThemeToggle:** a three-state segmented control (System, Light, Dark) with icons and labels and aria-pressed.
 
+**Shared components added in Brick 2a** (Addendum 1 §8, all in `src/components/ui/`): Textarea and FormField (a render-prop field that wires `id`, `aria-describedby` and `aria-invalid`); Chip; StatusBadge (red / amber / green / info, each colour plus icon plus label); DemoBadge (SIMULATION / DEMO / SAMPLE); Disclaimer; Skeleton; EmptyState (warm, with a call-to-action slot); ErrorState (a retry plus an offline-alternative slot); SafetyRail (999, 18222, 2824 6111, Hospital Authority — **UNVERIFIED** until confirmed); RedactionNotice (a count of hidden identifiers plus the caveat that patterns can miss things). Brick 2b adds Combobox, CountryCombobox, Dialog, Sheet, Tabs, the progress ring and bar, and the interactive-card effects.
+
+`UniversityLogo`'s plate padding is `0.5rem` (`space-2`) rather than the `0.375rem` above: 0.375rem is not one of the ten steps in §6, and the spacing gate is absolute. The acronym scales with the box in container units, so it fits at every size.
+
 ## 9. Landing page
 
 **Hero.** Eyebrow (mono): FOR INTERNATIONAL STUDENTS IN HONG KONG. Headline: Your safe harbour in Hong Kong. Subhead: Language, scams, loneliness — the things nobody warns you about. Harbour helps you through them. Buttons: Create your profile (primary, goes to signup) and See how it works (ghost, scrolls). Aurora background with the WaveLine across the lower third.
@@ -339,7 +345,7 @@ Use Zustand persist with a versioned schema and zod validation on read. Wrap eve
 - **Stylelint:** ban px except 1px; ban hex, rgb and hsl outside the token file; restrict padding, margin, gap and inset values to the spacing scale, the section/container tokens, `0`, `auto` or the aurora geometry tokens. **ESLint:** flag Tailwind arbitrary values such as w-\[437px\], and off-scale spacing steps such as `p-5` or `gap-7` (see the §6 mapping table).
 - **Playwright matrix:** every route at 360, 390, 768, 1024 and 1440 px, in both themes, with screenshots. Fail if scrollWidth exceeds clientWidth. Add a 200% zoom pass.
 - **axe-core:** no serious or critical violations, in both themes.
-- **Gallery page** at /dev/gallery showing every component in every state, with a theme toggle, behind a dev flag.
+- **Gallery pages** at `/dev/gallery`, `/dev/primitives` and `/dev/components` showing every token and every component in every state, with a theme toggle, behind a dev flag.
 - **Performance targets:** LCP at or under 2.5s on throttled mid-range mobile, CLS at or under 0.1, landing initial JavaScript at or under 250 KB gzipped (a target to measure, not a guarantee). Code-split below-the-fold sections and the demo.
 
 **Definition of done for every brick:** both themes, five viewports, 200% zoom, keyboard only, reduced motion, no px beyond hairlines, no raw colours, axe clean, and screenshots shown before moving on.

@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
@@ -7,6 +8,13 @@ import tailwindcss from '@tailwindcss/vite';
 // the Playwright webServer can find the dev server predictably.
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  // shadcn/ui resolves its imports through `@/`; components.json declares the
+  // same alias so a future `npx shadcn add` lands in the right place.
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
+  },
   // Bind to the IPv4 loopback explicitly: the default `localhost` resolves to
   // ::1 on some machines, which makes the Playwright webServer check (and any
   // 127.0.0.1 client) fail with a connection refused.

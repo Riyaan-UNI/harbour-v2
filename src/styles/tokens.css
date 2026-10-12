@@ -53,6 +53,13 @@
   --aurora-2: #1aa89b;
   --aurora-3: rgba(241, 201, 111, 0.12);
 
+  /* ADDED in Part B. Spec §8 gives the university logo "a white plate in both
+     themes" and a "dark teal" acronym fallback. Neither is a theme colour, so
+     both are the same value in dark and light and live here like every other
+     colour. `--logo-plate-ink` is the light theme's `--accent-fill`. */
+  --logo-plate: #ffffff;
+  --logo-plate-ink: #0b3935;
+
   /* --- §3 Chart and avatar palette ------------------------------------- */
   --chart-1: #4fe3d0;
   --chart-2: #f1c96f;
@@ -227,6 +234,10 @@
   --aurora-2: #f7e3b0;
   --aurora-3: #e7f1ee;
 
+  /* ADDED in Part B — identical in both themes; see the dark block. */
+  --logo-plate: #ffffff;
+  --logo-plate-ink: #0b3935;
+
   /* --- §3 Chart and avatar palette ------------------------------------- */
   --chart-1: #0a6f66;
   --chart-2: #b7791f;
@@ -348,6 +359,10 @@
   --color-aurora-1: var(--aurora-1);
   --color-aurora-2: var(--aurora-2);
   --color-aurora-3: var(--aurora-3);
+
+  /* --- §8 University logo plate --------------------------------------- */
+  --color-logo-plate: var(--logo-plate);
+  --color-logo-plate-ink: var(--logo-plate-ink);
 
   /* --- §3 Chart palette ------------------------------------------------ */
   --color-chart-1: var(--chart-1);

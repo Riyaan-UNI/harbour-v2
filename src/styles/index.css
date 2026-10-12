@@ -8,8 +8,10 @@
 @import 'tailwindcss';
 @import './fonts.css';
 @import './tokens.css';
+@import './shadcn.css';
 @import './base.css';
 @import './layout.css';
+@import './ui.css';
 
 /* Spec §11: the dark variant is keyed to data-theme on <html>, never on a
    wrapper, so Radix and shadcn portals inherit it.

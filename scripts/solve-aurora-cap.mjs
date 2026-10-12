@@ -111,6 +111,7 @@ function readTheme(name, block) {
     onAccent: colour('on-accent'),
     goldFill: colour('gold-fill'),
     onGold: colour('on-gold'),
+    danger: colour('danger'),
     focusRing: colour('focus-ring'),
     border: colour('border'),
     borderStrong: colour('border-strong'),
@@ -363,6 +364,12 @@ for (const theme of THEMES) {
       {
         label: 'on-gold on gold-fill',
         values: [{ ratio: contrast(theme.onGold, theme.goldFill) }],
+      },
+      // The danger Button (Brick 2a) takes `--on-accent` as its label colour,
+      // so that pairing is checked too rather than assumed.
+      {
+        label: 'on-accent on danger',
+        values: [{ ratio: contrast(theme.onAccent, theme.danger) }],
       },
     ],
   });

@@ -9,6 +9,11 @@
     "useDefineForClassFields": true,
     "types": ["vite/client"],
 
+    /* shadcn/ui is written against the `@/` alias, so the alias exists even
+       though this project's own imports stay relative. */
+    "baseUrl": ".",
+    "paths": { "@/*": ["src/*"] },
+
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,

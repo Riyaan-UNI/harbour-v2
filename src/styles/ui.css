@@ -1,0 +1,130 @@
+/* ==========================================================================
+   Harbour — shared component CSS (Brick 2a)
+
+   The parts of a component that cannot be expressed as a Tailwind utility:
+   a keyframe, a colour-mix tone, and one hover rule that has to out-specify
+   `.glass`.
+
+   Everything here reads tokens. The only raw values are percentages inside a
+   gradient and a `calc()` on a spacing token — no colour, no px.
+   ========================================================================== */
+
+@layer components {
+  /* --- Skeleton --------------------------------------------------------
+     A calm shimmer, never a spinner. The sweep is a transform on a pseudo-
+     element, so it is composited on the GPU; under reduced motion the sweep
+     is removed and the block is static. */
+  .ui-skeleton {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--glass-fill-strong);
+    border-radius: var(--radius-sm);
+  }
+
+  .ui-skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      var(--glass-fill-strong),
+      transparent
+    );
+    animation: ui-skeleton-sweep var(--dur-scene) var(--ease-in-out) infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-skeleton::after {
+      animation: none;
+      opacity: 0;
+    }
+  }
+
+  /* --- StatusBadge -----------------------------------------------------
+     Risk is never colour alone: the badge also carries an icon and a label.
+     `--badge-tone` is set inline from the tone token, so the text, the icon,
+     the border and the tinted surface all derive from one semantic colour.
+     The surface is a light tint of the tone over the elevated surface, so the
+     badge reads on any theme without a second set of tokens. */
+  .ui-badge {
+    color: var(--badge-tone, var(--text));
+    background-color: color-mix(
+      in srgb,
+      var(--badge-tone, var(--text)) 14%,
+      var(--bg-elevated)
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--badge-tone, var(--text)) 42%,
+      transparent
+    );
+  }
+
+  /* --- Avatar ----------------------------------------------------------
+     Spec §8: a chart colour at 20% alpha, with the text token on top. The
+     tone is set inline from a chart token, so no per-person colour is
+     invented and the avatar repaints with the theme. */
+  .ui-avatar {
+    color: var(--text);
+    background-color: color-mix(
+      in srgb,
+      var(--avatar-tone, var(--chart-1)) 20%,
+      transparent
+    );
+  }
+
+  /* --- University logo -------------------------------------------------
+     The plate is white in both themes (spec §8). The acronym fallback scales
+     with the box in container units, so a three-letter code fits at 2rem and
+     at 3rem without a per-size font size. */
+  .ui-logo {
+    container-type: size;
+  }
+
+  .ui-logo__acronym {
+    font-family: var(--font-mono);
+    font-size: 26cqw;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: var(--tracking-label);
+    text-align: center;
+    text-transform: uppercase;
+  }
+}
+
+@keyframes ui-skeleton-sweep {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Interactive card — hover and focus-visible only. Brick 2b adds the pointer
+   spotlight (--mx / --my), the <=6 degree tilt and the layoutId expand.
+
+   Unlayered on purpose: `.glass` is unlayered too, so a `hover:border-*`
+   utility (which lives in @layer utilities) would lose the cascade. Declaring
+   this here lets the interactive card deepen its own border, and the lift is a
+   transform so it never fights the glass fill.
+   -------------------------------------------------------------------------- */
+
+.ui-card--interactive {
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.ui-card--interactive:hover,
+.ui-card--interactive:focus-within {
+  transform: translateY(calc(var(--space-1) * -1));
+  border-color: var(--border-strong);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-card--interactive:hover,
+  .ui-card--interactive:focus-within {
+    transform: none;
+  }
+}
