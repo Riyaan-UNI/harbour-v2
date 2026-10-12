@@ -273,7 +273,7 @@ maxima (dark blob 0.18 / patch 0.29; light 1 / 1).
 
 ### The contrast script, after Brick 3
 
-Eleven surfaces × seven text tokens × two themes = **154 text pairs**, plus the component
+Twelve surfaces × seven text tokens × two themes = **168 text pairs**, plus the component
 pairs, plus four solvers. Exit 0.
 
 Two findings in Part B were acted on rather than excused:
@@ -303,7 +303,7 @@ pair rescued by the 3:1 large-text allowance.
 | Lint CSS | `npm run lint:css` | pass, 0 problems |
 | Build | `npm run build` | pass — CSS 45.24 kB (gzip 9.87), main JS 414.44 kB (gzip 139.39) |
 | E2E + axe | `npm run test:e2e` | **105/105 pass** — landing 29, components 25, primitives 27, gallery 24 |
-| Contrast | `node scripts/solve-aurora-cap.mjs` | exit 0 — 154 text pairs, every component pair |
+| Contrast | `node scripts/solve-aurora-cap.mjs` | exit 0 — 168 text pairs, every component pair |
 
 **The main JS grew from 269.35 to 414.44 kB (gzip 86.71 → 139.39)** because the landing
 now pulls GSAP, Lenis and Radix Dialog into the initial graph. The spec's landing target is
