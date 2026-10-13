@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 import { SplitText } from 'gsap/SplitText';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AuroraPatch } from '../AuroraPatch';
 import { Container, Grid, Heading, Section, Stack, Text } from '../layout';
 import { ArtSlot } from './ArtSlot';
@@ -39,10 +39,24 @@ export function Hero({ savedNickname = null }: HeroProps): JSX.Element {
   const ctaWrapRef = useRef<HTMLDivElement>(null);
   const waveLineRef = useRef<WaveLineHandle>(null);
 
+  /**
+   * The entrance's own state marker, on the section itself.
+   *
+   * The CTA block fades up from `opacity: 0`, and an axe scan that runs
+   * mid-tween measures the button against its half-painted background — a
+   * contrast failure that is the animation's doing, not the design's. The
+   * tests wait for `data-entrance="entered"` before scanning, which is the
+   * moment every element in the hero is at its final opacity.
+   */
+  const [entrance, setEntrance] = useState<'entering' | 'entered'>(
+    'entering',
+  );
+
   useEffect(() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduced) {
       waveLineRef.current?.settle();
+      setEntrance('entered');
       return;
     }
 
@@ -67,7 +81,11 @@ export function Hero({ savedNickname = null }: HeroProps): JSX.Element {
       split = new SplitText(headline, { type: 'lines' });
       gsap.set(split.lines, { opacity: 0, y: 20 });
 
-      tl = gsap.timeline();
+      tl = gsap.timeline({
+        onComplete: () => {
+          if (!cancelled) setEntrance('entered');
+        },
+      });
 
       // 1. Headline lines reveal.
       tl.to(split.lines, {
@@ -105,7 +123,13 @@ export function Hero({ savedNickname = null }: HeroProps): JSX.Element {
   }, []);
 
   return (
-    <Section id="top" aria-labelledby="hero-headline" contained={false}>
+    <Section
+      id="top"
+      aria-labelledby="hero-headline"
+      contained={false}
+      className="hero__section"
+      data-entrance={entrance}
+    >
       <AuroraPatch variant="hero">
         <Container>
           <Stack gap={8} className="hero__content">

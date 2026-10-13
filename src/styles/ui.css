@@ -152,6 +152,44 @@
     inline-size: auto;
     aspect-ratio: 510 / 128;
   }
+
+  /* --- ProgressRing ---------------------------------------------------
+     The 100-unit viewBox makes the geometry unitless, so the stroke width
+     below is user units, not px: 8/100 of the box, which lands at 0.2rem on
+     a 2.5rem ring and 0.36rem on a 4.5rem one. The rotation starts the
+     value arc at 12 o'clock, because a stroke dash begins at 3 o'clock.
+     Both circles read tokens, so the ring follows the theme. */
+  .progress-ring {
+    display: block;
+    inline-size: var(--ring-size);
+    block-size: var(--ring-size);
+    transform: rotate(-90deg);
+  }
+
+  .progress-ring--sm {
+    --ring-size: 2.5rem;
+  }
+
+  .progress-ring--md {
+    --ring-size: 3rem;
+  }
+
+  .progress-ring--lg {
+    --ring-size: 4.5rem;
+  }
+
+  .progress-ring__track {
+    fill: none;
+    stroke: var(--glass-fill-strong);
+    stroke-width: 8;
+  }
+
+  .progress-ring__value {
+    fill: none;
+    stroke: var(--accent-text);
+    stroke-linecap: round;
+    stroke-width: 8;
+  }
 }
 
 @keyframes ui-skeleton-sweep {

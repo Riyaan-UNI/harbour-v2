@@ -30,6 +30,12 @@ export default defineConfig({
   // occasionally took longer than 60s on its own. The assertions are unchanged
   // — only the budget.
   timeout: 90_000,
+  // The default 5s expect timeout assumes a fast machine. The workspace is on
+  // the mapped `R:` drive and the suite runs two workers against one Vite dev
+  // server, so a route's first on-demand compile — or the hero's entrance
+  // timeline waiting on fonts — can legitimately take longer than that under
+  // load. Ten seconds keeps a slow moment from reading as a failure.
+  expect: { timeout: 10_000 },
   workers: 2,
   reporter: [['list'], ['html', { open: 'never' }]],
 

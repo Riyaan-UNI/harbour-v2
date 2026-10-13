@@ -181,6 +181,23 @@
      the spec gives the nav a sticky glass bar but no height. */
   --section-scroll-margin: 5rem;
 
+  /* The nav bar's own height, measured: `--touch-target` (2.75rem) plus the
+     bar's `--space-3` padding on each side. The hero pulls itself under the
+     nav by exactly this, and `scroll-padding-top` reserves it so an anchor
+     jump lands with the section heading clear of the glass. */
+  --nav-height: 4.25rem;
+
+  /* --- §6 Hero offset --------------------------------------------------
+     The hero's negative pull and its compensating top padding. Both are
+     spacing declarations, so (like every other spacing value in the build)
+     they live here as tokens rather than being written as `calc()` in a
+     component stylesheet — the Stylelint spacing gate only accepts a token,
+     `0`, `auto` or the two layout tokens, which is the point of it. */
+  --hero-pull-up: calc(var(--nav-height) * -1);
+  --hero-padding-block-start: calc(
+    var(--section-padding-block) + var(--nav-height)
+  );
+
   /* Grid track minimums, spec §6. `md` is the value the spec names (17rem);
      `sm` and `lg` are the smaller and larger steps the Grid primitive exposes. */
   --grid-min-sm: 14rem;

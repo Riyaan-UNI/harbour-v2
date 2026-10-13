@@ -34,12 +34,16 @@ const SPACING_PROPERTIES =
  * One permitted value in a spacing declaration:
  *   - a step of the spec's ten-value scale (`var(--space-1..10)`),
  *   - the section and container tokens the spec names in §6,
+ *   - the two hero offsets (§6, added with the under-nav hero): the pull-up and
+ *     the compensating top padding. Both are `calc()` composites of the tokens
+ *     above, kept in tokens.css precisely so they are declared once rather than
+ *     written per-component,
  *   - the aurora blob corner offsets, which are *positions* in %, not spacing
  *     steps, and live in tokens.css like every other value,
  *   - the keywords `0` and `auto`.
  */
 const SPACING_VALUE =
-  '(?:var\\(--space-\\d+\\)|var\\(--section-padding-block\\)|var\\(--container-padding-inline\\)|var\\(--aurora-blob-[a-z0-9-]+\\)|0|auto)';
+  '(?:var\\(--space-\\d+\\)|var\\(--section-padding-block\\)|var\\(--container-padding-inline\\)|var\\(--hero-pull-up\\)|var\\(--hero-padding-block-start\\)|var\\(--aurora-blob-[a-z0-9-]+\\)|0|auto)';
 
 /**
  * Flags a spacing value that is NOT a whitespace-separated run of permitted

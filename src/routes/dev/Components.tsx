@@ -31,6 +31,7 @@ import {
   HarbourMark,
   Input,
   InteractiveCard,
+  ProgressRing,
   RedactionNotice,
   SafetyRail,
   Skeleton,
@@ -157,7 +158,7 @@ export function Components(): JSX.Element {
           <Cluster as="header" justify="between" align="start" gap={6}>
             <Stack gap={3}>
               <Text role="label" tone="muted">
-                Harbour · Brick 2a
+                Harbour · Bricks 2a + 4
               </Text>
               <Heading level={1}>Shared components</Heading>
               <Text tone="muted">
@@ -723,6 +724,47 @@ export function Components(): JSX.Element {
             <Card variant="flat">
               <RedactionNotice count={0} />
             </Card>
+          </Stack>
+        </Block>
+        <Block
+          title="Progress ring"
+          description="The progress indicator from Brick 2b, built in Brick 4 for the landing's Settle-in sample. The ring is decorative and static — it never animates, and the caller's words carry the number, because a progress indicator is never the only carrier of meaning (Addendum 1 rule 4). The value is clamped, not asserted."
+        >
+          <Stack gap={6}>
+            <Row label="sizes, each at a third of progress">
+              <Cluster gap={6} align="center">
+                <ProgressRing value={1 / 3} size="sm" />
+                <ProgressRing value={1 / 3} size="md" />
+                <ProgressRing value={1 / 3} size="lg" />
+              </Cluster>
+            </Row>
+            <Row label="values, with the words that carry them">
+              <Cluster gap={6} align="center">
+                <Cluster gap={3} align="center">
+                  <ProgressRing value={0} size="md" />
+                  <Text role="small">0 of 3 done</Text>
+                </Cluster>
+                <Cluster gap={3} align="center">
+                  <ProgressRing value={2 / 3} size="md" />
+                  <Text role="small">2 of 3 done</Text>
+                </Cluster>
+                <Cluster gap={3} align="center">
+                  <ProgressRing value={1} size="md" />
+                  <Text role="small">3 of 3 done</Text>
+                </Cluster>
+              </Cluster>
+            </Row>
+            <Row label="out-of-range values, clamped">
+              <Cluster gap={6} align="center">
+                <ProgressRing value={-2} size="sm" />
+                <ProgressRing value={7} size="sm" />
+                <ProgressRing value={Number.NaN} size="sm" />
+                <Text role="small" tone="muted">
+                  Negative, over one and NaN all clamp to a real ring rather
+                  than an error.
+                </Text>
+              </Cluster>
+            </Row>
           </Stack>
         </Block>
       </main>

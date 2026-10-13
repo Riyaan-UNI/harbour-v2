@@ -13,6 +13,10 @@ export default tseslint.config(
       'node_modules/**',
       'playwright-report/**',
       'test-results/**',
+      // The old build is read-only reference material, not our source: it is
+      // plain JSX that predates this repo's rules, and the gate would fail on
+      // 2,550 pre-existing findings instead of on anything we wrote.
+      'Harbour-oldbuild/**',
     ],
   },
 

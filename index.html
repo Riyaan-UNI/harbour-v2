@@ -3,7 +3,37 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Harbour</title>
+    <title>Harbour — a safe harbour for international students in Hong Kong</title>
+
+    <meta
+      name="description"
+      content="Scams, language, paperwork, loneliness — the things nobody warns you about. Harbour helps international students in Hong Kong through them, one small step at a time."
+    />
+
+    <!-- Icons. The tab icon carries both colour schemes inside one file (a
+         favicon is rendered outside the page, so it cannot read data-theme). -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+
+    <!-- Open Graph / social. There is no social card image in the repo, so the
+         tags describe the page rather than claiming artwork that does not exist. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Harbour" />
+    <meta
+      property="og:title"
+      content="Harbour — a safe harbour for international students in Hong Kong"
+    />
+    <meta
+      property="og:description"
+      content="Scams, language, paperwork, loneliness — the things nobody warns you about. Harbour helps you through them, one small step at a time."
+    />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Harbour" />
+    <meta
+      name="twitter:description"
+      content="A safe harbour for international students in Hong Kong."
+    />
+
     <!-- Dark is the default theme; theme.ts rewrites this on every change. -->
     <meta name="theme-color" content="#061b1a" />
     <script>
@@ -25,8 +55,142 @@
         }
       })();
     </script>
+
+    <!--
+      Boot splash — pure HTML and CSS, before any JavaScript.
+
+      It exists so the first paint is Harbour rather than a white rectangle
+      while the bundle parses. It sits at `--z-boot` (above everything),
+      fades out on `harbour:boot` (dispatched by main.tsx on first commit),
+      and is removed from the DOM entirely afterwards.
+
+      Two timers keep it honest: it is on screen for at least 600 ms so it
+      does not flash, and at most 1800 ms so a slow or failed bundle cannot
+      leave a user staring at it. Reduced motion shows it without the ripple.
+
+      Inline styles are used here only because this runs before the app's
+      stylesheet is guaranteed to be parsed; the colours are the same hex
+      values the tokens hold in both themes.
+    -->
+    <style>
+      #harbour-boot {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483000;
+        display: grid;
+        place-content: center;
+        gap: 1.5rem;
+        justify-items: center;
+        background-color: var(--boot-bg, #061b1a);
+        color: var(--boot-fg, #f2f7f6);
+        transition: opacity 420ms ease;
+      }
+
+      html[data-theme='light'] #harbour-boot {
+        --boot-bg: #eef5f4;
+        --boot-fg: #0b3935;
+      }
+
+      #harbour-boot[data-leaving='true'] {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      #harbour-boot .boot__mark {
+        position: relative;
+        inline-size: 4rem;
+        block-size: 4rem;
+      }
+
+      #harbour-boot .boot__mark svg {
+        inline-size: 100%;
+        block-size: 100%;
+        display: block;
+      }
+
+      /* The soft ripple behind the mark. */
+      #harbour-boot .boot__ripple {
+        position: absolute;
+        inset: -50%;
+        border-radius: 50%;
+        border: 1px solid currentColor;
+        opacity: 0.35;
+        animation: boot-ripple 1.8s ease-out infinite;
+      }
+
+      #harbour-boot .boot__ripple--delay {
+        animation-delay: 0.9s;
+      }
+
+      @keyframes boot-ripple {
+        0% {
+          transform: scale(0.35);
+          opacity: 0.4;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 0;
+        }
+      }
+
+      #harbour-boot .boot__name {
+        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+
+      #harbour-boot .boot__line {
+        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        font-size: 0.8125rem;
+        opacity: 0.7;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        #harbour-boot .boot__ripple {
+          animation: none;
+          opacity: 0.2;
+          transform: scale(0.85);
+        }
+      }
+    </style>
   </head>
   <body>
+    <div
+      id="harbour-boot"
+      role="status"
+      aria-live="polite"
+      aria-label="Harbour is loading"
+    >
+      <div class="boot__mark">
+        <span class="boot__ripple"></span>
+        <span class="boot__ripple boot__ripple--delay"></span>
+        <!-- The Harbour mark: a disc, a sun and two waves. Same geometry as
+             src/components/ui/harbour-mark.tsx, inlined so it costs no request. -->
+        <svg viewBox="0 0 128 128" aria-hidden="true" focusable="false">
+          <circle cx="64" cy="64" r="60" fill="var(--boot-fg, #f2f7f6)" />
+          <circle cx="64" cy="52" r="14" fill="var(--boot-bg, #061b1a)" />
+          <path
+            d="M18 78c12-10 24-10 36 0s24 10 36 0 24-10 20 0"
+            fill="none"
+            stroke="var(--boot-bg, #061b1a)"
+            stroke-width="6"
+            stroke-linecap="round"
+          />
+          <path
+            d="M18 98c12-10 24-10 36 0s24 10 36 0 24-10 20 0"
+            fill="none"
+            stroke="var(--boot-bg, #061b1a)"
+            stroke-width="6"
+            stroke-linecap="round"
+            opacity="0.55"
+          />
+        </svg>
+      </div>
+      <div class="boot__name">Harbour</div>
+      <div class="boot__line">Getting your harbour ready…</div>
+    </div>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

@@ -36,6 +36,7 @@ export {
 } from './interactive-card';
 export { Chip, type ChipProps } from './chip';
 export { chipVariants } from './chip-variants';
+export { ProgressRing, type ProgressRingProps, type ProgressRingSize } from './progress-ring';
 export { StatusBadge, type StatusBadgeProps, type StatusTone } from './status-badge';
 export { DemoBadge, type DemoBadgeProps } from './demo-badge';
 export {

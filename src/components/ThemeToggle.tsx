@@ -61,20 +61,71 @@ const OPTIONS: readonly Option[] = [
   { value: 'dark', label: 'Dark', Icon: MoonIcon },
 ];
 
+/** The mode the compact button shows a single icon for. */
+const COMPACT_ICON: Record<ThemeMode, () => JSX.Element> = {
+  system: MonitorIcon,
+  light: SunIcon,
+  dark: MoonIcon,
+};
+
+export type ThemeToggleProps = {
+  /**
+   * `full` (default) is the three-state segmented control for settings
+   * surfaces. `compact` is a single icon button that cycles
+   * system → light → dark, sized for the nav, the app shell and any bar where
+   * three buttons will not fit.
+   */
+  variant?: 'full' | 'compact';
+  className?: string;
+};
+
 /**
- * Three-state segmented theme control — spec §8.
+ * Theme control — spec §8.
  *
- * Each state is a real button with `aria-pressed`, and the circular reveal
- * starts from whichever button was pressed.
+ * In `full` mode each state is a real button with `aria-pressed`, and the
+ * circular reveal starts from whichever button was pressed. In `compact` mode
+ * it is one button that cycles: the whole control moves with it, so a user
+ * watching the icon always knows which state they are about to leave.
  */
-export function ThemeToggle(): JSX.Element {
+export function ThemeToggle({
+  variant = 'full',
+  className,
+}: ThemeToggleProps = {}): JSX.Element {
   const mode = useThemeMode();
+
+  if (variant === 'compact') {
+    const Icon = COMPACT_ICON[mode];
+    const current = OPTIONS.find((option) => option.value === mode);
+    const next: ThemeMode =
+      mode === 'system' ? 'light' : mode === 'light' ? 'dark' : 'system';
+
+    return (
+      <button
+        type="button"
+        className={cn(
+          'glass inline-grid size-11 place-items-center rounded-pill text-text',
+          'transition-colors duration-fast hover:bg-glass-fill-strong',
+          className,
+        )}
+        aria-label={`Colour theme: ${current?.label ?? 'System'}. Switch to ${next}.`}
+        onClick={(event) => {
+          const rect = event.currentTarget.getBoundingClientRect();
+          setMode(next, {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+          });
+        }}
+      >
+        <Icon />
+      </button>
+    );
+  }
 
   return (
     <div
       role="group"
       aria-label="Colour theme"
-      className="glass inline-flex items-center gap-1 p-1"
+      className={cn('glass inline-flex items-center gap-1 p-1', className)}
     >
       {OPTIONS.map(({ value, label, Icon }) => {
         const selected = mode === value;

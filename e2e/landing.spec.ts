@@ -47,6 +47,14 @@ async function openLanding(
       name: 'Your safe harbour in Hong Kong.',
     }),
   ).toBeVisible();
+  // The hero's entrance fades the CTAs up from opacity 0; an axe scan that
+  // runs mid-tween measures a half-painted button. Wait for the settle —
+  // generously, because the timeline waits on fonts first.
+  await expect(page.locator('#top')).toHaveAttribute(
+    'data-entrance',
+    'entered',
+    { timeout: 30_000 },
+  );
 }
 
 async function expectNoHorizontalOverflow(page: Page): Promise<void> {

@@ -34,9 +34,13 @@ export function LandingFooter(): JSX.Element {
             anywhere until you ask it to.
           </Text>
 
+          {/* Dev-only marker. It is behind the flag, so it never ships — but
+              the copy is neutral rather than a phase label, because a label
+              inside `import.meta.env.DEV` is still a label the moment someone
+              forces the flag on in a build. */}
           {import.meta.env.DEV && (
             <Text role="label" tone="subtle">
-              Harbour · Brick 3b · landing page in progress
+              Harbour · development build
             </Text>
           )}
         </Stack>

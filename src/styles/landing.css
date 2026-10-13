@@ -66,11 +66,51 @@ html.lenis body {
   }
 }
 
-/* --- Nav ------------------------------------------------------------------ */
+/* --- Nav ------------------------------------------------------------------
+   The bar is sticky and starts **bare**: no glass, no border, so the hero's
+   colour field runs underneath it and there is no hard edge where the two
+   meet. The glass arrives only once the page has scrolled (`data-scrolled` on
+   the header), which is the moment the bar actually needs a background to sit
+   its links on. `--nav-height` is the measured height both the hero's negative
+   margin and `scroll-padding-top` below are derived from. */
+html {
+  scroll-padding-block-start: var(--nav-height);
+}
+
 .landing-nav {
   position: sticky;
   inset-block-start: 0;
   z-index: var(--z-nav);
+}
+
+/* The 1px sentinel the observer watches, parked at the document's very top so
+   it leaves the viewport exactly when the page starts scrolling. */
+.landing-nav__sentinel {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  block-size: 1px;
+  pointer-events: none;
+}
+
+.landing-nav__bar-surface {
+  border-block-end: var(--hairline) solid transparent;
+  background-color: transparent;
+  transition:
+    background-color var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    backdrop-filter var(--dur-base) var(--ease-out);
+}
+
+.landing-nav[data-scrolled='true'] .landing-nav__bar-surface {
+  border-block-end-color: var(--border);
+  background-color: var(--glass-fill);
+  backdrop-filter: blur(var(--glass-blur));
+}
+
+/* The glass surface's own hairline would double the one above. */
+.landing-nav[data-scrolled='true'] .landing-nav__bar-surface.glass {
+  border-block-end-color: var(--border);
 }
 
 .landing-nav__bar {
@@ -105,13 +145,21 @@ html.lenis body {
 
 /* --- Hero -----------------------------------------------------------------
    Brick 3b: the hero section has no padding — the AuroraPatch is full-bleed,
-   so the padding lives on the content inside it instead. */
+   so the padding lives on the content inside it instead.
+
+   Brick 4/P0: the section is pulled up under the nav by exactly `--nav-height`
+   (`margin-block-start` on the section, because the nav is sticky rather than
+   fixed and therefore occupies its own row in flow). The patch's top edge is
+   now behind the transparent nav instead of below it, which is what removes
+   the strip. `padding-block-start` on the content adds the same height back,
+   so the copy keeps its original distance from the top of the viewport. */
 .hero__section {
+  margin-block-start: var(--hero-pull-up);
   padding-block: 0;
 }
 
 .hero__content {
-  padding-block: var(--section-padding-block);
+  padding-block: var(--hero-padding-block-start) var(--section-padding-block);
 }
 
 .hero__wave {
@@ -181,4 +229,45 @@ html.lenis body {
 .landing-footer {
   padding-block: var(--section-padding-block);
   border-block-start: var(--hairline) solid var(--border);
+}
+
+/* --- Brick 4: sections below the hero ------------------------------------- */
+
+/* The sample quote that sits inside a glass card. A nested surface is solid,
+   never glass (spec §4): glass on glass is the one combination the spec bans
+   outright, so the quote is the elevated background with a hairline. */
+.landing-quote {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-elevated);
+}
+
+/* Cards in a bento or a grid stretch to the row, so a row of cards shares one
+   bottom edge. The hit wrapper is the layout's child — the card's own box is
+   transformed by the tilt — so the wrapper carries the height and hands it
+   down. */
+.layout-grid > .ui-card-hit,
+.layout-bento > .layout-bento__item > .ui-card-hit {
+  block-size: 100%;
+}
+
+.layout-grid > .ui-card-hit > .ui-card,
+.layout-bento > .layout-bento__item > .ui-card-hit > .ui-card {
+  block-size: 100%;
+}
+
+/* The step number in How it works. Mono, in a circle at the touch target. */
+.landing-step__number {
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--touch-target);
+  block-size: var(--touch-target);
+  flex: none;
+  border: var(--hairline) solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
 }
