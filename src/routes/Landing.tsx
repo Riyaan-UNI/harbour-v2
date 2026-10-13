@@ -84,7 +84,10 @@ export function Landing(): JSX.Element {
         <LandingNav />
 
         <main id="main" tabIndex={-1}>
-          <Hero savedNickname={profile?.nickname ?? null} />
+          {/* The legacy store calls the display name `name`; the hero's CTA
+              was written against `nickname` (the v2 name for the same thing).
+              One alias here is cheaper than changing either side. */}
+          <Hero savedNickname={profile?.name ?? null} />
 
           {/* The below-the-fold chunk gets a real skeleton rather than an
               empty div: on a cold load over a slow link the boundary can be on

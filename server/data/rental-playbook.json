@@ -1,0 +1,59 @@
+{
+  "title": "I think I've been scammed",
+  "intro": "Work through these steps in order. You do not have to do them alone — ask a friend, your hall tutor or your university to sit with you.",
+  "steps": [
+    {
+      "id": "stop",
+      "title": "Stop paying, right now",
+      "detail": "Do not send another transfer, top-up or deposit, even if you are told the money is refundable. Stopping early is the single most useful thing you can do.",
+      "minutes": 1,
+      "links": []
+    },
+    {
+      "id": "bank",
+      "title": "Call your bank's hotline",
+      "detail": "Use the number printed on the back of your card or in your banking app — never a number from the message. Ask them to freeze the transfer and note the case number.",
+      "minutes": 10,
+      "links": [
+        { "label": "Call the number on your card or app", "url": "" }
+      ]
+    },
+    {
+      "id": "police",
+      "title": "Report to the police",
+      "detail": "Call 999 if you are in danger right now. Otherwise call the 24-hour Anti-Scam Helpline on 18222 for advice, then file a report at any police station.",
+      "minutes": 15,
+      "links": [
+        { "label": "Anti-Scam Helpline 18222", "url": "tel:18222" },
+        { "label": "Emergency services 999", "url": "tel:999" }
+      ]
+    },
+    {
+      "id": "evidence",
+      "title": "Keep the evidence",
+      "detail": "Screenshot the listing, the chat, the payment confirmation and the account number you paid. Save them somewhere you can find later. Do not delete the conversation.",
+      "minutes": 10,
+      "links": []
+    },
+    {
+      "id": "university",
+      "title": "Tell your university",
+      "detail": "Your student affairs or international office can help with accommodation, a temporary place to stay, and a letter if you need one. They have seen this before.",
+      "minutes": 10,
+      "links": []
+    },
+    {
+      "id": "protect",
+      "title": "Protect your identity",
+      "detail": "If you shared your HKID, bank details or a one-time code, change your banking passwords and ask your bank to watch the account. Do not share any new codes with anyone.",
+      "minutes": 20,
+      "links": []
+    }
+  ],
+  "helplines": [
+    { "label": "Emergency services", "value": "999", "href": "tel:999" },
+    { "label": "Anti-Scam Helpline", "value": "18222", "href": "tel:18222" },
+    { "label": "Rating and Valuation Department", "value": "2152 0111", "href": "tel:21520111" }
+  ],
+  "disclaimer": "General information only, not legal advice. For a tenancy dispute, speak to the Rating and Valuation Department hotline or the Duty Lawyer Service."
+}

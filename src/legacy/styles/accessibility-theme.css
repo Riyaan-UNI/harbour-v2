@@ -1,0 +1,1069 @@
+/*
+ * Harbour appearance preferences and accessibility theme layer.
+ * Theme colors are semantic so every shared surface changes together.
+ * The artwork keeps its original Harbour palette; interface surfaces, copy,
+ * controls, status states and charts use the selected theme tokens.
+ */
+
+:root {
+  color-scheme: light;
+  --text-muted: #50665d;
+  --focus-ring: #8a5b10;
+  --chart-line: #1a5c56;
+  --chart-grid: #e9e0cb;
+  --chart-tick: #5b726b;
+  --chart-cursor: #8ccbd0;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Harbour after dark (UI-012): the same deep-water teals and lantern gold as
+     daylight, just darker. Previously this was a navy + cyan scheme, which read
+     as a different product. */
+  --teal-950: #04100e;
+  --teal-900: #0b1e1b;
+  --teal-850: #102723;
+  --teal-800: #16332e;
+  --teal-700: #7fd6c7;
+  --teal-600: #63c2b2;
+  --teal-500: #4aa899;
+  --teal-400: #5f9084;
+  --teal-300: #476a62;
+  --teal-200: #2b423d;
+  --teal-100: #1c2c29;
+  --teal-50: #141f1d;
+
+  --gold-700: #f4d77f;
+  --gold-600: #edca68;
+  --gold-500: #e9c257;
+  --gold-400: #e5b94d;
+  --gold-300: #f0cd6e;
+  --gold-200: #332a19;
+  --gold-100: #211d18;
+
+  --ivory-50: #08110f;
+  --ivory-100: #0f1c19;
+  --ivory-200: #182723;
+  --ivory-300: #293a35;
+  --paper: #101c1a;
+  --deep: #04100e;
+  --ivory: var(--surface-page);
+
+  --blue-700: #d5e8e2;
+  --blue-600: #bcd8d0;
+  --blue-500: #7ea79d;
+  --blue-400: #4e6f68;
+  --blue-300: #334a45;
+  --blue-200: #253a36;
+  --blue-100: #182825;
+  --blue-50: #12201e;
+
+  --success: #9bd6ae;
+  --success-tint: #142a22;
+  --warning: #f1cd70;
+  --warning-tint: #2e2717;
+  --danger: #f0a196;
+  --danger-tint: #2f1c1a;
+  --info: #bcd8d0;
+  --info-tint: #182825;
+
+  --surface-page: #08110f;
+  --surface-card: #162624;     /* UI-028: was #101c1a, only 1.09:1 on the page - cards did not read as elevated */
+  --surface-sunken: #0b1614;   /* recessed relative to a card */
+  --surface-info: #1a2c2a;
+  --surface-accent: #e5b94d;
+  --surface-brand: #122120;
+  --surface-brand-soft: #1a2c2a;
+  --surface-glass: linear-gradient(135deg, rgba(30, 54, 49, 0.74), rgba(9, 18, 16, 0.78));
+  --surface-clay: linear-gradient(145deg, #16302b, #0b1e1b 72%);
+  --glow-hover: 0 0 0 1px rgba(127, 214, 199, 0.46), 0 0 26px rgba(74, 168, 153, 0.24), 0 18px 44px rgba(0, 0, 0, 0.54);
+
+  --text-strong: #eef4f0;
+  --text-heading: #f2f7f3;
+  --text-info: #d3e5dd;
+  --text-body: #dfe9e3;
+  --text-muted: #b6c6bc;
+  --text-inverse: #08110f;
+  --text-on-gold: #152422;
+  --text-on-brand: #e6efea;
+
+  --border-strong: rgba(165, 200, 190, 0.72);
+  --border: rgba(150, 190, 180, 0.50);   /* UI-028: 3.0:1 on a card; was 1.6:1 and read as merged */
+  --border-soft: rgba(150, 190, 180, 0.30);
+  --border-inverse: rgba(8, 17, 15, 0.38);
+
+  --shadow-resting: 8px 10px 26px rgba(0, 0, 0, 0.42), -4px -4px 18px rgba(127, 214, 199, 0.045);
+  --shadow-raised: 14px 18px 40px rgba(0, 0, 0, 0.54), -6px -6px 22px rgba(127, 214, 199, 0.08);
+
+  /* Backwards-compatible names used by older page styles. */
+  --ink: var(--text-body);
+  --ink-strong: var(--text-strong);
+  --muted: var(--text-muted);
+  --forest: var(--teal-900);
+  --forest-dark: var(--teal-950);
+  --paper-legacy: var(--surface-page);
+  --white: var(--surface-card);
+  --line: var(--border);
+  --gold: var(--gold-400);
+  --blue: var(--blue-200);
+  --mint: var(--teal-200);
+  --sage: var(--teal-200);
+  --coral: #d48772;
+  --surface-overlay: rgba(3, 15, 14, 0.78);
+  --coral-ink: #e8a98f;
+
+  --focus-ring: #f1cf76;
+  --chart-line: #7fd6c7;
+  --chart-grid: #263a35;
+  --chart-tick: #c2d2c9;
+  --chart-cursor: #e5b94d;
+}
+
+html[data-theme="dark"] body,
+html[data-theme="dark"] .app-shell,
+html[data-theme="dark"] .entry-shell,
+html[data-theme="dark"] .portal-shell,
+html[data-theme="dark"] .portal-main,
+html[data-theme="dark"] .landing-page,
+html[data-theme="dark"] .figma-shell {
+  color: var(--text-body);
+  background-color: var(--surface-page);
+  background-image: radial-gradient(ellipse at 15% 0%, rgba(38, 92, 82, 0.22), transparent 38%), radial-gradient(ellipse at 88% 45%, rgba(24, 68, 60, 0.16), transparent 42%), linear-gradient(145deg, #08110f, #0b1a17 62%, #08110f);
+  background-attachment: fixed;
+}
+
+html[data-theme="dark"] .portal-shell {
+  --portal-deep: var(--teal-950);
+  --portal-ink: var(--text-body);
+  --portal-ivory: var(--surface-page);
+  --portal-paper: var(--surface-card);
+  --portal-blue: var(--blue-200);
+  --portal-sage: var(--teal-200);
+  --portal-coral: #d48772;
+  --portal-gold: var(--gold-400);
+}
+
+/* The previous signed-in shell has local light-mode tokens. Keep those
+   aliases connected to the active theme when an older layout is displayed. */
+html[data-theme="dark"] .app-shell:not(.entry-shell) {
+  --ink: var(--text-body);
+  --ink-strong: var(--text-heading);
+  --muted: var(--text-muted);
+  --paper: var(--surface-page);
+  --white: var(--surface-card);
+  --line: var(--border);
+  --forest: var(--teal-700);
+  --forest-dark: var(--surface-page);
+  --green: var(--success);
+  --mint: var(--surface-info);
+  --sage: var(--surface-sunken);
+  --coral: #d48772;
+  --gold: var(--gold-400);
+  --blue: var(--surface-info);
+}
+
+/* Legacy palette names are kept in sync so older components cannot retain
+   ivory paper surfaces after the global theme changes. */
+html[data-theme="dark"] {
+  --paper: var(--surface-card);
+  --paper-legacy: var(--surface-page);
+  --white: var(--surface-card);
+  --deep: var(--teal-950);
+  --ivory: var(--surface-page);
+  --ink: var(--text-body);
+  --ink-strong: var(--text-strong);
+  --muted: var(--text-muted);
+  --line: var(--border);
+  --forest: var(--teal-900);
+  --forest-dark: var(--teal-950);
+  --gold: var(--gold-400);
+  --blue: var(--blue-200);
+  --mint: var(--teal-200);
+  --sage: var(--surface-sunken);
+  --coral: #d48772;
+}
+
+html[data-theme="dark"] .figma-shell {
+  --ink: var(--text-body);
+  --deep: var(--teal-950);
+  --blue: var(--blue-200);
+  --sage: var(--surface-sunken);
+  --ivory: var(--surface-page);
+  --paper: var(--surface-card);
+  --coral: #d48772;
+  --gold: var(--gold-400);
+  --line: var(--border);
+}
+
+html[data-theme="dark"] :where(h1, h2, h3, h4, h5, h6) { color: var(--text-heading); }
+html[data-theme="dark"] :where(p, li, dd, dt, label, legend, small, .eyebrow, .panel-note, .figma-tool-note) { color: var(--text-muted); }
+html[data-theme="dark"] :where(.eyebrow, .nav-group-label, .section-kicker) { color: var(--gold-400); }
+html[data-theme="dark"] a { color: var(--teal-700); }
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
+  color: var(--text-body);
+  background-color: var(--surface-sunken);
+  border-color: var(--border);
+}
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder { color: #a2b2a9; opacity: 1; }
+html[data-theme="dark"] :where(button, a, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 2px var(--surface-page);
+}
+
+html[data-theme="light"] :where(button, a, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 2px var(--surface-page);
+}
+
+/* Strengthen the light-theme copy called out by the audit. */
+html[data-theme="light"] .hero-copy > p,
+html[data-theme="light"] .section-heading > .eyebrow,
+html[data-theme="light"] .panel-note,
+html[data-theme="light"] .ask-empty > p,
+html[data-theme="light"] .empty-custom-lists > p,
+html[data-theme="light"] .dash-chart-card > .panel-heading > .chart-chip,
+html[data-theme="light"] .impact-panel > .panel-heading > .chart-chip,
+html[data-theme="light"] .dash-shortcuts > a[href$="checklist"] > span,
+html[data-theme="light"] .demo-banner > span,
+html[data-theme="light"] label[for="rental-text"] {
+  color: #4e6259;
+}
+html[data-theme="light"] .portal-tool-card .tool-num { color: #52685f; }
+html[data-theme="light"] .portal-event .event-number,
+html[data-theme="light"] .event-card .event-card-top .event-number { color: #65463c; }
+html[data-theme="light"] .demo-banner { color: #70450c; }
+html[data-theme="light"] .page p,
+html[data-theme="light"] .page li,
+html[data-theme="light"] .page label { color: var(--text-body); }
+html[data-theme="light"] .page :where(.eyebrow, small, .panel-note, .figma-tool-note, .field-count, .loading-note) { color: var(--text-muted); }
+html[data-theme="light"] .portal-main #rental-text { color: var(--text-body); }
+html[data-theme="light"] .figma-task-row small { color: #52685f; }
+
+/* ------------------------------------------------------------------------
+   Dark-panel registry (UI-002).
+
+   The two rules directly above paint text by ancestor — `.page p` is (0,2,2) —
+   so any dark island inside `.page` (a teal-900 card on an ivory page) had its
+   light-on-dark copy overwritten with a dark body colour. Measured at 1.28:1
+   before this block.
+
+   Every panel listed here sets its own light base colour (`--text-on-brand`),
+   so `inherit` restores exactly the intended value. `:is()` is used rather than
+   `:where()` on purpose: it must carry the same (0,2,2) weight as the rule it
+   corrects, and it comes later in the cascade, so it wins.
+   ------------------------------------------------------------------------ */
+html[data-theme="light"] :is(
+  .sos-card,
+  .tide-card,
+  .dash-next-card,
+  .rental-sos-bar,
+  .ask-reply-card,
+  .weather-orb,
+  .celebration-toast,
+  .event-date,
+  .sdg-chip,
+  .person-avatar,
+  .public-avatar,
+  .volunteer-avatar
+) :is(p, li, small, strong, .panel-note) {
+  color: inherit;
+}
+
+/* The eyebrow keeps its gold accent rather than inheriting the panel colour. */
+html[data-theme="light"] :is(
+  .sos-card,
+  .tide-card,
+  .dash-next-card,
+  .rental-sos-bar,
+  .ask-reply-card,
+  .celebration-toast
+) .eyebrow {
+  color: var(--gold-400);
+}
+
+/* `.tide-card-top span + span` is set to #a08a58 by the legacy index.css and
+   measures 3.8:1 on the teal-900 card. Let it inherit the panel's own copy
+   colour (rgba(247,243,233,.78) — about 10:1). */
+html[data-theme="light"] .tide-card .tide-card-top span {
+  color: inherit;
+}
+
+/* Shared navigation and appearance controls. */
+.nav-display-settings {
+  display: grid;
+  gap: var(--sp-2);
+  margin-top: var(--sp-3);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--border-soft);
+}
+
+.nav-setting-button {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  min-height: 52px;
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-control);
+  background: var(--surface-card);
+  color: var(--text-body);
+  text-align: left;
+  cursor: pointer;
+}
+
+.nav-setting-button > svg { flex: 0 0 auto; color: var(--teal-600); }
+.nav-setting-button > span { min-width: 0; display: grid; gap: 2px; }
+.nav-setting-button strong { color: var(--text-strong); font-size: var(--fs-14); }
+.nav-setting-button small { color: var(--text-muted); font-size: var(--fs-12); }
+.nav-setting-button:hover { border-color: var(--border-strong); background: var(--surface-brand-soft); }
+.nav-setting-button[aria-pressed="true"] > svg { color: var(--gold-500); }
+
+.phrase-output-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+.phrase-output-row > span { min-width: 0; overflow-wrap: anywhere; }
+.speech-button { flex: 0 0 auto; min-height: 44px !important; }
+
+html[data-theme="dark"] .harbour-topnav,
+html[data-theme="dark"] .harbour-tabs {
+  border-color: var(--border-soft);
+  background: rgba(20, 33, 30, 0.97);
+  color: var(--text-body);
+}
+html[data-theme="dark"] .harbour-topnav .brand,
+html[data-theme="dark"] .harbour-title,
+html[data-theme="dark"] .harbour-tabs a,
+html[data-theme="dark"] .harbour-tabs button { color: var(--text-body); }
+html[data-theme="dark"] .harbour-topnav .brand > span:last-child { color: var(--text-heading); }
+html[data-theme="dark"] .harbour-topnav .brand-mark { background: var(--teal-900); }
+html[data-theme="dark"] .app-shell:not(.entry-shell) .sidebar .brand { color: var(--text-heading); }
+html[data-theme="dark"] .app-shell:not(.entry-shell) .sidebar .brand-mark { color: var(--text-heading); background: var(--surface-brand); }
+html[data-theme="dark"] .harbour-navlinks a { color: var(--text-body); }
+html[data-theme="dark"] .harbour-navlinks a:hover,
+html[data-theme="dark"] .harbour-tabs a.active,
+html[data-theme="dark"] .harbour-tabs button[aria-expanded="true"] {
+  color: var(--text-strong);
+  background: var(--surface-brand-soft);
+}
+html[data-theme="dark"] .harbour-navlinks a.active { background: var(--surface-brand); color: var(--text-on-brand); }
+html[data-theme="dark"] .icon-button,
+html[data-theme="dark"] .profile-chip,
+html[data-theme="dark"] .nav-more-panel {
+  border-color: var(--border);
+  background: var(--surface-card);
+  color: var(--text-body);
+}
+html[data-theme="dark"] .profile-chip > span { background: var(--blue-200); color: var(--text-strong); }
+html[data-theme="dark"] .harbour-topnav .is-alert { background: #9c453c; color: #fff4ec; }
+html[data-theme="dark"] .sos-button { background: #8e4038; color: #fff4ec; }
+html[data-theme="dark"] .sos-button.is-listening { background: var(--gold-400); color: var(--text-on-gold); }
+html[data-theme="dark"] .nav-more-panel a { color: var(--text-body); }
+html[data-theme="dark"] .nav-more-panel a:hover { background: var(--surface-brand-soft); }
+html[data-theme="dark"] .nav-more-panel a.active { background: var(--surface-brand); color: var(--text-on-brand); }
+
+/* Branded cards, forms, feedback and overlays. */
+html[data-theme="dark"] :where(.portal-card, .harbour-card, .card, .metric-grid > article, .metric-grid > a, .portal-event, .portal-extra-links a, .match-card, .figma-checklist-card, .people-search, .person-card, .public-profile-card, .profile-details, .profile-identity, .dashboard-section, .analytics-card, .friends-card, .tool-card, .form-card, .result-card, .check-card, .translation-result, .tide-card, .volunteer-modal, .portal-modal, .playbook-panel, .university-dialog) {
+  border-color: var(--border-soft);
+  background-color: var(--surface-card);
+  color: var(--text-body);
+  box-shadow: var(--shadow-resting);
+}
+
+html[data-theme="dark"] .portal-tool-card,
+html[data-theme="dark"] .feature-card {
+  border-color: var(--border-soft);
+  background: var(--surface-card);
+  color: var(--text-body);
+}
+html[data-theme="dark"] .portal-tool-card .tool-num,
+html[data-theme="dark"] .portal-tool-card .tool-card-copy small,
+html[data-theme="dark"] .portal-extra-links small,
+html[data-theme="dark"] .portal-event p,
+html[data-theme="dark"] .event-copy p,
+html[data-theme="dark"] .activity-total,
+html[data-theme="dark"] .activity-foot,
+html[data-theme="dark"] .emergency-numbers span,
+html[data-theme="dark"] .emergency-numbers small,
+html[data-theme="dark"] .portal-extras p { color: var(--text-muted); }
+html[data-theme="dark"] .home-activity,
+html[data-theme="dark"] .home-chart,
+html[data-theme="dark"] .weather-details,
+html[data-theme="dark"] .portal-extra-links a,
+html[data-theme="dark"] .portal-event { border-color: var(--border-soft); background: var(--surface-card); }
+html[data-theme="dark"] .portal-extras { background: linear-gradient(130deg, #17413d, #10302d 52%, #143a36); }
+html[data-theme="dark"] .emergency-ripples::before { background: linear-gradient(135deg, #173a37, #102b28 55%, #143a36); }
+html[data-theme="dark"] .emergency-numbers a:hover { background: var(--surface-card); }
+html[data-theme="dark"] .portal-home .sos-card { border-color: var(--border-soft); background: var(--surface-card); color: var(--text-body); }
+html[data-theme="dark"] .portal-home .sos-card h2 { color: var(--text-strong); }
+html[data-theme="dark"] .portal-home .sos-card p { color: var(--text-muted); }
+html[data-theme="dark"] .portal-home .bank-card { background: var(--surface-brand); color: var(--text-on-brand); }
+html[data-theme="dark"] .portal-home .bank-reveal { background: rgba(255, 255, 255, 0.07); color: var(--text-on-brand); }
+html[data-theme="dark"] .portal-tag.warning,
+html[data-theme="dark"] .demo-banner { border-color: #6d5930; background: var(--warning-tint); color: var(--warning); }
+html[data-theme="dark"] .demo-banner span { color: #e0cf9b; }
+html[data-theme="dark"] .returning-profile-prompt,
+html[data-theme="dark"] .portal-event,
+html[data-theme="dark"] .portal-extra-links a,
+html[data-theme="dark"] .home-activity { color: var(--text-body); }
+html[data-theme="dark"] .activity-foot strong { color: var(--text-heading); }
+html[data-theme="dark"] .section-heading-row > p,
+html[data-theme="dark"] .event-copy p,
+html[data-theme="dark"] .event-copy h3,
+html[data-theme="dark"] .event-copy button,
+html[data-theme="dark"] .portal-extra-links a,
+html[data-theme="dark"] .portal-extra-links strong { color: var(--text-body); }
+html[data-theme="dark"] .portal-extra-links small { color: var(--text-muted); }
+html[data-theme="dark"] .portal-tag:not(.warning) { border-color: var(--border); background: var(--surface-sunken); color: var(--text-info); }
+html[data-theme="dark"] .returning-profile-prompt { border-color: var(--border-soft); background: var(--surface-card); }
+html[data-theme="dark"] .returning-profile-prompt small { color: var(--text-muted); }
+html[data-theme="dark"] .local-login-note {
+  border: 1px solid var(--border-soft);
+  background: var(--surface-info);
+  color: var(--text-body);
+}
+html[data-theme="dark"] .local-note-icon { background: var(--surface-card); color: var(--teal-700); }
+html[data-theme="dark"] .saved-profile,
+html[data-theme="dark"] .no-profile { border-color: var(--border-soft); background: var(--surface-card); color: var(--text-body); }
+html[data-theme="dark"] .login-footer { background: var(--gold-400); color: var(--text-on-gold); }
+/* UI-004: the footer turns gold, but its span and button kept --teal-700,
+   giving cyan-on-gold at 1.13:1. */
+html[data-theme="dark"] .login-footer :is(span, button) { color: var(--text-on-gold); }
+
+/* UI-003: legacy index.css pins these marks to fixed hex inks (#38594a, #103e38,
+   --forest) that never flip with the theme, leaving dark-on-dark at 1.45-1.88:1. */
+html[data-theme="dark"] :is(.local-login-note, .saved-profile, .no-profile) strong { color: var(--text-strong); }
+html[data-theme="dark"] :is(.local-login-note, .saved-profile, .no-profile) small { color: var(--text-muted); }
+html[data-theme="dark"] :is(.no-profile-mark, .saved-profile-photo) { color: var(--text-strong); }
+
+/* UI-006: the university picker is pinned to a near-white surface (#fffefa) and
+   a #6d857a chevron in index.css. In dark theme it kept --portal-ink, which the
+   theme flips to light text, giving 1.73:1; the chevron fails in both themes at
+   3.94:1. Make the control theme-aware and give the chevron a passing ink. */
+html[data-theme="light"] .university-trigger > b { color: var(--text-muted); }
+
+html[data-theme="dark"] .university-trigger {
+  background: var(--surface-sunken);
+  border-color: var(--border);
+  color: var(--text-body);
+}
+
+html[data-theme="dark"] .university-trigger > b { color: var(--text-muted); }
+
+/* Same control, same cause: the picker dialog body copy is a fixed #64786d. */
+html[data-theme="dark"] .university-dialog > p { color: var(--text-muted); }
+
+/* UI-022: legacy index.css pins two inks against the light ivory page and the
+   theme never overrides them, so they stay mid-dark on a near-black page.
+   .portal-main > .page .page-heading p is (0,3,1), so this must outrank it. */
+html[data-theme="dark"] .portal-main > .page .page-heading p,
+html[data-theme="dark"] .page-heading p { color: var(--text-muted); }
+
+html[data-theme="dark"] .metric-grid i { color: var(--gold-400); }
+
+html[data-theme="dark"] .scam-input-card,
+html[data-theme="dark"] .translate-workspace,
+html[data-theme="dark"] .translate-pane,
+html[data-theme="dark"] .translate-arrow,
+html[data-theme="dark"] .translate-output,
+html[data-theme="dark"] .ask-form-card,
+html[data-theme="dark"] .scam-result-placeholder,
+html[data-theme="dark"] .scam-result-card,
+html[data-theme="dark"] .rental-form,
+html[data-theme="dark"] .rental-result,
+html[data-theme="dark"] .counter-preview,
+html[data-theme="dark"] .counter-form,
+html[data-theme="dark"] .counter-scenarios,
+html[data-theme="dark"] .counter-documents,
+html[data-theme="dark"] .figma-checklist-card,
+html[data-theme="dark"] .custom-list-card,
+html[data-theme="dark"] .ask-bubble,
+html[data-theme="dark"] .ask-reply-card,
+html[data-theme="dark"] .clause,
+html[data-theme="dark"] .flag {
+  border-color: var(--border-soft);
+  background-color: var(--surface-card);
+  color: var(--text-body);
+}
+html[data-theme="dark"] .scam-result-placeholder,
+html[data-theme="dark"] .scam-result-card { background: #173a37; }
+html[data-theme="dark"] .figma-progress-card { border-color: #40817a; background: #143a36; }
+html[data-theme="dark"] .figma-progress-card span,
+html[data-theme="dark"] .figma-task-row,
+html[data-theme="dark"] .figma-task-row.checked,
+html[data-theme="dark"] .figma-task-row small { color: var(--text-muted); }
+html[data-theme="dark"] .figma-task-row { border-color: var(--border-soft); }
+html[data-theme="dark"] .figma-task-row > .figma-checkbox,
+html[data-theme="dark"] .task > .fake-check,
+html[data-theme="dark"] .rental-check > .figma-checkbox { border-color: var(--border-strong); }
+html[data-theme="dark"] .rental-check:hover { background: rgba(213, 224, 216, 0.06); }
+html[data-theme="dark"] .bank-reveal,
+html[data-theme="dark"] .rental-payment,
+html[data-theme="dark"] .rental-placeholder,
+html[data-theme="dark"] .rental-green-note,
+html[data-theme="dark"] .counter-glossary li,
+html[data-theme="dark"] .playbook-helplines a,
+html[data-theme="dark"] .phrase-groups details,
+html[data-theme="dark"] .phrase-groups summary,
+html[data-theme="dark"] .checklist-offline-note { border-color: var(--border-soft); background: var(--surface-sunken); color: var(--text-body); }
+html[data-theme="dark"] .service-error {
+  border: 1px solid rgba(238, 155, 145, 0.32);
+  border-left: 4px solid #e99a83;
+  background: linear-gradient(145deg, #153935, #102725 76%);
+  color: var(--text-body);
+  box-shadow: var(--shadow-resting);
+}
+html[data-theme="dark"] .service-error h2 { color: var(--text-heading); }
+html[data-theme="dark"] .service-error-message p { color: var(--text-muted); }
+html[data-theme="dark"] .service-offline { border-color: var(--border-soft); }
+html[data-theme="dark"] .phrase-groups { gap: 0.875rem; }
+html[data-theme="dark"] .phrase-group-column { gap: 0.75rem; }
+html[data-theme="dark"] .phrase-groups details {
+  overflow: hidden;
+  border: 1px solid rgba(116, 245, 232, 0.24);
+  border-radius: 14px;
+  background: linear-gradient(145deg, #173d39, #112f2c);
+  color: var(--text-body);
+  box-shadow: inset 0 1px 0 rgba(235, 255, 253, 0.06), 0 8px 20px rgba(0, 0, 0, 0.16);
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+html[data-theme="dark"] .phrase-groups details:hover,
+html[data-theme="dark"] .phrase-groups details:focus-within {
+  border-color: rgba(116, 245, 232, 0.55);
+  box-shadow: inset 0 1px 0 rgba(235, 255, 253, 0.1), 0 0 18px rgba(65, 240, 222, 0.1);
+}
+html[data-theme="dark"] .phrase-groups details[open] {
+  border-color: rgba(116, 245, 232, 0.42);
+  background: linear-gradient(145deg, #194541, #123330);
+}
+html[data-theme="dark"] .phrase-groups summary {
+  min-height: 58px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  list-style: none;
+  color: var(--text-heading);
+  font-size: 0.9375rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+html[data-theme="dark"] .phrase-groups summary::-webkit-details-marker { display: none; }
+html[data-theme="dark"] .phrase-groups summary > svg {
+  flex: 0 0 auto;
+  margin-left: auto;
+  color: #8bfaef;
+  transition: transform 180ms ease;
+}
+html[data-theme="dark"] .phrase-groups details[open] summary { border-bottom: 1px solid var(--border-soft); }
+html[data-theme="dark"] .phrase-groups details[open] summary > svg { transform: rotate(180deg); }
+html[data-theme="dark"] .phrase-groups ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  padding: 0.25rem 1rem 0.75rem;
+  list-style: none;
+}
+html[data-theme="dark"] .phrase-groups li {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.875rem 0;
+  border-top: 1px solid var(--border-soft);
+  color: var(--text-body);
+}
+html[data-theme="dark"] .phrase-groups li:first-child { border-top: 0; }
+html[data-theme="dark"] .phrase-groups li > strong { color: var(--text-heading); font-size: 0.875rem; }
+html[data-theme="dark"] .phrase-groups li .phrase-output-row { align-items: center; gap: 0.625rem; }
+html[data-theme="dark"] .phrase-groups li .phrase-output-row > span { color: #e6fffc; font-size: 1.125rem; line-height: 1.5; }
+html[data-theme="dark"] .phrase-groups li > small { color: var(--text-muted); font-size: 0.8125rem; }
+html[data-theme="dark"] .error-box,
+html[data-theme="dark"] .service-error,
+html[data-theme="dark"] .scam-result-error,
+html[data-theme="dark"] .playbook-error { border-color: #74453d; background: var(--danger-tint); color: #ffd0c7; }
+html[data-theme="dark"] .service-error-icon { background: #8e4038; color: #fff4ec; }
+html[data-theme="dark"] .status-badge.is-info { background: var(--info-tint); color: #c3e8e8; }
+html[data-theme="dark"] .status-badge.is-success { background: var(--success-tint); color: #b8e5c7; }
+html[data-theme="dark"] .status-badge.is-warning { background: var(--warning-tint); color: #f5dda0; }
+html[data-theme="dark"] .status-badge.is-danger { background: var(--danger-tint); color: #ffd0c7; }
+html[data-theme="dark"] .tag.warning,
+html[data-theme="dark"] .tag.danger { border-color: var(--border-soft); background: var(--surface-sunken); color: var(--text-body); }
+html[data-theme="dark"] .progress-track { background: #294c48; }
+html[data-theme="dark"] .week-tag { background: #1a403c; color: #e5f3f2; }
+html[data-theme="dark"] .weather-orb { background: var(--surface-brand); color: var(--text-on-brand); }
+html[data-theme="dark"] .weather-orb a { color: #b9e1df; }
+html[data-theme="dark"] .weather-details { color: var(--text-body); }
+html[data-theme="dark"] .service-offline,
+html[data-theme="dark"] .empty-custom-lists,
+html[data-theme="dark"] .empty-state { color: var(--text-muted); }
+html[data-theme="dark"] .counter-fullscreen { background: var(--surface-page); color: var(--text-body); }
+html[data-theme="dark"] .counter-fullscreen h2,
+html[data-theme="dark"] .counter-fullscreen li { color: var(--text-strong); }
+html[data-theme="dark"] .phrase-groups li > strong,
+html[data-theme="dark"] .phrase-output-row > span,
+html[data-theme="dark"] .student-card,
+html[data-theme="dark"] .staff-card { color: var(--text-body); }
+html[data-theme="dark"] .modal-backdrop,
+html[data-theme="dark"] .prototype-modal-overlay,
+html[data-theme="dark"] .university-backdrop { background: var(--surface-overlay); }
+html[data-theme="dark"] .university-option { color: var(--text-body); }
+html[data-theme="dark"] .university-option:hover,
+html[data-theme="dark"] .university-option.selected { background: var(--surface-brand-soft); }
+html[data-theme="dark"] .university-search { border-color: var(--border); background: var(--surface-sunken); color: var(--text-body); }
+html[data-theme="dark"] .university-close,
+html[data-theme="dark"] .prototype-modal-close { border-color: var(--border); background: var(--surface-sunken); color: var(--text-body); }
+html[data-theme="dark"] .modal-close { border-color: var(--border); background: var(--surface-sunken); color: var(--text-body); }
+
+/* Components that intentionally use fixed light colors in their base styles. */
+html[data-theme="dark"] .harbour-topnav { box-shadow: var(--shadow-raised); }
+html[data-theme="dark"] .counter-card { border-color: var(--border-soft); background: var(--surface-card); color: var(--text-body); }
+html[data-theme="dark"] .counter-fullscreen { border-color: var(--border-soft); }
+html[data-theme="dark"] .staff-card { border-color: var(--border-soft); background: var(--surface-sunken); color: var(--text-body); }
+html[data-theme="dark"] .staff-card h3,
+html[data-theme="dark"] .staff-card li,
+html[data-theme="dark"] .counter-glossary li strong { color: var(--text-strong); }
+html[data-theme="dark"] .figma-shell .message-demo { border-color: var(--border-soft); background: var(--surface-sunken); color: var(--text-body); }
+html[data-theme="dark"] .figma-shell .message-demo > span { color: var(--text-muted); }
+html[data-theme="dark"] .figma-shell .feature-translate h2,
+html[data-theme="dark"] .figma-shell .closing h2 { color: var(--text-strong); }
+html[data-theme="dark"] .figma-shell .feature-translate .btn-secondary { color: var(--text-body); border-color: var(--border-strong); }
+html[data-theme="dark"] .figma-shell .prototype-modal { border-color: var(--border-soft); }
+html[data-theme="dark"] .directory-banner,
+html[data-theme="dark"] .ask-form-card,
+html[data-theme="dark"] .empty-state,
+html[data-theme="dark"] .profile-action-card { border-color: var(--border-soft); background: var(--surface-card); color: var(--text-body); }
+html[data-theme="dark"] .profile-action-card :where(p, small) { color: var(--text-muted); }
+html[data-theme="dark"] .translation-pair,
+html[data-theme="dark"] .wireflow span { border-color: var(--border-soft); background: var(--surface-sunken); color: var(--text-body); }
+html[data-theme="dark"] .metric-grid strong,
+html[data-theme="dark"] .drill-score strong,
+html[data-theme="dark"] .impact-card strong,
+html[data-theme="dark"] .sos-state strong,
+html[data-theme="dark"] .phrase-groups summary,
+html[data-theme="dark"] .phrase-groups li span,
+html[data-theme="dark"] .match-card { color: var(--text-strong); }
+html[data-theme="dark"] .dash-friend-pill > span:first-child,
+html[data-theme="dark"] .profile-friend-row > span:first-child { background: var(--surface-brand-soft); color: var(--text-strong); }
+html[data-theme="dark"] .friend-action { border-color: var(--border); background: var(--surface-sunken); color: var(--text-body); }
+html[data-theme="dark"] .dash-shortcuts span { color: var(--teal-700); }
+html[data-theme="dark"] .translate-pane label,
+html[data-theme="dark"] .garden-heading h1 em,
+html[data-theme="dark"] .garden-heading a,
+html[data-theme="dark"] .scam-help-lines a,
+html[data-theme="dark"] .offline-links a,
+html[data-theme="dark"] .login-back,
+html[data-theme="dark"] .login-switch a { color: var(--teal-700); }
+html[data-theme="dark"] .mode-switch { border-color: var(--border-soft); background: var(--surface-sunken); }
+html[data-theme="dark"] .mode-switch button:hover { background: var(--surface-brand-soft); color: var(--text-strong); }
+html[data-theme="dark"] .mode-switch button[aria-pressed="true"] { background: var(--surface-brand); color: var(--text-on-brand); }
+html[data-theme="dark"] .rental-tabs button:not([aria-selected="true"]) { border-color: var(--border); background: var(--surface-card); color: var(--text-body); }
+html[data-theme="dark"] .rental-tabs button[aria-selected="true"] { border-color: var(--teal-500); background: var(--surface-brand); color: var(--text-on-brand); }
+html[data-theme="dark"] .event-type { color: var(--teal-700); }
+html[data-theme="dark"] .harbour-tabs button:hover,
+html[data-theme="dark"] .icon-button:hover,
+html[data-theme="dark"] .profile-chip:hover { background: var(--surface-brand-soft); }
+html[data-theme="dark"] ::selection { background: #416b61; color: #fffdf7; }
+html[data-theme="dark"] .toast,
+html[data-theme="dark"] [role="status"].toast,
+html[data-theme="dark"] .toast-host > div { border-color: var(--border-soft); background: var(--surface-card); color: var(--text-body); }
+html[data-theme="dark"] .page :where(.muted, .subtle, .field-count, .loading-note, .empty-note) { color: var(--text-muted); }
+
+/* The public landing uses its own local palette; point it at the same theme. */
+html[data-theme="dark"] .landing-nav,
+html[data-theme="dark"] .landing-intro,
+html[data-theme="dark"] .landing-tools,
+html[data-theme="dark"] .landing-how,
+html[data-theme="dark"] .statement,
+html[data-theme="dark"] .feature-grid,
+html[data-theme="dark"] .how,
+html[data-theme="dark"] .landing-last,
+html[data-theme="dark"] .figma-shell .site-header,
+html[data-theme="dark"] .figma-shell .statement,
+html[data-theme="dark"] .figma-shell .feature-grid,
+html[data-theme="dark"] .figma-shell .how { color: var(--text-body); background-color: var(--surface-page); }
+html[data-theme="dark"] .landing-page :where(p, small, .landing-eyebrow, .landing-feature-label, .feature-topline, .hero-footnote, .hero-secondary),
+html[data-theme="dark"] .figma-shell :where(p, small, .landing-eyebrow, .landing-feature-label, .feature-topline, .hero-footnote, .hero-secondary) { color: var(--text-muted); }
+html[data-theme="dark"] .landing-page :where(h1, h2, h3, h4),
+html[data-theme="dark"] .figma-shell :where(h1, h2, h3, h4) { color: var(--text-strong); }
+html[data-theme="dark"] .figma-shell .site-header .brand,
+html[data-theme="dark"] .figma-shell footer .footer-brand,
+html[data-theme="dark"] .figma-shell .site-header .brand > span:last-child,
+html[data-theme="dark"] .figma-shell footer .footer-brand > span:last-child {
+  color: var(--text-heading);
+}
+html[data-theme="dark"] .figma-shell .site-header .brand-mark,
+html[data-theme="dark"] .figma-shell footer .footer-brand .brand-mark {
+  background: #0b3935;
+}
+html[data-theme="dark"] .onboarding-entry .entry-top .landing-brand,
+html[data-theme="dark"] .onboarding-entry .entry-top .landing-brand > span:last-child {
+  color: var(--text-heading);
+}
+html[data-theme="dark"] .onboarding-entry .entry-top .landing-brand .brand-period { color: var(--gold-400); }
+html[data-theme="dark"] .onboarding-entry .entry-top .landing-brand small { color: var(--text-muted); }
+html[data-theme="dark"] .onboarding-entry .entry-top .login-link {
+  border-color: rgba(241, 201, 111, 0.48);
+  background: linear-gradient(135deg, #18403c, #11302d);
+  color: var(--text-body);
+  box-shadow: inset 0 1px 0 rgba(235, 255, 253, 0.08);
+}
+html[data-theme="dark"] .onboarding-entry .entry-top .login-link b { color: #f1c96f; }
+html[data-theme="dark"] .onboarding-entry .entry-top .login-link:hover {
+  border-color: #f1c96f;
+  background: linear-gradient(135deg, #294a47, #1d3f3c);
+  color: var(--text-heading);
+  box-shadow: 0 0 0 2px rgba(241, 201, 111, 0.12), 0 0 18px rgba(241, 201, 111, 0.16);
+}
+html[data-theme="dark"] .onboarding-entry .entry-top .login-link:focus-visible {
+  outline: 3px solid #f1c96f;
+  outline-offset: 3px;
+}
+html[data-theme="dark"] .figma-shell .landing-theme-toggle {
+  border-color: var(--border-soft);
+  background: linear-gradient(135deg, #194440, #11302d);
+  color: var(--text-body);
+}
+html[data-theme="dark"] .figma-shell .landing-theme-toggle > svg { color: #8bfaef; }
+html[data-theme="dark"] .figma-shell .landing-theme-toggle:hover { border-color: rgba(116, 245, 232, 0.65); }
+html[data-theme="dark"] .figma-shell .landing-theme-track { background: #335e5a; }
+html[data-theme="dark"] .figma-shell .landing-theme-toggle[aria-checked="true"] .landing-theme-track { background: #247d74; }
+html[data-theme="dark"] .figma-shell .landing-theme-track > span { background: #e5fffc; }
+html[data-theme="dark"] .landing-feature,
+html[data-theme="dark"] .figma-shell .landing-feature,
+html[data-theme="dark"] .figma-shell .statement-card,
+html[data-theme="dark"] .figma-shell .message-demo { border-color: var(--border-soft); background: var(--surface-card); color: var(--text-body); }
+html[data-theme="dark"] .landing-coral,
+html[data-theme="dark"] .figma-shell .feature-scam { background: linear-gradient(145deg, #244d49, #112e2b 72%); color: var(--text-body); }
+html[data-theme="dark"] .landing-sage,
+html[data-theme="dark"] .figma-shell .feature-check { background: #143a36; color: var(--text-body); }
+
+/* UI-028: in dark mode the landing cards sat within 1.0-1.5:1 of the page, so
+   their edges were invisible - "the border is merged". The dark theme gave
+   .feature-translate no background at all, so it fell through to --deep
+   (--teal-950, 1.01:1 on the page). Every card now has an elevated surface and
+   a border that clears 3:1 against it. */
+html[data-theme="dark"] .figma-shell .feature-translate {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+}
+
+html[data-theme="dark"] .figma-shell .feature-check,
+html[data-theme="dark"] .figma-shell .feature-scam {
+  border: 1px solid var(--border);
+}
+
+html[data-theme="dark"] .figma-shell .message-demo,
+html[data-theme="dark"] .translation-pair {
+  border: 1px solid var(--border);
+  background: var(--surface-sunken);
+}
+html[data-theme="dark"] .landing-gold,
+html[data-theme="dark"] .figma-shell .feature-language { background: #1b3936; color: var(--text-body); }
+html[data-theme="dark"] .figma-shell .site-header nav { background: var(--surface-page); }
+html[data-theme="dark"] .figma-shell .prototype-modal { background: var(--surface-card); color: var(--text-body); }
+
+/* Two calm dimensional treatments: translucent glass and raised clay. */
+html[data-theme="dark"] :is(
+  .metric-grid > article, .metric-grid > a, .dash-chart-card, .dash-community-card,
+  .people-search, .person-card, .public-profile-card, .profile-details,
+  .analytics-card, .friends-card, .scam-input-card, .translate-workspace,
+  .translate-pane, .rental-form, .rental-result, .ask-form-card,
+  .portal-home .sos-card, .portal-modal, .volunteer-modal, .playbook-panel,
+  .university-dialog, .translation-result
+) {
+  border: 1px solid var(--border);
+  background: var(--surface-glass);
+  -webkit-backdrop-filter: blur(18px) saturate(135%);
+  backdrop-filter: blur(18px) saturate(135%);
+  box-shadow: inset 0 1px 0 rgba(237, 255, 253, 0.1), var(--shadow-resting);
+}
+
+html[data-theme="dark"] :is(
+  .portal-tool-card, .portal-event, .figma-checklist-card, .counter-preview,
+  .tide-card, .match-card, .event-card, .impact-card, .weather-orb,
+  .portal-home .bank-card
+) {
+  border: 1px solid var(--border);
+  background: var(--surface-clay);
+  box-shadow: inset 1px 1px 0 rgba(227, 255, 252, 0.08), 9px 11px 24px rgba(0, 0, 0, 0.4), -5px -5px 16px rgba(107, 190, 182, 0.055);
+  transition: box-shadow 220ms ease, border-color 220ms ease, transform 220ms ease, background-color 220ms ease;
+}
+
+html[data-theme="dark"] :is(
+  .metric-grid > article, .metric-grid > a, .dash-chart-card, .dash-community-card,
+  .people-search, .person-card, .public-profile-card, .profile-details,
+  .analytics-card, .friends-card, .scam-input-card, .translate-workspace,
+  .translate-pane, .rental-form, .rental-result, .ask-form-card,
+  .portal-home .sos-card, .portal-modal, .volunteer-modal, .playbook-panel,
+  .university-dialog, .translation-result, .portal-tool-card, .portal-event,
+  .figma-checklist-card, .counter-preview, .tide-card, .match-card,
+  .event-card, .impact-card, .weather-orb, .portal-home .bank-card
+):is(:hover, :focus-within) {
+  border-color: rgba(116, 245, 232, 0.5);
+  box-shadow: inset 0 1px 0 rgba(245, 255, 254, 0.18), var(--glow-hover);
+}
+
+html[data-theme="dark"] :where(.portal-tool-card, .portal-event, .figma-checklist-card, .counter-preview, .tide-card, .match-card, .event-card, .impact-card, .weather-orb) :where(h1, h2, h3, h4, .eyebrow) {
+  color: var(--text-heading);
+}
+html[data-theme="dark"] .portal-home .bank-card :where(h1, h2, h3, h4, p, small, a, .portal-tag) { color: var(--text-body); }
+html[data-theme="dark"] .portal-home .bank-card .portal-tag.light-outline { color: var(--text-heading); }
+html[data-theme="dark"] .portal-home .bank-card .portal-tag.light-outline { border-color: rgba(116, 245, 232, 0.42); background: #1a403c; }
+
+/* Contrast and control states for the live dark theme. */
+html[data-theme="dark"] :where(.portal-welcome h1, .portal-welcome h1 span,
+  .result-columns h3, .scam-result-card h2, .scam-result-card h3, .ask-page h1, .profile-page h1,
+  .profile-page h2, .profile-page h3, .tide-page h1, .tide-page h2, .counter-intro h2) {
+  color: var(--text-heading);
+}
+html[data-theme="dark"] .portal-welcome h1,
+html[data-theme="dark"] .portal-welcome h1 span,
+html[data-theme="dark"] .portal-tool-card .tool-card-copy strong,
+html[data-theme="dark"] .scam-result-card .result-columns h3 { color: var(--text-heading); }
+html[data-theme="dark"] :where(.panel-note, .text-privacy-note, .scam-privacy-note, .crosslink-card p,
+  .counter-intro p, .impact-panel > p, .tide-page p, .ask-page p) { color: var(--text-body); }
+html[data-theme="dark"] .portal-home .portal-welcome > div > .portal-tag,
+html[data-theme="dark"] .directory-banner .demo-badge {
+  border-color: var(--border);
+  background: var(--surface-sunken);
+  color: var(--text-info);
+}
+html[data-theme="dark"] .portal-tool-card .tool-num { color: var(--teal-700); }
+html[data-theme="dark"] .portal-tool-card .portal-round-arrow { color: var(--teal-700); }
+
+html[data-theme="dark"] .harbour-card.is-glass {
+  border: 1px solid var(--border);
+  background: var(--surface-glass);
+  -webkit-backdrop-filter: blur(18px) saturate(135%);
+  backdrop-filter: blur(18px) saturate(135%);
+  box-shadow: inset 0 1px 0 rgba(237, 255, 253, 0.1), var(--shadow-resting);
+}
+html[data-theme="dark"] .harbour-card.is-clay {
+  border: 1px solid var(--border);
+  background: var(--surface-clay);
+  box-shadow: inset 1px 1px 0 rgba(227, 255, 252, 0.08), 9px 11px 24px rgba(0, 0, 0, 0.4), -5px -5px 16px rgba(107, 190, 182, 0.055);
+}
+html[data-theme="dark"] .harbour-card.is-glass:is(:hover, :focus-within),
+html[data-theme="dark"] .harbour-card.is-clay:is(:hover, :focus-within) {
+  border-color: rgba(116, 245, 232, 0.58);
+  box-shadow: inset 0 1px 0 rgba(235, 255, 253, 0.18), var(--glow-hover);
+}
+
+/* One field primitive prevents page-label rules from changing search layout. */
+.page label.search-field,
+.university-dialog label.search-field {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  min-width: 0;
+  min-height: 68px;
+  margin: 0;
+  padding: 8px var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  color: var(--text-body);
+  box-shadow: var(--shadow-resting);
+  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+.page label.search-field > svg,
+.university-dialog label.search-field > svg { display: block; width: 20px; height: 20px; flex: 0 0 20px; color: var(--teal-700); }
+.page label.search-field > input,
+.university-dialog label.search-field > input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  height: 48px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-body);
+  font: var(--fw-medium) var(--fs-16) / 1.4 var(--font-body);
+  box-shadow: none;
+}
+.page label.search-field > input:focus-visible,
+.university-dialog label.search-field > input:focus-visible { outline: none; box-shadow: none; }
+.page label.search-field:focus-within,
+.university-dialog label.search-field:focus-within { border-color: var(--teal-700); box-shadow: 0 0 0 3px rgba(65, 240, 222, 0.17), var(--shadow-resting); }
+@media (max-width: 600px) {
+  .page label.search-field,
+  .university-dialog label.search-field { min-height: 56px; padding: 4px var(--sp-3); }
+  .page label.search-field > input,
+  .university-dialog label.search-field > input { min-height: 46px; height: 46px; font-size: var(--fs-14); }
+}
+
+html[data-theme="dark"] .button.secondary,
+html[data-theme="dark"] a.button.secondary,
+html[data-theme="dark"] .quiet-button,
+html[data-theme="dark"] .friend-action:not(.is-friend),
+html[data-theme="dark"] .ask-suggestions button,
+html[data-theme="dark"] .chip:not([aria-pressed="true"]),
+html[data-theme="dark"] .filter-chips .chip:not([aria-pressed="true"]) {
+  border-color: var(--border);
+  background: #11312e;
+  color: var(--text-body);
+}
+html[data-theme="dark"] .button.secondary:hover:not(:disabled),
+html[data-theme="dark"] a.button.secondary:hover,
+html[data-theme="dark"] .quiet-button:hover,
+html[data-theme="dark"] .friend-action:not(.is-friend):hover,
+html[data-theme="dark"] .ask-suggestions button:hover,
+html[data-theme="dark"] .chip:not([aria-pressed="true"]):hover {
+  border-color: var(--teal-700);
+  background: linear-gradient(135deg, #1b4944, #143935);
+  color: #eafffd;
+  box-shadow: inset 0 1px 0 rgba(235, 255, 253, 0.12), 0 0 18px rgba(65, 240, 222, 0.2);
+}
+html[data-theme="dark"] .button:disabled,
+html[data-theme="dark"] .button[aria-disabled="true"],
+html[data-theme="dark"] .button.secondary:disabled,
+html[data-theme="dark"] button:disabled:not(.sos-button) {
+  border-color: rgba(167, 211, 207, 0.22);
+  background: #173633;
+  color: #aed0cd;
+  opacity: 1;
+  box-shadow: none;
+}
+html[data-theme="dark"] a.button,
+html[data-theme="dark"] a.button:not(.secondary),
+html[data-theme="dark"] .login-submit { color: var(--text-on-gold); }
+html[data-theme="dark"] a.button:hover:not(.secondary),
+html[data-theme="dark"] .login-submit:hover { color: var(--text-on-gold); box-shadow: 0 0 20px rgba(229, 185, 77, 0.22); }
+html[data-theme="dark"] .nav-panel-footer .button.secondary:hover:not(:disabled) {
+  border-color: var(--teal-700);
+  background: linear-gradient(135deg, #1a4742, #143935);
+  color: #eafffd;
+  box-shadow: inset 0 1px 0 rgba(235, 255, 253, 0.12), 0 0 20px rgba(65, 240, 222, 0.22);
+}
+
+html[data-theme="dark"] .chip[aria-pressed="true"] {
+  border-color: var(--teal-700);
+  background: #184b46;
+  color: #eafffd;
+}
+html[data-theme="dark"] .profile-photo-wrap,
+html[data-theme="dark"] .profile-friend-row > span:first-child {
+  border: 1px solid var(--border-soft);
+  background: #1b4440;
+  color: var(--text-heading);
+}
+html[data-theme="dark"] .profile-topline > a,
+html[data-theme="dark"] .panel-heading > a,
+html[data-theme="dark"] .profile-friends a:not(.profile-friend-row) { color: var(--teal-700); }
+html[data-theme="dark"] .profile-page .profile-identity,
+html[data-theme="dark"] .profile-page .profile-details,
+html[data-theme="dark"] .profile-page .public-profile-card { border-color: var(--border-soft); }
+html[data-theme="dark"] .profile-page .social-preview > p button { color: var(--teal-700); }
+
+/* Dashboard's compact profile link had a translucent ivory fill and inherited
+   low-contrast light-theme colors in dark appearance. */
+html[data-theme="dark"] .dash-profile-chip {
+  border-color: var(--border-soft);
+  background: linear-gradient(135deg, #194440, #11302d);
+  color: var(--text-body);
+  box-shadow: var(--shadow-resting);
+}
+html[data-theme="dark"] .dash-profile-chip:hover,
+html[data-theme="dark"] .dash-profile-chip:focus-visible {
+  border-color: rgba(116, 245, 232, 0.58);
+  background: linear-gradient(135deg, #20544f, #153d39);
+  color: var(--text-heading);
+  box-shadow: var(--glow-hover);
+}
+html[data-theme="dark"] .dash-profile-chip > span:first-child,
+html[data-theme="dark"] .dash-profile-chip img {
+  border: 1px solid rgba(116, 245, 232, 0.38);
+  background: #20534e;
+  color: #d8fffb;
+}
+html[data-theme="dark"] .dash-profile-chip strong { color: var(--text-heading); }
+html[data-theme="dark"] .dash-profile-chip small { color: #9ffaf1; }
+
+html[data-theme="dark"] .portal-tool-card:hover,
+html[data-theme="dark"] .person-card:hover,
+html[data-theme="dark"] .harbour-card.is-glass:hover,
+html[data-theme="dark"] .harbour-card.is-clay:hover,
+html[data-theme="dark"] .portal-event:hover,
+html[data-theme="dark"] .event-card:hover,
+html[data-theme="dark"] .metric-grid > a:hover {
+  border-color: rgba(116, 245, 232, 0.58);
+  box-shadow: inset 0 1px 0 rgba(235, 255, 253, 0.18), var(--glow-hover);
+}
+html[data-theme="dark"] .nav-panel-footer .button.secondary { color: var(--text-body); }
+html[data-theme="dark"] .expander summary { border-color: var(--border); background: #11312e; color: var(--text-body); }
+html[data-theme="dark"] .expander summary:hover { border-color: var(--teal-700); color: #eafffd; box-shadow: 0 0 16px rgba(65, 240, 222, 0.16); }
+html[data-theme="dark"] .support-line { border: 1px solid var(--border-soft); background: #143935; color: var(--text-body); }
+html[data-theme="dark"] .support-line a { color: var(--teal-700); }
+html[data-theme="dark"] .support-line > strong { color: var(--text-body); }
+html[data-theme="dark"] .figma-progress-copy strong,
+html[data-theme="dark"] .metric-grid strong,
+html[data-theme="dark"] .drill-score strong,
+html[data-theme="dark"] .impact-card strong { color: var(--text-heading); }
+html[data-theme="dark"] .impact-panel > .panel-note,
+html[data-theme="dark"] .impact-panel > p { color: var(--text-body); }
+
+/* Translation speech controls inherited a pale light-theme fill, which made
+   their label disappear against a dark phrase card. */
+html[data-theme="dark"] .translate-speak,
+html[data-theme="dark"] .speech-button {
+  border: 1px solid rgba(116, 245, 232, 0.48);
+  background: linear-gradient(135deg, #1a504b, #133b37);
+  color: #eafffd;
+  box-shadow: inset 0 1px 0 rgba(235, 255, 253, 0.12);
+}
+html[data-theme="dark"] .translate-speak svg,
+html[data-theme="dark"] .speech-button svg { color: #8bfaef; }
+html[data-theme="dark"] .translate-speak:hover,
+html[data-theme="dark"] .translate-speak.is-speaking,
+html[data-theme="dark"] .speech-button:hover,
+html[data-theme="dark"] .speech-button.is-speaking {
+  border-color: #8bfaef;
+  background: linear-gradient(135deg, #216962, #19524c);
+  color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(116, 245, 232, 0.16), 0 0 18px rgba(65, 240, 222, 0.2);
+}
+
+/* Calm mode is user-controlled and also complements the OS reduced-motion setting. */
+html[data-calm="true"] *,
+html[data-calm="true"] *::before,
+html[data-calm="true"] *::after {
+  scroll-behavior: auto !important;
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+html[data-calm="true"] .blob-bg,
+html[data-calm="true"] .scene-grain,
+html[data-calm="true"] .voice-wave { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-calm="false"]) *,
+  html:not([data-calm="false"]) *::before,
+  html:not([data-calm="false"]) *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  html[data-theme="dark"],
+  html[data-theme="dark"] body { color-scheme: light; background: #fff; color: #111; }
+}

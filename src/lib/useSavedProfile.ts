@@ -1,18 +1,36 @@
+import { useEffect, useState } from 'react';
+import { readLegacyProfile, type LegacyProfile } from './profile-store';
+
 /**
  * The saved profile, as the landing page needs it.
  *
- * Brick 6 adds the real store (spec §10: `harbour:v1:profiles`, validated with
- * zod, read inside a try/catch). Until then there is genuinely nothing to read,
- * so this returns `null` and the landing shows the new-visitor call to action.
+ * Brick 3 returned a hard `null`. It now reads the real store — the same
+ * legacy key the ported app lane reads — and re-reads it whenever anything on
+ * the page changes it (`harbour-profile-change`) or another tab does
+ * (`storage`). That means the landing page's call to action flips from
+ * "Get started" to "Continue as {name}" the moment signup finishes, without a
+ * reload.
  *
- * It is a hook rather than a constant so that the one place the CTA block reads
- * from is already in the right shape, and so `/dev/components` can render both
- * states without a store to fake.
+ * It stays a hook so that both the landing page and `/dev/components` can read
+ * the same shape, and so a component that only wants the nickname does not have
+ * to know about the storage layout.
  */
-export type SavedProfile = {
-  nickname: string;
-};
+export type SavedProfile = LegacyProfile;
 
 export function useSavedProfile(): SavedProfile | null {
-  return null;
+  const [profile, setProfile] = useState<SavedProfile | null>(() =>
+    readLegacyProfile(),
+  );
+
+  useEffect(() => {
+    const sync = (): void => setProfile(readLegacyProfile());
+    window.addEventListener('harbour-profile-change', sync);
+    window.addEventListener('storage', sync);
+    return () => {
+      window.removeEventListener('harbour-profile-change', sync);
+      window.removeEventListener('storage', sync);
+    };
+  }, []);
+
+  return profile;
 }

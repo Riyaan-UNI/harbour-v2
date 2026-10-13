@@ -1,11 +1,17 @@
 # Dependencies
 node_modules/
+server/node_modules/
 
 # Build output
 dist/
 dist-ssr/
 *.local
 .vite/
+
+# The legacy Express lane's env file holds API keys.
+server/.env
+server/.env.*
+!server/.env.example
 
 # Playwright
 /test-results/
@@ -17,6 +23,10 @@ dist-ssr/
 
 # Screenshots captured by the e2e matrix
 /screenshots/
+
+# The old build is a working reference, not part of this repo.
+# It carries its own .git, so it must never be staged as a submodule.
+/Harbour-oldbuild/
 
 # Logs
 npm-debug.log*

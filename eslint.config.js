@@ -11,12 +11,18 @@ export default tseslint.config(
     ignores: [
       'dist/**',
       'node_modules/**',
+      'server/**',
       'playwright-report/**',
       'test-results/**',
       // The old build is read-only reference material, not our source: it is
       // plain JSX that predates this repo's rules, and the gate would fail on
       // 2,550 pre-existing findings instead of on anything we wrote.
       'Harbour-oldbuild/**',
+      // The ported legacy lane. Same reasoning: it is working JSX carried over
+      // from the old build, and the harbour/* rules and the TS-strict rules are
+      // for new code only. The `files` blocks below already scope to
+      // `src/**/*.{ts,tsx}`, so this entry is what keeps the vendored JSX out.
+      'src/legacy/**',
     ],
   },
 

@@ -1,0 +1,266 @@
+/* =========================================================================
+   Harbour design tokens
+   Personality: calm harbour at dusk.
+   Deep teal surfaces · warm gold lantern accents · ivory paper cards ·
+   pale-blue water highlights.
+   This file is the single source of truth for colour, type, space, radius,
+   shadow, motion and z-index. Every other stylesheet consumes these.
+   ========================================================================= */
+
+:root {
+  /* ---- Core palette (do not change these four) ------------------------- */
+  --teal-900: #0b3935;
+  --gold-400: #f1c96f;
+  --ivory-50: #f7f3e9;
+  --blue-200: #b9dfe1;
+
+  /* ---- Teal tints & shades -------------------------------------------- */
+  --teal-950: #062a27;
+  --teal-850: #093330;
+  --teal-800: #124a45;
+  --teal-700: #1a5c56;
+  --teal-600: #24706a;
+  --teal-500: #2f867f;
+  --teal-400: #5aa69f;
+  --teal-300: #8cc3bd;
+  --teal-200: #bfe0db;
+  --teal-100: #dfefec;
+  --teal-50: #f0f7f5;
+
+  /* ---- Gold tints & shades -------------------------------------------- */
+  --gold-700: #846319;   /* UI-009: was #8f6d1f, which is 4.33:1 on ivory-50 */
+  --gold-600: #b9902f;
+  --gold-500: #d9ae4c;
+  --gold-300: #f6dc9c;
+  --gold-200: #faedc9;
+  --gold-100: #fdf7e6;
+
+  /* ---- Ink that always sits on a dark panel -----------------------------
+     The landing's dark panels (.closing, .feature-translate) and its
+     "light" tag pills stay dark in BOTH themes, so their copy must not
+     follow --ivory-50, which the dark theme flips to near-black.
+     These two are deliberately NOT redefined in accessibility-theme.css. */
+  /* Display tracking. The landing hero used -0.07em at 102px, which reads as
+     cramped; -0.035em keeps the serif tight without closing the letters up. */
+  --ls-display: -0.035em;
+
+  --on-dark-surface: #f7f3e9;
+  --on-dark-surface-muted: rgba(247, 243, 233, 0.8);
+
+  /* ---- Ivory / paper --------------------------------------------------- */
+  --ivory-100: #f2ecdd;
+  --ivory-200: #e9e0cb;
+  --ivory-300: #ded2b6;
+  --paper: #fffdf7;
+
+  /* ---- Water blue ------------------------------------------------------ */
+  --blue-700: #2f6f76;
+  --blue-600: #3e7f86;
+  --blue-500: #6ba9b0;
+  --blue-400: #8ccbd0;
+  --blue-300: #a5d5d9;
+  --blue-100: #d9eef0;
+  --blue-50: #eef7f8;
+
+  /* ---- Semantic (desaturated to sit beside the palette) ---------------- */
+  --success: #3e7d5f;
+  --success-tint: #dfeee5;
+  --warning: #a9761f;
+  --warning-tint: #f8edd4;
+  --danger: #ab4f45;
+  --danger-tint: #f6e3df;
+  --info: var(--blue-600);
+  --info-tint: var(--blue-100);
+
+  /* ---- Semantic aliases ------------------------------------------------ */
+  --surface-page: var(--ivory-50);
+  --surface-card: var(--paper);
+  --surface-sunken: var(--ivory-100);
+  --surface-info: var(--blue-100);
+  --surface-accent: var(--gold-400);
+  --surface-brand: var(--teal-900);
+  --surface-brand-soft: var(--teal-50);
+
+  --text-strong: #0a2f2b;
+  --text-body: #1d4a44;
+  --text-muted: #5b726b;
+  --text-inverse: #f7f3e9;
+  --text-on-gold: var(--teal-900);
+  --text-on-brand: var(--ivory-50);
+
+  /* UI-028: --border was 0.18, which is only 1.4:1 on a white card - the edge
+     stopped reading. 0.30 gives 1.8:1, still a hairline but clearly perceptible.
+     The light theme also separates cards with --shadow-*, which dark mode cannot. */
+  --border-strong: rgba(11, 57, 53, 0.50);
+  --border: rgba(11, 57, 53, 0.30);
+  --border-soft: rgba(11, 57, 53, 0.16);
+  --border-inverse: rgba(247, 243, 233, 0.28);
+
+  /* ---- Type ------------------------------------------------------------ */
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body: "DM Sans", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+
+  --fs-12: 0.75rem;
+  --fs-14: 0.875rem;
+  --fs-16: 1rem;
+  --fs-18: 1.125rem;
+  --fs-24: 1.5rem;
+  --fs-32: 2rem;
+  --fs-48: 3rem;
+
+  --lh-tight: 1.15;
+  --lh-snug: 1.35;
+  --lh-body: 1.6;
+  --lh-loose: 1.75;
+
+  --measure: 68ch;
+  --measure-narrow: 54ch;
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* ---- Space (4px base) ------------------------------------------------ */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+
+  /* ---- Radius ---------------------------------------------------------- */
+  --radius-card: 16px;
+  --radius-control: 12px;
+  --radius-pill: 999px;
+  --radius-sm: 8px;
+
+  /* ---- Elevation (two tiers) ------------------------------------------ */
+  --shadow-resting: 0 1px 2px rgba(6, 42, 39, 0.05), 0 6px 18px rgba(6, 42, 39, 0.06);
+  --shadow-raised: 0 2px 4px rgba(6, 42, 39, 0.07), 0 18px 40px rgba(6, 42, 39, 0.14);
+
+  /* ---- Motion ---------------------------------------------------------- */
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur-micro: 150ms;
+  --dur-state: 250ms;
+  --dur-page: 400ms;
+
+  /* ---- z-index scale --------------------------------------------------- */
+  --z-base: 10;
+  --z-sticky: 20;
+  --z-overlay: 30;
+  --z-modal: 50;
+
+  /* ---- Layout ---------------------------------------------------------- */
+  --topnav-h: 72px;
+  --tabs-h: 64px;
+  --shell-max: 1180px;
+
+  /* Legacy bridge: older stylesheets reference these names. */
+  --ink: var(--text-body);
+  --ink-strong: var(--text-strong);
+  --muted: var(--text-muted);
+  --forest: var(--teal-900);
+  --forest-dark: var(--teal-950);
+  --paper-legacy: var(--ivory-50);
+  --white: var(--paper);
+  --line: var(--border);
+  --gold: var(--gold-400);
+  --blue: var(--blue-200);
+  --mint: var(--teal-200);
+  --sage: var(--teal-200);
+  /* UI-016: one accent. Terracotta, not salmon and not gold - gold stays
+     reserved for actions, terracotta carries warmth and decoration.
+     --coral is a surface/graphic colour; --coral-ink is its text pair. */
+  --coral: #db765c;
+  --coral-ink: #a4553c;
+
+  /* ===================================================================
+     HARBOUR v2 — living harbour world tokens
+     Concept: LAND · SEA · SHIP · HARBOUR
+     Four visual zones, each with its own surface and accent family,
+     all rooted in the existing teal/gold/ivory palette.
+     =================================================================== */
+
+  /* ---- Zone: LAND (earth, terrain, grounded) --------------------------- */
+  --land-900: #1a2e1a;
+  --land-700: #2d4a2d;
+  --land-500: #4a6b4a;
+  --land-300: #8fb08f;
+  --land-100: #d4e5d4;
+  --land-surface: var(--land-100);
+  --land-ink: var(--land-700);
+
+  /* ---- Zone: SEA (water, depth, movement) ----------------------------- */
+  --sea-900: #0a2a30;
+  --sea-700: #14505a;
+  --sea-500: #2a7580;
+  --sea-300: #7ab5bc;
+  --sea-100: #c8e8eb;
+  --sea-surface: var(--sea-100);
+  --sea-ink: var(--sea-700);
+
+  /* ---- Zone: SHIP (vessel, warmth, lantern) ---------------------------- */
+  --ship-900: #3a1f0a;
+  --ship-700: #6b3d15;
+  --ship-500: #a8632b;
+  --ship-300: #d4a574;
+  --ship-100: #f4e8d4;
+  --ship-surface: var(--ship-100);
+  --ship-ink: var(--ship-700);
+
+  /* ---- Zone: HARBOUR (structure, commerce, arrival) -------------------- */
+  --harbour-900: #2a1f15;
+  --harbour-700: #4a3a28;
+  --harbour-500: #6b5538;
+  --harbour-300: #a89878;
+  --harbour-100: #e8dfcc;
+  --harbour-surface: var(--harbour-100);
+  --harbour-ink: var(--harbour-700);
+
+  /* ---- v2 Fluid type scale (clamp-based) -------------------------------- */
+  --fs-fluid-xs: clamp(0.75rem, 0.72rem + 0.15vw, 0.82rem);
+  --fs-fluid-sm: clamp(0.875rem, 0.84rem + 0.18vw, 0.98rem);
+  --fs-fluid-base: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  --fs-fluid-lg: clamp(1.25rem, 1.2rem + 0.25vw, 1.5rem);
+  --fs-fluid-xl: clamp(1.75rem, 1.6rem + 0.75vw, 2.5rem);
+  --fs-fluid-2xl: clamp(2.5rem, 2.2rem + 1.5vw, 4rem);
+  --fs-fluid-3xl: clamp(3.5rem, 3rem + 2.5vw, 6rem);
+
+  /* ---- v2 Motion easings ----------------------------------------------- */
+  --ease-ripple: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --ease-wave: cubic-bezier(0.45, 0.05, 0.25, 1);
+  --ease-ship: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-harbour: cubic-bezier(0.4, 0.0, 0.2, 1);
+
+  --dur-ripple: 1200ms;
+  --dur-wave: 800ms;
+  --dur-ship: 600ms;
+  --dur-tilt: 400ms;
+  --dur-reveal: 600ms;
+
+  /* ---- v2 Glass / glassmorphism (used sparingly) ---------------------- */
+  --glass-bg: rgba(255, 253, 247, 0.72);
+  --glass-border: rgba(11, 57, 53, 0.12);
+  --glass-blur: 16px;
+  --glass-shadow: 0 8px 32px rgba(6, 42, 39, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+
+  /* ---- v3 Grain / noise overlay ---------------------------------------- */
+  --grain-opacity: 0.035;
+  --grain-size: 180px;
+
+  /* ---- v2 Bento grid --------------------------------------------------- */
+  --bento-gap: var(--sp-4);
+  --bento-radius: var(--radius-card);
+
+  /* ---- v2 Tilt / 3D card ----------------------------------------------- */
+  --tilt-max: 8deg;
+  --tilt-perspective: 800px;
+  --tilt-scale: 1.02;
+
+  /* ---- v2 Scroll storytelling ------------------------------------------ */
+  --scroll-reveal-threshold: 0.12;
+  --scroll-reveal-root-margin: 0px 0px -5% 0px;
+}

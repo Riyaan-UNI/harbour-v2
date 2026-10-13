@@ -1,0 +1,6 @@
+[
+  { "id": "emergency", "name": "Emergency services", "phone": "999", "category": "Emergency" },
+  { "id": "antiscam", "name": "Police Anti-Scam Helpline", "phone": "18222", "category": "Scam support" },
+  { "id": "immigration", "name": "Immigration Department", "phone": "2824 6111", "category": "Immigration" },
+  { "id": "care", "name": "Hospital Authority 24-hour enquiry", "phone": "2300 6555", "category": "Health" }
+]

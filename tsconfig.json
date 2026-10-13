@@ -12,7 +12,14 @@
     /* shadcn/ui is written against the `@/` alias, so the alias exists even
        though this project's own imports stay relative. */
     "baseUrl": ".",
-    "paths": { "@/*": ["src/*"] },
+    "paths": {
+      "@/*": ["src/*"],
+      /* The ported legacy lane. `@legacy/*` resolves to the real file for
+         Vite, and to the ambient declarations in `src/legacy.d.ts` for tsc —
+         which is what lets a `.tsx` file import a legacy `.jsx` without the
+         strict project trying to type-check it. */
+      "@legacy/*": ["src/legacy/*"]
+    },
 
     "strict": true,
     "noUnusedLocals": true,
@@ -29,7 +36,15 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "noEmit": true
+    "noEmit": true,
+
+    /* The legacy lane (`src/legacy/**`) is plain JSX ported from the old build
+       and is deliberately excluded from `include` below. TypeScript never sees
+       it, so its JSX compiles through Vite only, and the strict rules above
+       apply to new code and nothing else. `allowJs` is off for the same
+       reason: turning it on would pull those files back in through imports. */
+    "allowJs": false
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/legacy"]
 }

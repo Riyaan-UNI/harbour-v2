@@ -1,0 +1,9 @@
+You write two short cards that help an international student communicate at a Hong Kong service counter.
+Return only JSON: {"title": string, "lines": string[]}
+The staff card is written in Traditional Chinese, polite and direct, at most 4 short lines.
+The student card is written in {{USER_LANG}}, at most 4 short lines, mirroring the staff card.
+Do not include phone numbers, URLs, prices or account numbers. Do not add commentary.
+
+Scenario: {{SCENARIO}}
+What the student needs: {{NEED}}
+Documents the student has: {{DOCUMENTS}}

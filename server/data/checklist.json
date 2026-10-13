@@ -1,0 +1,7 @@
+[
+  { "id": "arrival", "title": "Settle in and stay connected", "week": "Before arrival", "countries": [], "steps": ["Save your university's emergency contact details.", "Keep digital and paper copies of your travel documents.", "Arrange a local SIM or eSIM for arrival."] },
+  { "id": "identity", "title": "Register and protect your identity", "week": "Week 1", "countries": [], "steps": ["Check your visa conditions and note any reporting deadlines.", "Ask your university about student registration and campus ID.", "Store important documents somewhere secure."] },
+  { "id": "banking", "title": "Set up everyday essentials", "week": "Week 1–2", "countries": [], "steps": ["Ask your bank about account requirements for students.", "Set up a secure way to receive one-time passcodes.", "Learn how to report a lost bank card."] },
+  { "id": "health", "title": "Know how to get care", "week": "Week 2", "countries": [], "steps": ["Find your campus clinic and nearby public hospital.", "Check your insurance and emergency care coverage.", "Save local emergency number 999."] },
+  { "id": "mainland", "title": "Plan cross-border essentials", "week": "Week 2", "countries": ["CN"], "steps": ["Check travel and entry requirements before each trip.", "Confirm your phone can receive important messages while abroad.", "Keep contact details for your consulate and university support team."] }
+]

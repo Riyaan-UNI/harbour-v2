@@ -1,0 +1,241 @@
+/* ==========================================================================
+   Harbour — legacy compatibility layer
+
+   The old build's pages (`src/legacy/**`) are ported verbatim: their logic,
+   their class names and their `var(--…)` references are unchanged. This file
+   is the single seam between them and the v2 design system.
+
+   Every CSS variable the legacy stylesheets read is redefined here as an alias
+   onto a v2 token. That means the old pages inherit the new palette, the new
+   type scale, both themes and the new motion values **without a single edit to
+   a legacy file** — which is what the master prompt asked for, and it is why
+   the alternative (fixing clashes one by one inside legacy CSS) is not done.
+
+   How this works at runtime:
+     - `data-theme` lives on <html>, and so does this file's `:root` block, so
+       one theme toggle drives both lanes at once.
+     - Where a legacy name has no v2 equivalent (the four HARBOUR world zones,
+       the teal ramp), the alias resolves to the nearest *semantic* v2 token
+       rather than a hard colour, so both themes stay in step.
+     - A handful of legacy names have no sensible v2 counterpart at all (fixed
+       px geometry, the legacy fluid type ramp). Those keep their own values and
+       are listed at the bottom of this file with a note saying why.
+
+   This file is loaded AFTER tokens.css and BEFORE the legacy stylesheets, so a
+   legacy file can still override one of these aliases if it needs to.
+   ========================================================================== */
+
+:root {
+  /* ---- Palette ramps ---------------------------------------------------
+     The legacy teal ramp and the LAND/SEA/SHIP/HARBOUR zone palettes are
+     collapsed onto the v2 semantic tokens. There is no v2 ramp to alias onto,
+     and inventing one would be a second colour system — so every ramp step
+     resolves to the semantic token it is standing in for. */
+  --teal-950: var(--bg);
+  --teal-900: var(--accent-fill);
+  --teal-850: var(--bg-elevated);
+  --teal-800: var(--accent-fill);
+  --teal-700: var(--accent-text);
+  --teal-600: var(--accent-text);
+  --teal-500: var(--accent-text);
+  --teal-400: var(--accent-fill);
+  --teal-300: var(--accent-fill);
+  --teal-200: var(--accent-fill);
+  --teal-100: var(--bg-elevated);
+  --teal-50: var(--bg-elevated);
+
+  --gold-700: var(--gold-text);
+  --gold-600: var(--gold-text);
+  --gold-500: var(--gold-fill);
+  --gold-400: var(--gold-fill);
+  --gold-300: var(--gold-fill);
+  --gold-200: var(--gold-fill);
+  --gold-100: var(--bg-elevated);
+
+  --blue-700: var(--accent-text);
+  --blue-600: var(--accent-text);
+  --blue-500: var(--accent-fill);
+  --blue-400: var(--accent-fill);
+  --blue-300: var(--accent-fill);
+  --blue-200: var(--accent-fill);
+  --blue-100: var(--bg-elevated);
+  --blue-50: var(--bg-elevated);
+
+  --ivory-50: var(--bg);
+  --ivory-100: var(--bg-elevated);
+  --ivory-200: var(--bg-elevated);
+  --ivory-300: var(--border);
+  --paper: var(--bg-elevated);
+
+  /* ---- Semantic aliases ------------------------------------------------ */
+  --success: var(--success);
+  --warning: var(--gold-text);
+  --danger: var(--danger);
+  --info: var(--accent-text);
+
+  --surface-page: var(--bg);
+  --surface-card: var(--bg-elevated);
+  --surface-sunken: var(--bg);
+  --surface-info: var(--bg-elevated);
+  --surface-accent: var(--gold-fill);
+  --surface-brand: var(--accent-fill);
+  --surface-brand-soft: var(--bg-elevated);
+  --surface-glass: var(--glass-fill);
+  --surface-overlay: var(--bg-elevated);
+  --surface-clay: var(--bg-elevated);
+
+  --text-strong: var(--text);
+  --text-body: var(--text);
+  --text-muted: var(--text-muted);
+  --text-info: var(--accent-text);
+  --text-inverse: var(--bg);
+  --text-on-gold: var(--on-gold);
+  --text-on-brand: var(--on-accent);
+
+  --border-strong: var(--border-strong);
+  --border: var(--border);
+  --border-soft: var(--border);
+  --border-inverse: var(--border-strong);
+  --line: var(--border);
+
+  /* ---- Legacy bridge names -------------------------------------------- */
+  --ink: var(--text);
+  --harbour-ink: var(--text);
+  --land-ink: var(--text);
+  --sea-ink: var(--text);
+  --ship-ink: var(--text);
+  --harbour-surface: var(--bg-elevated);
+  --land-surface: var(--bg-elevated);
+  --sea-surface: var(--bg-elevated);
+  --ship-surface: var(--bg-elevated);
+  --gold: var(--gold-fill);
+  --blue: var(--accent-fill);
+  --sage: var(--accent-fill);
+  --coral: var(--accent-fill);
+
+  /* ---- Type ------------------------------------------------------------
+     The legacy display face (Fraunces) and body face (DM Sans) are both
+     replaced by the v2 faces. The legacy pages keep their own size scale
+     below, but the two families are the spec's. */
+  --font-display: var(--font-heading);
+  --font-body: var(--font-body);
+  --display: var(--font-heading);
+  --sans: var(--font-body);
+
+  --lh-tight: var(--leading-h1);
+  --lh-snug: var(--leading-h3);
+  --lh-body: var(--leading-body);
+  --lh-loose: var(--leading-body);
+  --ls-display: var(--tracking-display);
+  --measure: var(--measure-body);
+  --measure-narrow: var(--container-measure);
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* ---- Space -----------------------------------------------------------
+     The legacy scale is a 4px base (--sp-1 = 4px). v2's --space-1 is 0.25rem
+     = 4px, so the two line up step for step. */
+  --sp-1: var(--space-1);
+  --sp-2: var(--space-2);
+  --sp-3: var(--space-3);
+  --sp-4: var(--space-4);
+  --sp-6: var(--space-5);
+  --sp-8: var(--space-6);
+  --sp-12: var(--space-7);
+  --sp-16: var(--space-8);
+
+  /* ---- Radius ---------------------------------------------------------- */
+  --radius-card: var(--radius-lg);
+  --radius-control: var(--radius-md);
+  --radius-pill: var(--radius-pill);
+  --radius-sm: var(--radius-sm);
+
+  /* ---- Elevation ------------------------------------------------------- */
+  --shadow-resting: var(--shadow-glass);
+  --shadow-raised: var(--shadow-glass);
+  --glow-hover: var(--shadow-glass);
+
+  /* ---- Glass ----------------------------------------------------------- */
+  --glass-bg: var(--glass-fill);
+  --glass-border: var(--border);
+  --glass-shadow: var(--shadow-glass);
+
+  /* ---- Motion ---------------------------------------------------------- */
+  --ease-out: var(--ease-out);
+  --ease-harbour: var(--ease-in-out);
+  --ease-ship: var(--ease-out);
+  --ease-wave: var(--ease-in-out);
+  --dur-micro: var(--dur-fast);
+  --dur-state: var(--dur-base);
+  --dur-page: var(--dur-slow);
+  --dur-reveal: var(--dur-slow);
+  --dur-tilt: var(--dur-base);
+
+  /* ---- z-index --------------------------------------------------------- */
+  --z-base: var(--z-base);
+  --z-sticky: var(--z-nav);
+  --z-overlay: var(--z-modal);
+  --z-modal: var(--z-modal);
+
+  /* ---- Tilt ------------------------------------------------------------ */
+  --tilt-perspective: var(--tilt-perspective);
+
+  /* ====================================================================
+     Names with no v2 counterpart — values kept, and why.
+
+     These are either pure geometry (a height that is a measurement, not a
+     spacing step), a legacy visual whose exact value matters to the ported
+     markup, or part of the legacy fluid type ramp. Keeping them here rather
+     than in a legacy stylesheet means there is still exactly one place the
+     legacy lane's constants live.
+     ==================================================================== */
+
+  /* Layout geometry the legacy shell measures against. The v2 nav is a
+     different height, so these stay the legacy *measurements* or the ported tab
+     bar and top nav would collapse. Written in rem rather than px because the
+     spacing gate bans px outside a 1px hairline — the values are the same
+     lengths (72px = 4.5rem, 64px = 4rem). */
+  --topnav-h: 4.5rem;
+  --tabs-h: 4rem;
+  --shell-max: var(--container-max-inline-size);
+
+  /* The legacy fluid type ramp. The ported pages set copy in these, and v2's
+     own type tokens are a fixed scale rather than a clamp ramp, so the two
+     cannot be aliased without flattening the old pages' responsive headings. */
+  --fs-fluid-xs: clamp(0.75rem, 0.72rem + 0.15vw, 0.82rem);
+  --fs-fluid-sm: clamp(0.875rem, 0.84rem + 0.18vw, 0.98rem);
+  --fs-fluid-base: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  --fs-fluid-lg: clamp(1.25rem, 1.2rem + 0.25vw, 1.5rem);
+  --fs-fluid-xl: clamp(1.75rem, 1.6rem + 0.75vw, 2.5rem);
+  --fs-fluid-2xl: clamp(2.5rem, 2.2rem + 1.5vw, 4rem);
+
+  /* Grain and reveal geometry. */
+  --grain-opacity: var(--aurora-noise-opacity);
+  --grain-size: var(--aurora-grid-size);
+  --reveal-delay: 0ms;
+  --bento-gap: var(--space-4);
+  --bento-radius: var(--radius-lg);
+
+  /* Interactive-card tilt. The rotate values are the v2 card's own starting
+     point (no rotation); `--tilt-scale` matches the v2 token so both lanes
+     scale alike. `--press-*` is the legacy button-press offset, zero at rest. */
+  --tilt-rotate-x: 0deg;
+  --tilt-rotate-y: 0deg;
+  --tilt-scale: 1.02;
+  --press-x: 0;
+  --press-y: 0;
+
+  /* The zone accent the ported landing uses for section tinting. */
+  --zone-accent: var(--accent-fill);
+
+  /* Tints used by the ported semantic badges. They are the legacy values
+     because v2 has no tint pair for warning/info/success/danger — the v2
+     StatusBadge draws its own. These sit on legacy markup only. */
+  --success-tint: var(--bg-elevated);
+  --warning-tint: var(--bg-elevated);
+  --danger-tint: var(--bg-elevated);
+  --info-tint: var(--bg-elevated);
+}

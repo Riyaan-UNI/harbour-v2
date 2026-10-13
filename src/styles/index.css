@@ -1,8 +1,38 @@
 /* ==========================================================================
    Harbour — stylesheet entry
 
-   Import order matters: Tailwind first, then fonts, tokens and base. tokens.css
-   carries the @theme bridge that turns semantic variables into utilities.
+   Two lanes, one entry point.
+
+   Order, and why:
+
+   1. Tailwind, then fonts, then `tokens.css` — the v2 token layer and the
+      `@theme` bridge that turns semantic variables into utilities.
+   2. The v2 component and layout stylesheets.
+   3. `legacy-compat.css` — the seam. It redefines every variable the old
+      stylesheets read as an alias onto a v2 token. It must come **after**
+      `tokens.css` (so the tokens exist to alias) and **before** the legacy
+      sheets (so a legacy rule can still win if it needs to).
+   4. The two legacy stylesheets that carry real ported UI: `harbour-ui.css`
+      (the shell, the pages) and `features.css` (Scam Shield, Rental Shield,
+      the counter card, the drill).
+
+   **The legacy `tokens.css` is deliberately NOT imported.** Its 266 lines of
+   raw hex are the old build's second colour system; importing it after the
+   compat layer would override the aliases and put a hard-coded palette back on
+   top of v2's. Its *values* are not lost — `legacy-compat.css` maps each name
+   the old stylesheets actually read onto the v2 token it stands for.
+
+   `accessibility-theme.css` is also not imported: it redefines the same
+   variables a second time for the old build's own dark mode, which the v2
+   theme engine now owns. Its calm-mode rules are carried by `data-calm`, which
+   `CalmModeProvider` sets, and every reduced-motion rule it held is already
+   enforced globally in `base.css`.
+
+   The legacy sheets use plain class names (`.page`, `.harbour-topnav`,
+   `.voyage`) with no prefix and no cascade layer, so they sit outside
+   Tailwind's layers and win against a utility of equal specificity. That is
+   intentional — the ported pages are already styled, and v2 utilities are for
+   new markup.
    ========================================================================== */
 
 @import 'tailwindcss';
@@ -13,6 +43,9 @@
 @import './layout.css';
 @import './ui.css';
 @import './landing.css';
+@import './legacy-compat.css';
+@import '../legacy/styles/harbour-ui.css';
+@import '../legacy/styles/features.css';
 
 /* Spec §11: the dark variant is keyed to data-theme on <html>, never on a
    wrapper, so Radix and shadcn portals inherit it.

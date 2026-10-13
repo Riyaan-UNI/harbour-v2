@@ -1,0 +1,5 @@
+[
+  { "id": "parcel", "title": "Delivery fee text messages", "risk": "High", "season": "Year-round" },
+  { "id": "impersonation", "title": "Government or police impersonation", "risk": "High", "season": "Year-round" },
+  { "id": "jobs", "title": "Too-good-to-be-true part-time jobs", "risk": "Medium", "season": "Semester start" }
+]

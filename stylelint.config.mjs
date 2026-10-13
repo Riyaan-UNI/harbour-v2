@@ -57,6 +57,13 @@ const OFF_SCALE_SPACING = new RegExp(
 export default {
   extends: ['stylelint-config-standard'],
 
+  /* The legacy lane's three stylesheets are copied verbatim from the old build
+     and are deliberately not held to this repo's rules — they carry px values,
+     raw colours and a namespacing convention that predate the spec. Stylelint's
+     CLI call in package.json globs `src/**\/*.css`, so this ignorePatterns
+     entry is what keeps them out of the gate. New CSS never lives here. */
+  ignoreFiles: ['src/legacy/**/*.css'],
+
   rules: {
     /* --- Builder rule 1: tokens only ---------------------------------- */
     'color-no-hex': true,

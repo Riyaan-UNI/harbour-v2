@@ -2,17 +2,28 @@ import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Stack, Text } from './components/layout';
 import { Toaster } from './components/ui';
+import { ProfileProvider } from '@legacy/context/ProfileContext.jsx';
+import { GuardedApp } from './components/app/AppGuard';
+import { LoginRoute, SignupRoute } from './routes/entry';
 import { Landing } from './routes/Landing';
 
 /**
  * Routing.
  *
- * Brick 0 to 2a had no product routes — the landing page, signup and app shell
- * all arrive in later bricks, so the only real routes were the dev pages.
- * Brick 3 adds `/`, and the dev pages load on demand.
+ * Three lanes, in one table:
+ *
+ *   - `/` plus the dev pages — the v2 lane.
+ *   - `/login` and `/signup` — the entry lane. P1 renders the ported legacy
+ *     pages inside the legacy entry shell; P2 replaces the bodies.
+ *   - `/app/*` — the ported legacy app, behind `AppGuard`, which sends an
+ *     unauthenticated visit to `/login`.
  *
  * Spec §12: dev pages sit behind a dev flag. They are on under `vite dev` and
  * can be forced on in a build with VITE_ENABLE_GALLERY.
+ *
+ * `ProfileProvider` wraps everything rather than only the app lane, because
+ * `/login` and `/signup` read the same profile the app does — one store, one
+ * context, so "signed in" cannot mean two different things on two routes.
  */
 const devPagesEnabled =
   import.meta.env.DEV || Boolean(import.meta.env.VITE_ENABLE_GALLERY);
@@ -65,9 +76,21 @@ function RouteFallback(): JSX.Element {
 
 export function App(): JSX.Element {
   return (
-    <>
+    <ProfileProvider>
       <Routes>
         <Route path="/" element={<Landing />} />
+
+        {/* The entry lane. Both routes own their full-viewport shell. */}
+        <Route path="/login" element={<LoginRoute />} />
+        <Route path="/signup" element={<SignupRoute />} />
+        {/* The old build called it `/onboarding`; the link lives on in case a
+            bookmark or an old internal link still points at it. */}
+        <Route path="/onboarding" element={<Navigate to="/signup" replace />} />
+
+        {/* The ported app, guarded. One route covering `/app` and everything
+            under it, so the shell mounts once and its own route table handles
+            the sub-paths. */}
+        <Route path="/app/*" element={<GuardedApp />} />
 
         {devPagesEnabled ? (
           <>
@@ -106,15 +129,14 @@ export function App(): JSX.Element {
           </>
         ) : null}
 
-        {/* Signup, login and the app shell arrive in Bricks 5 to 9. Until then
-            an unknown path goes back to the landing page rather than to a dead
-            end. The dev routes above still win, because they are declared first
-            and match exactly. */}
+        {/* An unknown path goes back to the landing page rather than to a dead
+            end. The routes above still win, because they are declared first and
+            match exactly. */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
       {/* One Toaster for the whole app, so a toast never has two homes. */}
       <Toaster />
-    </>
+    </ProfileProvider>
   );
 }
