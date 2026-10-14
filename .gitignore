@@ -7,8 +7,15 @@ dist/
 dist-ssr/
 *.local
 .vite/
+*.tsbuildinfo
+coverage/
+.eslintcache
+.stylelintcache
 
-# The legacy Express lane's env file holds API keys.
+# Secrets. The legacy Express lane's env file holds API keys.
+.env
+.env.*
+!.env.example
 server/.env
 server/.env.*
 !server/.env.example
@@ -28,16 +35,43 @@ server/.env.*
 # It carries its own .git, so it must never be staged as a submodule.
 /Harbour-oldbuild/
 
+# AI-assistant scratch (WorkBuddy and friends).
+# Keep the shared skill and the project memory summary; drop everything else
+# (probe scripts, screenshots, daily logs, logo candidates).
+/.workbuddy-ai/*
+!/.workbuddy-ai/skills/
+!/.workbuddy-ai/memory/
+/.workbuddy-ai/memory/*
+!/.workbuddy-ai/memory/MEMORY.md
+/.claude/
+/.codebuddy/
+/.cursor/
+
+# Reference material nobody needs to run the app (about 70 MB of mood-board
+# videos and images).
+/inspiration/
+
+# One-off previews, prototypes, audits and vendored copies of three.js.
+# The real three.js comes from node_modules.
+/outputs/
+
+# Concept art renders (heavy PNGs). The generator scripts and SVG sources stay.
+/art/*.png
+
+# Throwaway root-level probes and test output
+/_*.mjs
+/e2e-*.txt
+
 # Logs
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 pnpm-debug.log*
 *.log
 
 # Editor / OS
 .DS_Store
 Thumbs.db
+desktop.ini
 .idea/
 .vscode/*
 !.vscode/extensions.json
