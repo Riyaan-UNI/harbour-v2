@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:svg="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="The Hong Kong Polytechnic University">
+<title>The Hong Kong Polytechnic University</title>
+<defs>
+<linearGradient id="ua-field" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#8F1329" stop-opacity=".30"/>
+<stop offset=".52" stop-color="#ffffff" stop-opacity=".90"/>
+<stop offset="1" stop-color="#D9A441" stop-opacity=".30"/>
+</linearGradient>
+<!-- A ring-shaped bloom, not a disc: the colour peaks *around* the mark so it
+     never tints the mark itself. Institutions whose own colour matches their
+     accent (Lingnan's red, CityU's maroon) were washing out under a solid glow. -->
+<radialGradient id="ua-halo" cx="50%" cy="50%" r="50%">
+<stop offset="0" stop-color="#8F1329" stop-opacity="0"/>
+<stop offset=".34" stop-color="#8F1329" stop-opacity=".12"/>
+<stop offset=".68" stop-color="#8F1329" stop-opacity=".46"/>
+<stop offset="1" stop-color="#D9A441" stop-opacity="0"/>
+</radialGradient>
+<!-- A near-white bed under the mark, so the mark reads the same on every
+     accent. Fades out at its own edge and stops short of the inner ring. -->
+<radialGradient id="ua-bed" cx="50%" cy="50%" r="50%">
+<stop offset="0" stop-color="#ffffff" stop-opacity=".97"/>
+<stop offset=".62" stop-color="#ffffff" stop-opacity=".86"/>
+<stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+</radialGradient>
+<linearGradient id="ua-ring" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#8F1329" stop-opacity=".95"/>
+<stop offset="1" stop-color="#D9A441" stop-opacity=".7"/>
+</linearGradient>
+</defs>
+<style>
+@keyframes ua-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes ua-spin-rev{from{transform:rotate(360deg)}to{transform:rotate(0deg)}}
+@keyframes ua-breathe{0%,100%{opacity:.5;transform:scale(.94)}50%{opacity:1;transform:scale(1.07)}}
+@keyframes ua-blink{0%,100%{opacity:.2}50%{opacity:.85}}
+.ua-spin,.ua-spin-rev,.ua-breathe,.ua-blink{transform-box:view-box;transform-origin:100px 100px}
+.ua-spin{animation:ua-spin 19s linear infinite}
+.ua-spin-rev{animation:ua-spin-rev 29s linear infinite}
+.ua-breathe{animation:ua-breathe 7s ease-in-out infinite}
+.ua-blink{animation:ua-blink 5s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.ua-spin,.ua-spin-rev,.ua-breathe,.ua-blink{animation:none}}
+</style>
+<rect width="200" height="200" fill="url(#ua-field)"/>
+<circle class="ua-breathe" cx="100" cy="100" r="88" fill="url(#ua-halo)"/>
+<g fill="none" stroke="url(#ua-ring)">
+<circle cx="100" cy="100" r="90" stroke-opacity=".30" stroke-width="1"/>
+<ellipse cx="100" cy="100" rx="90" ry="34" stroke-opacity=".62" stroke-width="1.3" transform="rotate(-19 100 100)"/>
+<ellipse cx="100" cy="100" rx="90" ry="34" stroke-opacity=".42" stroke-width="1.3" transform="rotate(41 100 100)"/>
+<circle cx="100" cy="100" r="68" stroke-opacity=".26" stroke-width="1"/>
+</g>
+<circle cx="100" cy="100" r="60" fill="url(#ua-bed)"/>
+<g class="ua-spin">
+<circle cx="190" cy="100" r="3.6" fill="#8F1329"/>
+<circle cx="10" cy="100" r="2.2" fill="#D9A441" opacity=".85"/>
+</g>
+<g class="ua-spin-rev">
+<circle cx="100" cy="10" r="2.8" fill="#D9A441"/>
+<circle cx="100" cy="190" r="1.9" fill="#8F1329" opacity=".75"/>
+</g>
+<g class="ua-blink"><circle cx="100" cy="100" r="96" fill="none" stroke="#8F1329" stroke-opacity=".4" stroke-width="1"/></g>
+<g transform="translate(40 40) scale(0.615)"><title>Hong Kong Polytechnic University logo</title><path fill="#8F1329" d="m24.6 60.3c7.5-1.5 15.3-0.9 22.5 2l40.3-40.3c5.6-5.6 14.9-5.4 20.5 0.2 5.6 5.6 5.6 15 0 20.6l-10.3 10.4-15.6-15.5-12.2 12.2 43.4 43.5 12.3-12.3-15.5-15.5 10.2-10.2 0.1-0.1c12.5-12.5 12.5-32.8 0-45.2-12.5-12.5-32.8-12.6-45.3-0.1 0 0-50.4 50.4-50.4 50.3zm110.4-35.5c1.6 7.4 0.9 15.3-2 22.4l40.3 40.3c5.6 5.6 5.5 14.9-0.1 20.5-5.7 5.7-15 5.7-20.6 0l-10.4-10.3 15.5-15.5-12.3-12.3-43.4 43.5 12.3 12.2 15.5-15.4 10.2 10.2v0.1c12.5 12.4 32.8 12.4 45.3 0 12.5-12.6 12.6-32.9 0.1-45.4 0 0-50.4-50.4-50.4-50.3zm35.7 110.3c-7.5 1.6-15.3 0.9-22.5-2l-40.3 40.3c-5.6 5.6-14.9 5.4-20.5-0.2-5.6-5.6-5.6-15 0-20.6l10.3-10.3 15.5 15.5 12.3-12.3-43.4-43.4-12.3 12.2 15.5 15.5-10.3 10.3c-12.5 12.5-12.5 32.8 0 45.3 12.5 12.5 32.8 12.6 45.3 0.1 0 0 50.4-50.4 50.4-50.4zm-110.4 35.6c-1.6-7.5-0.9-15.3 2-22.5l-40.3-40.3c-5.6-5.6-5.4-14.9 0.2-20.5 5.6-5.6 15-5.6 20.6 0l10.3 10.4-15.5 15.5 12.3 12.3 43.4-43.5-12.2-12.3-15.5 15.5-10.3-10.2v-0.1c-12.5-12.5-32.8-12.5-45.3 0-12.5 12.5-12.6 32.8-0.1 45.3 0 0 50.4 50.4 50.4 50.4z"/></g>
+</svg>

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Cluster } from '../layout';
 import { Button } from '../ui';
+import { ArrowRight } from '../ui/icons';
 
 /**
  * The hero's call to action, in both of its states.
@@ -31,7 +32,7 @@ export function HeroCta({
     return (
       <Cluster gap={3} className={className} data-state="returning">
         <Button asChild size="large">
-          <Link to="/app">Continue as {nickname}</Link>
+          <Link to="/app">Continue as {nickname} <ArrowRight /></Link>
         </Button>
         <Button asChild variant="ghost" size="large">
           <Link to="/login">Not you? Choose a profile</Link>
@@ -43,7 +44,7 @@ export function HeroCta({
   return (
     <Cluster gap={3} className={className} data-state="new">
       <Button asChild size="large">
-        <Link to="/signup">Create your profile</Link>
+        <Link to="/signup">Create your profile <ArrowRight /></Link>
       </Button>
       <Button asChild variant="ghost" size="large">
         <a href="#how-it-works">See how it works</a>

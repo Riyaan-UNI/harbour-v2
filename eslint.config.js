@@ -14,6 +14,10 @@ export default tseslint.config(
       'server/**',
       'playwright-report/**',
       'test-results/**',
+      // The agent workspace: memory notes and scratch scripts, not Harbour
+      // source. Linting it was never intended — the `files` blocks below scope
+      // to `src/**`, `scripts/**`, `e2e/**` and config files.
+      '.workbuddy-ai/**',
       // The old build is read-only reference material, not our source: it is
       // plain JSX that predates this repo's rules, and the gate would fail on
       // 2,550 pre-existing findings instead of on anything we wrote.

@@ -101,3 +101,59 @@ dependency.
 **Related.** `/screenshots/` is ignored, so the owner-facing packs are added with
 `git add -f`. Phase-0's pack is 15 MB and is deliberately not tracked; phase-1's
 (1.6 MB) is.
+
+---
+
+## D-006 — University logos are bundled files, not the Google favicon service
+
+**Phase:** P2 · **Status:** in force
+
+`public/logos/` now holds the eight institutions' own marks. `UniversityPicker`
+resolves them through the `UniversityLogo` component and the `hkUniversities.js`
+id, with the acronym tile as the fallback on a missing or failed file. The
+master prompt's `google.com/s2/favicons?domain={domain}&sz=128` route is **not**
+used, and the `monogram: true` carve-out for CUHK and HKBU is retired.
+
+**Why.** The master prompt asked for the favicon service; DESIGN_SPEC §14 forbids
+hotlinking a logo and requires the institution's own mark. The two cannot both
+hold. Put to the owner, who chose the bundled files: no runtime request to a
+third party, no tracking, sharp at any size, and correct on a plane or offline.
+The favicon route also caps at 128 px and would have left CUHK and HKBU as
+letter tiles even though real logos exist.
+
+**Cost.** ~530 KB in `public/`. Seven files are SVG; `cuhk` is a PNG because no
+SVG of the current CUHK emblem exists on Wikimedia, so it is the one manifest
+path not ending `.svg`. Provenance, licences and the §14 deviation are recorded
+in `public/logos/README.md`.
+
+**Alternative rejected.** Bundled-first with a favicon fallback — it satisfies
+both documents but reintroduces the third-party request on the one path that is
+hardest to test.
+
+---
+
+## D-007 — Country flags come from `flag-icons`, copied into `public/` by a script
+
+**Phase:** P2 · **Status:** in force
+
+`npm run sync:flags` copies all 271 SVGs from `flag-icons/flags/4x3/` into
+`public/flags/` (250 country codes, full coverage — the script reports any gap).
+`src/legacy/lib/flags.js` maps a code to its path; `CountryFlag.jsx` renders the
+image and falls back to the two-letter tile.
+
+**Why a library.** Hand-drawing 250 flags is not maintainable, and flag emoji do
+not render on Windows — the platform shows the two letters instead, which is
+exactly the tile we already had.
+
+**Why copy rather than import the package's CSS.** The CSS uses
+`background-image`, which cannot be lazy-loaded, cannot be given alt text, and
+cannot be swapped for a fallback. An `<img>` can do all three, and
+`loading="lazy"` matters because the picker renders all 251 rows at once.
+
+**Cost.** 2.4 MB in `public/`, emitted to `dist/` but fetched per flag on demand.
+`flag-icons` is a devDependency only — nothing imports it at runtime; it is an
+asset source. Re-run the script after bumping it.
+
+**Trap recorded.** Vite's public-dir watcher did not pick up two of the copied
+files (`am.svg`, `au.svg` served as `text/html` from the SPA fallback) until the
+dev server was restarted. A restart after `sync:flags` is the safe habit.

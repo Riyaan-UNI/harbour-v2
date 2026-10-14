@@ -35,6 +35,7 @@ const SURFACES = [
   { name: 'login', path: '/login', needsProfile: false },
   { name: 'signup', path: '/signup', needsProfile: false },
   { name: 'home', path: '/app/home', needsProfile: true },
+  { name: 'dashboard', path: '/app/dashboard', needsProfile: true },
   { name: 'tools', path: '/#tools', needsProfile: false },
   { name: 'how-it-works', path: '/#how-it-works', needsProfile: false },
 ];

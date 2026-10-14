@@ -510,7 +510,11 @@ img, svg, video, canvas {
   align-items: stretch;
   padding: var(--sp-1) var(--sp-1) calc(var(--sp-1) + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--border-soft);
-  background: rgba(255, 253, 247, 0.94);
+  /* Brick 9: was a hard-coded ivory (rgba(255, 253, 247, 0.94)) that never
+     re-themed, so dark mode showed pale labels on a light bar — 1.6:1, an
+     axe failure the first /app scan caught. The token mix keeps the 94%
+     opacity and the blur, and follows the theme engine. */
+  background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   box-shadow: 0 -6px 24px rgba(6, 42, 39, 0.08);
@@ -2456,58 +2460,6 @@ img, svg, video, canvas {
 .tide-ledger-row .amount { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: var(--fw-bold); }
 .tide-ledger-row.is-credit .amount { color: var(--success); }
 .tide-ledger-row.is-debit .amount { color: var(--danger); }
-
-/* --------------------------------------------------- BunnyGarden ------- */
-.bunny-garden-page { display: flex; flex-direction: column; gap: var(--sp-8); }
-
-.garden-heading {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-6);
-  align-items: flex-end;
-  justify-content: space-between;
-}
-
-.garden-heading h1 { font-size: clamp(2rem, 1.2rem + 3.4vw, var(--fs-48)); }
-.garden-heading h1 em { color: var(--teal-700); font-style: italic; }
-.garden-heading p { color: var(--text-muted); margin-top: var(--sp-3); max-width: var(--measure-narrow); }
-.garden-heading a { min-height: 44px; display: inline-flex; align-items: center; color: var(--teal-700); font-weight: var(--fw-semibold); }
-
-.garden-stage {
-  position: relative;
-  min-height: 360px;
-  border-radius: var(--radius-card);
-  overflow: hidden;
-  background: linear-gradient(180deg, var(--blue-100) 0%, var(--teal-50) 55%, var(--teal-200) 100%);
-  box-shadow: var(--shadow-resting);
-}
-
-.garden-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-4);
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--sp-6);
-  border-radius: var(--radius-card);
-  background: var(--paper);
-  box-shadow: var(--shadow-resting);
-}
-
-.garden-actions h2 { font-size: var(--fs-24); }
-
-.magic-button {
-  min-height: 48px;
-  padding: 0 var(--sp-6);
-  border: 0;
-  border-radius: var(--radius-control);
-  background: var(--gold-400);
-  color: var(--teal-900);
-  font: var(--fw-semibold) var(--fs-16) var(--font-body);
-  cursor: pointer;
-}
-
-.magic-button.magic-stop { background: var(--teal-900); color: var(--text-on-brand); }
 
 /* -------------------------------------------------- modal surfaces ----- */
 .modal-backdrop,

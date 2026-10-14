@@ -1,4 +1,6 @@
-import { useMemo } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Link } from "../router.jsx";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import { useProfile } from "../context/ProfileContext.jsx";
@@ -14,7 +16,10 @@ const socialUrls = { instagram: "https://instagram.com/", linkedin: "https://lin
 /* UI-019: chart colours follow the theme. These were fixed light-theme hexes, so the
    grid and tick labels were wrong in dark mode. */
 const CHART = { bar: "var(--chart-line)", barSoft: "var(--teal-300)", grid: "var(--chart-grid)", tick: "var(--chart-tick)", paper: "var(--surface-card)", hover: "var(--surface-sunken)", line: "var(--chart-line)" };
+gsap.registerPlugin(ScrollTrigger);
+
 export default function Dashboard() {
+  const root = useRef(null);
   const { profile } = useProfile();
   const done = completedCount();
   const points = Number(localStorage.getItem("harbour-tide-balance") || 3);
@@ -26,10 +31,47 @@ export default function Dashboard() {
   const summary = weekTotal === 0
     ? "No checklist steps recorded in the last seven days yet. Complete one small task to start the line."
     : `${weekTotal} step${weekTotal === 1 ? "" : "s"} recorded in the last seven days. Your busiest day was ${busiest.label} with ${busiest.value}.`;
-  return <section className="page dashboard-page">
+
+  useLayoutEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+
+    const context = gsap.context(() => {
+      gsap.fromTo(
+        ".dash-welcome, .metric-grid > *, .dash-panels > *",
+        { autoAlpha: 0, y: 16 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.5,
+          stagger: 0.08,
+          ease: "power3.out",
+          clearProps: "all",
+        },
+      );
+
+      gsap.utils.toArray(".dashboard-community-row > *, .dash-shortcuts > *").forEach((item) => {
+        gsap.fromTo(
+          item,
+          { autoAlpha: 0, y: 14 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.45,
+            ease: "power2.out",
+            clearProps: "all",
+            scrollTrigger: { trigger: item, start: "top 90%", once: true },
+          },
+        );
+      });
+    }, root);
+
+    return () => context.revert();
+  }, []);
+
+  return <section ref={root} className="page dashboard-page">
     <div className="dash-welcome">
       <div><span className="eyebrow">YOUR HARBOUR · PERSONAL DASHBOARD</span><h1>Your progress,<br/><em>at your own pace.</em></h1><p>A quiet overview of the small steps you’ve taken in Hong Kong.</p></div>
-      <Link className="dash-profile-chip" to="/profile">{profile?.photo ? <img src={profile.photo} alt=""/> : <span>{profile?.name?.[0]?.toUpperCase() || "S"}</span>}<span><strong>{profile?.name || "Your profile"}</strong><small>Edit your details ↗</small></span></Link>
+      <Link className="dash-profile-chip" to="/profile">{profile?.photo || profile?.avatar ? <img src={profile.photo || profile.avatar} alt=""/> : <span>{profile?.name?.[0]?.toUpperCase() || "S"}</span>}<span><strong>{profile?.name || "Your profile"}</strong><small>Edit your details ↗</small></span></Link>
     </div>
 
     <div className="metric-grid">
@@ -89,7 +131,6 @@ export default function Dashboard() {
     <div className="dash-shortcuts">
       <Link to="/checklist"><span>01</span><strong>My checklists</strong><small>Keep moving, one task at a time ↗</small></Link>
       <Link to="/people"><span>02</span><strong>Find your people</strong><small>Search the Harbour demo directory ↗</small></Link>
-      <Link to="/bunny-garden"><span>03</span><strong>Bunny’s garden</strong><small>Take a small break ↗</small></Link>
     </div>
   </section>;
 }

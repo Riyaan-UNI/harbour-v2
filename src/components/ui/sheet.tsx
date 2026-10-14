@@ -35,6 +35,9 @@ export type SheetProps = {
    * keyboard lands afterwards, which for a keyboard user is the whole point.
    */
   returnFocusTo?: RefObject<HTMLElement>;
+  /** Optional styling hooks for a feature-specific theme. */
+  className?: string;
+  overlayClassName?: string;
   children: ReactNode;
 };
 
@@ -44,12 +47,16 @@ export function Sheet({
   title,
   showTitle = false,
   returnFocusTo,
+  className,
+  overlayClassName,
   children,
 }: SheetProps): JSX.Element {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="ui-overlay ui-sheet__overlay fixed inset-0 z-modal" />
+        <Dialog.Overlay
+          className={`ui-overlay ui-sheet__overlay fixed inset-0 z-modal ${overlayClassName ?? ''}`}
+        />
         <Dialog.Content
           asChild
           aria-describedby={undefined}
@@ -60,7 +67,7 @@ export function Sheet({
             target.focus();
           }}
         >
-          <div className="ui-sheet glass">
+          <div className={`ui-sheet glass ${className ?? ''}`}>
             <div className="flex flex-col gap-6 p-6">
               <div className="flex items-start justify-between gap-4">
                 <Dialog.Title asChild>

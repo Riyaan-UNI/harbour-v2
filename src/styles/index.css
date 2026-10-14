@@ -43,9 +43,46 @@
 @import './layout.css';
 @import './ui.css';
 @import './landing.css';
+@import './translate.css';
+@import './app-home.css';
+@import './app-people.css';
+@import './app-profile.css';
 @import './legacy-compat.css';
 @import '../legacy/styles/harbour-ui.css';
 @import '../legacy/styles/features.css';
+@import './entry-story.css';
+
+/* The dashboard lane. Imported **last** on purpose: the ported legacy
+   stylesheets above are unlayered, so unlayered legacy CSS beats a Tailwind
+   utility of equal specificity. Putting `dashboard.css` after them lets its
+   class-level selectors win wherever the legacy lane would otherwise override
+   a dashboard rule. `dashboard.css` is unlayered for the same reason. */
+@import './dashboard.css';
+
+/* The Scam Shield lane (`/app/scam`), after the legacy sheets and the
+   dashboard lane for the same reason: unlayered, so its class-level rules
+   win ties against the ported CSS the page lives beside. It uses no legacy
+   class name. */
+@import './scam-shield.css';
+
+/* The chat lane (`/app/chat`). It re-uses the legacy class name `.ask-page`,
+   which the ported sheet sizes to 860px (`harbour-ui.css`), so it MUST load
+   after that sheet to win the tie — the same reason the dashboard and Scam
+   Shield lanes sit here. It is the one page lane that pairs a v2 scope class
+   with a legacy name. */
+@import './chat.css';
+
+/* The App shell lane — global glass on the top nav, the More destinations
+   panel, and its trigger. Imported after the legacy lane for the same
+   reason: unlayered, so its class-level rules win ties against the ported
+   nav styles it lives beside. Token-only, no raw colours. */
+@import './app-shell.css';
+
+/* The profile edit form's control family. Last, for the same unlayered-cascade
+   reason, and scoped with three class selectors so it beats both the legacy
+   lane (`.page input`) and the entry lane (`.university-trigger`) it corrects
+   without either of them being edited. See the header comment in the file. */
+@import './profile-form.css';
 
 /* Spec §11: the dark variant is keyed to data-theme on <html>, never on a
    wrapper, so Radix and shadcn portals inherit it.

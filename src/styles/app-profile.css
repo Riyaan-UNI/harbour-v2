@@ -1,0 +1,677 @@
+/* ==========================================================================
+   Harbour — Profile (v2 rebuild)
+
+   Token-only. No raw colours, no px except the 1px hairline, and every
+   padding / margin / gap / inset comes from the ten --space-* steps.
+
+   The page mirrors `app-home.css` and `app-people.css`: it sits on the same
+   fixed harbour-scene backdrop (`art/harbour-scene-1.svg`) inside an isolated
+   stacking context, and every text-bearing block that is not already a Card
+   surface wraps itself in `.app-profile-glass-text` — the same `--glass-tint`
+   and `backdrop-filter` recipe AppHome uses. Cards are NEVER nested inside a
+   glass-text plate: glass on glass is the one rule the spec forbids outright.
+
+   The portrait plate is a `Card variant="static"` beside the intro plate, never
+   inside it. Friends uses `Card variant="flat"` (a hairline, no glass) so it
+   stays out of the three-glass budget; the preview bar and the footer are solid
+   — neither is a glass surface.
+   ========================================================================== */
+
+.app-profile {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  isolation: isolate;
+}
+
+/* --- Scene backdrop ------------------------------------------------------ */
+.app-profile__scene {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.app-profile__scene img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.32;
+}
+
+.app-profile__scene-tint {
+  position: absolute;
+  inset: 0;
+  background: var(--glass-tint);
+}
+
+/* The reading column — capped and centred so the page reads as one column at
+   every width, never a banner stretched across a wide screen. */
+.app-profile__shell {
+  width: 100%;
+  max-width: var(--container-max-inline-size);
+  margin-inline: auto;
+  padding-inline: var(--container-padding-inline);
+}
+
+/* The first section is a normal Section: `.portal-main` already owns the
+   vertical rhythm above it, so the page sets no extra offset — the scene sits
+   behind everything via the isolated stacking context above. */
+.app-profile__hero {
+  position: relative;
+}
+
+/* --- Glass plate behind text ------------------------------------------- */
+.app-profile-glass-text {
+  position: relative;
+  isolation: isolate;
+  background: var(--glass-tint);
+  backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  border: var(--hairline) solid var(--glass-highlight);
+  border-radius: var(--radius-md);
+  padding: var(--space-5) var(--space-6);
+  box-shadow: var(--shadow-glass);
+}
+
+/* --- Storage-blocked banner --------------------------------------------- */
+.app-profile__banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: var(--hairline) solid var(--danger);
+  background: var(--bg-elevated);
+}
+
+.app-profile__banner-text {
+  color: var(--danger);
+}
+
+/* --- Masthead — intro left, portrait plate right, never centred --------- */
+.app-profile-masthead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: var(--space-6);
+}
+
+.app-profile-masthead__intro {
+  flex: 1 1 22rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  justify-content: center;
+}
+
+.app-profile-masthead__plate {
+  flex: 0 1 18rem;
+  min-width: 0;
+}
+
+.app-profile-masthead__actions {
+  margin-block-start: var(--space-2);
+}
+
+/* The eyebrow above the name. */
+.app-profile-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+
+/* The name carries an anywhere wrap so a long name never scrolls sideways. */
+.app-profile-name {
+  overflow-wrap: anywhere;
+}
+
+.app-profile-lede {
+  max-width: var(--measure-body);
+}
+
+/* --- Portrait plate — a Card, the mascot or photo on its accent field --- */
+.app-profile-plate {
+  /* The own profile has no per-person accent, so the field takes a chart tone
+     default; a nested scope (e.g. a sample person) can override it. */
+  --person-accent: var(--chart-4);
+
+  overflow: hidden;
+  aspect-ratio: var(--profile-plate-ratio);
+  border-radius: var(--radius-md);
+}
+
+.app-profile-plate__inner {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    120% 90% at 50% 12%,
+    var(--profile-identity-field),
+    var(--bg-elevated) 64%
+  );
+}
+
+.app-profile-plate__mascot {
+  width: 54%;
+  height: 54%;
+  color: var(--person-accent, var(--accent-text));
+}
+
+.app-profile-plate__photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The mask fades a photo's bottom edge into the card instead of a hard line. */
+.app-profile-plate__veil {
+  position: absolute;
+  inset: 0;
+  background: var(--profile-mask-fade);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* --- Preview bar — a solid tint, not a glass surface -------------------- */
+.app-profile-previewbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  margin-block-end: var(--space-6);
+  border-radius: var(--radius-md);
+  border: var(--hairline) solid var(--border-strong);
+  background: var(--profile-note-bg);
+}
+
+/* --- Details card: view XOR edit, one box ------------------------------ */
+.app-profile-form {
+  display: block;
+}
+
+/* The facts ledger — a mono-uppercase label over a plain value. */
+.app-profile-ledger {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.app-profile-ledger__row {
+  display: grid;
+  gap: var(--space-1);
+  padding-block-end: var(--space-4);
+  border-block-end: var(--hairline) solid var(--border);
+}
+
+.app-profile-ledger__row:last-child {
+  padding-block-end: 0;
+  border-block-end: none;
+}
+
+.app-profile-ledger__value {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* The home-region flag, sized against the value line it sits in. */
+.app-profile-flag {
+  flex: none;
+  display: block;
+  width: var(--space-4);
+  height: var(--space-3);
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  box-shadow: 0 0 0 var(--hairline) var(--border);
+}
+
+.app-profile-uni-crest {
+  flex: none;
+}
+
+/* --- Photo control ------------------------------------------------------ */
+.app-profile-photo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.app-profile-photo__label {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* --- Socials ------------------------------------------------------------ */
+.app-profile-socials {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.app-profile-socials__hint {
+  max-width: var(--measure-body);
+}
+
+.app-profile-socials__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.app-profile-socials-preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-block-start: var(--space-4);
+  border-block-start: var(--hairline) solid var(--border);
+}
+
+.app-profile-inline-link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent-text);
+  font-size: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.app-profile-inline-link:hover {
+  text-decoration: underline;
+}
+
+.app-profile-inline-link:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-sm);
+}
+
+/* --- Mascot picker — a radio group as cards ----------------------------- */
+.app-profile-mascot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.app-profile-mascot__help {
+  max-width: var(--measure-body);
+}
+
+.app-profile-mascot__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
+  gap: var(--space-3);
+}
+
+.app-profile-mascot__option {
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+
+/* The native radio sits invisibly over its whole card: it stays focusable and
+   clickable (the card is only a label), so the whole tile is the control. */
+.app-profile-mascot__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: var(--z-raised);
+}
+
+.app-profile-mascot__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--touch-target);
+  height: 100%;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: var(--hairline) solid var(--border-strong);
+  background: var(--bg-elevated);
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+
+.app-profile-mascot__option:hover .app-profile-mascot__card {
+  border-color: var(--accent-text);
+}
+
+.app-profile-mascot__creature {
+  width: var(--space-7);
+  height: var(--space-7);
+  color: var(--accent-text);
+}
+
+.app-profile-mascot__name {
+  font-size: var(--type-small);
+  color: var(--text-muted);
+}
+
+/* The selected card gets an accent ring plus a stronger border. */
+.app-profile-mascot__input:checked + .app-profile-mascot__card {
+  border-color: var(--accent-text);
+  background: var(--glass-fill);
+  box-shadow: 0 0 0 var(--focus-ring-width) var(--accent-text);
+}
+
+.app-profile-mascot__input:checked + .app-profile-mascot__card .app-profile-mascot__name {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.app-profile-mascot__input:focus-visible + .app-profile-mascot__card {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.app-profile-mascot__restore {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent-text);
+  font-size: var(--type-small);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.app-profile-mascot__restore:hover {
+  text-decoration: underline;
+}
+
+.app-profile-mascot__restore:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-sm);
+}
+
+/* --- Friends — a flat Card (hairline, no glass) ------------------------- */
+.app-profile-findlink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--accent-text);
+  font-size: var(--type-small);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.app-profile-findlink:hover {
+  text-decoration: underline;
+}
+
+.app-profile-findlink:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-sm);
+}
+
+.app-profile-friend-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.app-profile-friend-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: var(--hairline) solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.app-profile-friend-row:hover {
+  background: var(--glass-fill);
+  border-color: var(--border-strong);
+}
+
+.app-profile-friend-row:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.app-profile-friend-row__pfp {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--space-7);
+  height: var(--space-7);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  background: var(--bg-elevated);
+  box-shadow: 0 0 0 var(--hairline) var(--person-accent, var(--accent-text));
+}
+
+.app-profile-friend-row__mascot {
+  width: 82%;
+  height: 82%;
+  color: var(--person-accent, var(--accent-text));
+}
+
+.app-profile-friend-row__who {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.app-profile-friend-row__name {
+  color: var(--text);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.app-profile-friend-row__go {
+  flex: none;
+  color: var(--text-subtle);
+}
+
+/* --- Footer — no surface, bare over the scene -------------------------- */
+.app-profile-footer {
+  align-items: flex-start;
+}
+
+.app-profile-footer__note {
+  max-width: var(--measure-body);
+}
+
+/* --- Public card (own preview and :userId) ----------------------------- */
+.app-profile-public {
+  /* A default field tone; a sample person's scope overrides it inline. */
+  --person-accent: var(--chart-4);
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  align-items: flex-start;
+}
+
+.app-profile-public__plate {
+  flex: 0 1 18rem;
+  min-width: 0;
+  display: grid;
+  place-items: center;
+  aspect-ratio: var(--profile-plate-ratio);
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: var(--hairline) solid var(--glass-highlight);
+  background: radial-gradient(
+    120% 90% at 50% 12%,
+    var(--profile-identity-field),
+    var(--bg-elevated) 64%
+  );
+}
+
+.app-profile-public__mascot {
+  width: 54%;
+  height: 54%;
+  color: var(--person-accent, var(--accent-text));
+}
+
+.app-profile-public__photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.app-profile-public__body {
+  flex: 1 1 20rem;
+  min-width: 0;
+}
+
+.app-profile-public__facts {
+  align-items: center;
+}
+
+.app-profile-public__uni {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.app-profile-public__place {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.app-profile-public__flag {
+  flex: none;
+  display: block;
+  width: var(--space-4);
+  height: var(--space-3);
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  box-shadow: 0 0 0 var(--hairline) var(--border);
+}
+
+.app-profile-public__note {
+  max-width: var(--measure-body);
+}
+
+.app-profile-public__honesty {
+  max-width: var(--measure-body);
+}
+
+/* --- Back-link and empty state ----------------------------------------- */
+.app-profile__backlink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--accent-text);
+  font-size: var(--type-small);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.app-profile__backlink:hover {
+  text-decoration: underline;
+}
+
+.app-profile__backlink:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-sm);
+}
+
+.app-profile-empty {
+  max-width: var(--measure-body);
+  margin-inline: auto;
+}
+
+.app-profile-empty__glyph {
+  display: grid;
+  place-items: center;
+  width: var(--space-10);
+  height: var(--space-10);
+  border-radius: var(--radius-pill);
+  background: var(--bg-elevated);
+  color: var(--accent-text);
+}
+
+.app-profile-empty__mascot {
+  width: 70%;
+  height: 70%;
+}
+
+/* --- Responsive: the plate stacks above the intro below 48em -----------
+   On mobile, the plate is a compact square instead of a 4:5 portrait at full
+   container width — a full-width portrait (296 × 370 here) would dominate the
+   page and push every other section down. `flex-shrink: 0` keeps the wrapper
+   sized to its content (the Card with `aspect-ratio`): without it, the intro
+   item's `flex-grow: 1` would shrink the wrapper down to its intrinsic
+   content (the mascot's natural height), leaving the Card to overflow
+   visibly on top of the intro card. */
+@media (width < 48em) {
+  .app-profile-masthead {
+    flex-direction: column;
+  }
+
+  .app-profile-masthead__plate {
+    order: -1;
+    flex: 0 0 auto;
+    align-self: center;
+    max-width: 14rem;
+    width: 100%;
+  }
+
+  /* The Card with `aspect-ratio: 4 / 5` would render a 4:5 portrait inside
+     the 14rem wrapper, leaving white space around a too-tall plate. Pin the
+     plate to a square at mobile so the page rhythm stays balanced. */
+  .app-profile-plate {
+    aspect-ratio: 1 / 1;
+  }
+
+  .app-profile-masthead__intro {
+    flex-basis: auto;
+  }
+
+  .app-profile-public {
+    flex-direction: column;
+  }
+
+  .app-profile-public__plate {
+    flex: 0 0 auto;
+    align-self: center;
+    width: 100%;
+    max-width: 14rem;
+    aspect-ratio: 1 / 1;
+  }
+}

@@ -38,36 +38,27 @@ export function LandingNav(): JSX.Element {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const menuButton = useRef<HTMLButtonElement>(null);
-  const sentinel = useRef<HTMLDivElement>(null);
 
   /**
-   * `data-scrolled` is driven by a 1px sentinel placed at the very top of the
-   * page rather than by a `scroll` listener: an observer does not run a
-   * callback per frame, and it answers the only question the nav has — "is the
-   * page still at the top?" — directly.
+   * The header itself is sticky, so a sentinel inside it never scrolls out of
+   * view. Track only the top/not-top threshold and update React state when that
+   * threshold changes; the listener is passive and does no per-frame work.
    */
   useEffect(() => {
-    const node = sentinel.current;
-    if (!node) return undefined;
+    const update = (): void => {
+      const next = window.scrollY > 0;
+      setScrolled((current) => (current === next ? current : next));
+    };
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (!entry) return;
-        setScrolled(!entry.isIntersecting);
-      },
-      { threshold: 0 },
-    );
-    observer.observe(node);
+    update();
+    window.addEventListener('scroll', update, { passive: true });
     return () => {
-      observer.disconnect();
+      window.removeEventListener('scroll', update);
     };
   }, []);
 
   return (
     <header className="landing-nav" data-scrolled={scrolled}>
-      <div ref={sentinel} className="landing-nav__sentinel" aria-hidden="true" />
-
       <nav aria-label="Main" className="landing-nav__bar-surface">
         <Container>
           <Cluster
@@ -104,7 +95,7 @@ export function LandingNav(): JSX.Element {
                     <Link to="/login">Log in</Link>
                   </Button>
                   <Button asChild>
-                    <Link to="/signup">Get started</Link>
+                    <Link to="/signup" className="landing-nav__action">Get started</Link>
                   </Button>
                 </Cluster>
               </div>
@@ -134,6 +125,8 @@ export function LandingNav(): JSX.Element {
         title="Menu"
         showTitle
         returnFocusTo={menuButton}
+        className="landing-nav__sheet"
+        overlayClassName="landing-nav__overlay"
       >
         <Stack as="ul" gap={2} className="list-none p-0">
           {LINKS.map((link) => (
@@ -143,7 +136,7 @@ export function LandingNav(): JSX.Element {
                 onClick={() => {
                   setMenuOpen(false);
                 }}
-                className="flex min-h-11 items-center rounded-md border border-border bg-glass-fill-strong px-4 text-text no-underline"
+                className="landing-nav__menu-link flex min-h-11 items-center rounded-md border border-border bg-glass-fill-strong px-4 text-text no-underline"
               >
                 {link.label}
               </a>
@@ -153,7 +146,7 @@ export function LandingNav(): JSX.Element {
 
         <Stack gap={2}>
           <Button asChild>
-            <Link to="/signup">Get started</Link>
+            <Link to="/signup" className="landing-nav__action">Get started</Link>
           </Button>
           <Button asChild variant="secondary">
             <Link to="/login">Log in</Link>

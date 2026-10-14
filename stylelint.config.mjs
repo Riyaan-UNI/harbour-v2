@@ -38,12 +38,21 @@ const SPACING_PROPERTIES =
  *     the compensating top padding. Both are `calc()` composites of the tokens
  *     above, kept in tokens.css precisely so they are declared once rather than
  *     written per-component,
+ *   - the dashboard rail's sticky offset (§4.6, `docs/DASHBOARD_DESIGN_SPEC.md`):
+ *     `--dash-rail-top` is `calc(var(--nav-height) + var(--space-6))`, a
+ *     composite of the same tokens, declared in tokens.css and consumed by the
+ *     rail's `inset-block-start` — the one place the spec writes the calc into
+ *     an `inset-*` declaration,
  *   - the aurora blob corner offsets, which are *positions* in %, not spacing
  *     steps, and live in tokens.css like every other value,
+ *   - the `/app/people` scene drifter offsets (`--drifter-pull-*`), which are
+ *     deliberate negative pulls that seat a floating mascot against the page
+ *     edge. They are offsets *within* a step of the scale (`calc(var(--space-6)
+ *     * -1)`), declared once in tokens.css rather than written per-rule,
  *   - the keywords `0` and `auto`.
  */
 const SPACING_VALUE =
-  '(?:var\\(--space-\\d+\\)|var\\(--section-padding-block\\)|var\\(--container-padding-inline\\)|var\\(--hero-pull-up\\)|var\\(--hero-padding-block-start\\)|var\\(--aurora-blob-[a-z0-9-]+\\)|0|auto)';
+  '(?:var\\(--space-\\d+\\)|var\\(--section-padding-block\\)|var\\(--container-padding-inline\\)|var\\(--hero-pull-up\\)|var\\(--hero-padding-block-start\\)|var\\(--dash-rail-top\\)|var\\(--aurora-blob-[a-z0-9-]+\\)|var\\(--drifter-[a-z0-9-]+\\)|0|auto)';
 
 /**
  * Flags a spacing value that is NOT a whitespace-separated run of permitted

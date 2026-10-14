@@ -7,16 +7,16 @@
  * where a bundled file must sit: logos are never hotlinked and never fetched
  * from an institution's own domain.
  *
- * **No logo file is bundled yet.** A search of `public/`, `src/assets/` and the
- * previous build found no university artwork at all — only the three Harbour
- * brand marks (`/harbour-logo.svg`, `/harbour-mark.svg`, `/favicon.svg`). So
- * every path below currently 404s and every box falls back to its acronym, by
- * design rather than by accident. Dropping a file at the matching path is the
- * only change needed to light one up; nothing here has to move.
+ * **All eight logo files are now bundled** in `public/logos/` (see the README
+ * beside them for provenance). Seven are SVG; `cuhk` is a PNG, because no SVG
+ * of the current CUHK emblem exists on Wikimedia — that is the one path below
+ * that does not end in `.svg`.
  *
  * Provenance rule (spec §14): a logo must come from the institution's own
  * official media page, and it may be used only to identify that institution.
- * Never recolour one, never crop it, never redraw it.
+ * Never recolour one, never crop it, never redraw it. The files here came from
+ * Wikimedia rather than each institution's media page — a documented deviation,
+ * recorded in `public/logos/README.md`.
  */
 
 export type UniversityId =
@@ -41,6 +41,19 @@ export type University = {
    * Always a repo-local path — never a remote URL.
    */
   logo: string | null;
+  /**
+   * The bundled concept-art SVG, or `null` for `other`. The art is a decorative
+   * rendering — orbiting rings, a coloured field and a near-white bed under
+   * the mark — built by `scripts/build-university-art.mjs` and committed into
+   * `public/logos/art/`. Each file is `prefers-reduced-motion: reduce`-aware,
+   * so the static composition is what users with reduced motion see.
+   *
+   * The art is **never** used as the identifying mark itself. The plain logo
+   * is what identifies the institution. The art is for surfaces where the
+   * institution is already named in text nearby — a picker row, a saved
+   * profile chip, a hero panel — and the mark is decorative colour.
+   */
+  art: string | null;
   /** `false` for `other`: it is the absence of an institution, not one. */
   enrolled: boolean;
 };
@@ -55,13 +68,15 @@ export const UNIVERSITIES: readonly University[] = [
     name: 'The University of Hong Kong',
     acronym: 'HKU',
     logo: '/logos/hku.svg',
+    art: '/logos/art/hku.svg',
     enrolled: true,
   },
   {
     id: 'cuhk',
     name: 'The Chinese University of Hong Kong',
     acronym: 'CUHK',
-    logo: '/logos/cuhk.svg',
+    logo: '/logos/cuhk.png',
+    art: '/logos/art/cuhk.svg',
     enrolled: true,
   },
   {
@@ -69,6 +84,7 @@ export const UNIVERSITIES: readonly University[] = [
     name: 'The Hong Kong University of Science and Technology',
     acronym: 'HKUST',
     logo: '/logos/hkust.svg',
+    art: '/logos/art/hkust.svg',
     enrolled: true,
   },
   {
@@ -76,6 +92,7 @@ export const UNIVERSITIES: readonly University[] = [
     name: 'The Hong Kong Polytechnic University',
     acronym: 'PolyU',
     logo: '/logos/polyu.svg',
+    art: '/logos/art/polyu.svg',
     enrolled: true,
   },
   {
@@ -83,6 +100,7 @@ export const UNIVERSITIES: readonly University[] = [
     name: 'City University of Hong Kong',
     acronym: 'CityU',
     logo: '/logos/cityu.svg',
+    art: '/logos/art/cityu.svg',
     enrolled: true,
   },
   {
@@ -90,6 +108,7 @@ export const UNIVERSITIES: readonly University[] = [
     name: 'Hong Kong Baptist University',
     acronym: 'HKBU',
     logo: '/logos/hkbu.svg',
+    art: '/logos/art/hkbu.svg',
     enrolled: true,
   },
   {
@@ -97,6 +116,7 @@ export const UNIVERSITIES: readonly University[] = [
     name: 'Lingnan University',
     acronym: 'LU',
     logo: '/logos/lingnan.svg',
+    art: '/logos/art/lingnan.svg',
     enrolled: true,
   },
   {
@@ -104,6 +124,7 @@ export const UNIVERSITIES: readonly University[] = [
     name: 'The Education University of Hong Kong',
     acronym: 'EdUHK',
     logo: '/logos/eduhk.svg',
+    art: '/logos/art/eduhk.svg',
     enrolled: true,
   },
   {
@@ -111,6 +132,7 @@ export const UNIVERSITIES: readonly University[] = [
     name: 'Other / not enrolled yet',
     acronym: '',
     logo: null,
+    art: null,
     enrolled: false,
   },
 ];
@@ -119,6 +141,20 @@ export const UNIVERSITIES: readonly University[] = [
 export const UNIVERSITY_IDS: readonly UniversityId[] = UNIVERSITIES.map(
   (university) => university.id,
 );
+
+/**
+ * A flat `id → art path` lookup for callers that just need the path — the
+ * login art stage and the signup step-3 illustration, both of which already
+ * know the id and only want the URL. `undefined` for ids with no art
+ * (`other`); callers should treat the absence as "no decoration" rather
+ * than as an error.
+ */
+export const UNIVERSITY_ART_BY_ID: Readonly<Partial<Record<UniversityId, string>>> =
+  Object.fromEntries(
+    UNIVERSITIES.filter((university) => university.art !== null).map(
+      (university) => [university.id, university.art as string],
+    ),
+  );
 
 const BY_ID = new Map<UniversityId, University>(
   UNIVERSITIES.map((university) => [university.id, university]),

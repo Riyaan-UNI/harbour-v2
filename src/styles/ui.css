@@ -2,8 +2,8 @@
    Harbour — shared component CSS (Brick 2a)
 
    The parts of a component that cannot be expressed as a Tailwind utility:
-   a keyframe, a colour-mix tone, and one hover rule that has to out-specify
-   `.glass`.
+   a keyframe, a colour-mix tone, a hover rule that has to out-specify
+   `.glass`, and the anchored popover the Combobox positions under its trigger.
 
    Everything here reads tokens. The only raw values are percentages inside a
    gradient and a `calc()` on a spacing token — no colour, no px.
@@ -377,4 +377,116 @@
   to {
     opacity: 0;
   }
+}
+
+/* --- Combobox ---------------------------------------------------------
+   The popover is anchored under the trigger and floats over the form, so it
+   needs a stacking context and a bound on how tall it may grow before it
+   scrolls. Everything visible — the surface, the border, the radius — is a
+   token; only the positioning lives here. */
+.ui-combobox__popover {
+  position: absolute;
+  inset-inline: 0;
+  z-index: var(--z-dropdown);
+  margin-block-start: var(--space-2);
+  border: var(--hairline) solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-elevated);
+  box-shadow: var(--shadow-glass);
+  overflow: hidden;
+  animation: ui-fade-in var(--dur-fast) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-combobox__popover {
+    animation: none;
+  }
+}
+
+/* The search row: an icon pinned inside the field, the input padding past it. */
+.ui-combobox__search {
+  position: relative;
+  padding: var(--space-2);
+}
+
+.ui-combobox__search-icon {
+  position: absolute;
+  inset-inline-start: var(--space-4);
+  inset-block-start: var(--space-4);
+  color: var(--text-subtle);
+  pointer-events: none;
+}
+
+.ui-combobox__search-input {
+  padding-inline-start: var(--space-8);
+}
+
+/* The scrollable option list. `max-block-size` keeps it inside the viewport
+   on a short screen; the long country list is why it scrolls at all. */
+.ui-combobox__list {
+  max-block-size: 18rem;
+  overflow-y: auto;
+  padding-block-end: var(--space-2);
+}
+
+.ui-combobox__option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  text-align: start;
+  color: var(--text);
+}
+
+/* The active row is where the keyboard is — it must be visible even when the
+   pointer is elsewhere, so it gets the same tint as a hover. */
+.ui-combobox__option.is-active,
+.ui-combobox__option:hover {
+  background-color: var(--glass-fill-strong);
+}
+
+.ui-combobox__option.is-selected .ui-combobox__option-label {
+  font-weight: 600;
+}
+
+.ui-combobox__option-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-inline-size: 0;
+  flex: 1;
+}
+
+.ui-combobox__option-detail {
+  color: var(--text-muted);
+}
+
+/* The flag / crest / mark column. It is a fixed box so rows align whether or
+   not each option has a mark. */
+.ui-combobox__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--space-6);
+  block-size: var(--space-6);
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+}
+
+.ui-combobox__mark > * {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+}
+
+.ui-combobox__check {
+  color: var(--accent-text);
+  flex-shrink: 0;
+}
+
+.ui-combobox__empty {
+  padding: var(--space-4);
+  color: var(--text-muted);
 }

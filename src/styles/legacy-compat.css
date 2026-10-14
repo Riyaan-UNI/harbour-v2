@@ -68,9 +68,10 @@
   --paper: var(--bg-elevated);
 
   /* ---- Semantic aliases ------------------------------------------------ */
-  --success: var(--success);
+
+  /* Names already defined by tokens.css must not alias themselves: CSS treats
+     a self-reference as an invalid cycle, not as an inherited token. */
   --warning: var(--gold-text);
-  --danger: var(--danger);
   --info: var(--accent-text);
 
   --surface-page: var(--bg);
@@ -86,14 +87,11 @@
 
   --text-strong: var(--text);
   --text-body: var(--text);
-  --text-muted: var(--text-muted);
   --text-info: var(--accent-text);
   --text-inverse: var(--bg);
   --text-on-gold: var(--on-gold);
   --text-on-brand: var(--on-accent);
 
-  --border-strong: var(--border-strong);
-  --border: var(--border);
   --border-soft: var(--border);
   --border-inverse: var(--border-strong);
   --line: var(--border);
@@ -118,7 +116,6 @@
      replaced by the v2 faces. The legacy pages keep their own size scale
      below, but the two families are the spec's. */
   --font-display: var(--font-heading);
-  --font-body: var(--font-body);
   --display: var(--font-heading);
   --sans: var(--font-body);
 
@@ -150,8 +147,6 @@
   /* ---- Radius ---------------------------------------------------------- */
   --radius-card: var(--radius-lg);
   --radius-control: var(--radius-md);
-  --radius-pill: var(--radius-pill);
-  --radius-sm: var(--radius-sm);
 
   /* ---- Elevation ------------------------------------------------------- */
   --shadow-resting: var(--shadow-glass);
@@ -164,7 +159,6 @@
   --glass-shadow: var(--shadow-glass);
 
   /* ---- Motion ---------------------------------------------------------- */
-  --ease-out: var(--ease-out);
   --ease-harbour: var(--ease-in-out);
   --ease-ship: var(--ease-out);
   --ease-wave: var(--ease-in-out);
@@ -175,13 +169,8 @@
   --dur-tilt: var(--dur-base);
 
   /* ---- z-index --------------------------------------------------------- */
-  --z-base: var(--z-base);
   --z-sticky: var(--z-nav);
   --z-overlay: var(--z-modal);
-  --z-modal: var(--z-modal);
-
-  /* ---- Tilt ------------------------------------------------------------ */
-  --tilt-perspective: var(--tilt-perspective);
 
   /* ====================================================================
      Names with no v2 counterpart — values kept, and why.

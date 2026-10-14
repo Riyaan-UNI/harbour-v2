@@ -30,7 +30,7 @@ export {
 } from 'react-router-dom';
 
 /** The root-level routes that are NOT part of the app lane. */
-const ENTRY_ROUTES = new Set(['/login', '/signup', '/onboarding']);
+const ENTRY_ROUTES = new Set(['/login', '/signup', '/onboarding', '/arrival']);
 
 /**
  * Re-base one legacy destination.

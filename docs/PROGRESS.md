@@ -556,3 +556,127 @@ screenshots, and the user's go-ahead before the next brick.
 - **Live AI**: provider + key settled at Brick 10.
 - **Taiwan flag**: no glyph per addendum §9 (HK/Macao SAR flags allowed) — revisit if the team decides otherwise.
 - **Bundle budget**: main chunk ≤250 kB gzip; recharts and the CJK font ride their routes, not the landing chunk.
+
+---
+
+## Brick 9 — Scam Shield at `/app/scam`
+
+**Status:** built on `brick-9-scam-shield`. The v2 rebuild of the old build's Shield
+page, presented in the structure the owner approved from a fraud-detection
+reference: hero → the tool behind two tabs (Scam X-ray, Scam Drill) → a
+SAMPLE-labelled example read → "if it already happened" → a calm final call.
+The reference's logo strip and testimonials are **absent on purpose** —
+inventing customers or praise is banned, and the space went to the recovery
+steps instead.
+
+### What landed
+
+- **Engines (ported verbatim, unit-tested).** `src/lib/features/redact.ts`
+  (the old Shield page's client-side hiding: email, HK phone, HKID, 13–19-digit
+  card, one-time-code labels), `src/lib/features/scam/keywordScreen.ts` (the
+  server's deterministic fallback — four indicator groups, High/Medium/Low),
+  `src/lib/features/scam/drillBank.ts` (all four pre-authored scenarios, the
+  score bands and the debrief strings), plus `sample.ts` and `types.ts`.
+  27 vitest cases pin the ports, including the legacy regex's real quirks
+  (a stray `)` after an HKID with a check digit; the phone alternative eating
+  a spaced card's first eight digits) — pinned, not "fixed".
+- **New component: `Tabs`** (`src/components/ui/tabs.tsx` + `tabs-variants.ts`),
+  Brick 2b's first consumer. Hand-rolled, no dependency: roving tabindex,
+  Arrow/Home/End with wrap and automatic activation, `aria-selected` /
+  `aria-controls` / `aria-labelledby` from `useId`, panels kept mounted
+  (hidden) so a drill or a half-typed message survives a switch.
+- **The page** (`src/routes/app/ScamShield.tsx` + `src/components/app/scam/`):
+  `XrayPanel` (four states, redaction shown through `RedactionNotice`, the
+  checklist handoff), `SampleRead` (the old build's fictional `hxxps://`
+  message run through the real engine → honestly Medium, not the marketing
+  mock's "High"), `DrillPanel` + `useDrillSession`, `RecoverySection`
+  (four steps, `SafetyRail`, `Disclaimer`), `FinalCall`, and
+  `ScamXrayScene` — original hand-drawn artwork (see below).
+- **Its own CSS lane** `src/styles/scam-shield.css` (unlayered, imported last
+  like `dashboard.css`, BEM under `.scam-shield`, zero legacy class names).
+- **Route + addresses.** `/app/scam` is lazy with its own skeleton; AppShell's
+  "Scam X-ray" link, the mobile tab, `TITLES`, the v2 dashboard card
+  (`AppHome.tsx`), `DashboardRail.tsx` and `scripts/flow-check.mjs` all point
+  at it.
+
+### Deviations (all deliberate)
+
+1. **The legacy `/app/shield` route is removed, not kept as deprecated** (the
+   approved plan said keep it mounted). The owner asked for one address for
+   the tool; two routes meant two UIs for the same thing. `Shield.jsx` stays
+   on disk as the port source and is now unreferenced.
+2. **The shell's catch-all was looping.** `<Navigate to="home">` inside the
+   `/app/*` splat resolved relatively, so an unknown subpath walked to
+   `/app/scam/home/home` instead of `/app/home`. It is now absolute
+   (`to="/app/home"`) — the loop was a shell bug for *any* unmatched
+   `/app/...`, not just this one.
+3. **`keywordScreen`'s explanation drops the old "Automated AI review is
+   unavailable" clause.** There is no AI path behind this tool any more;
+   claiming one, even in a negation, is the dishonesty the addendum bans.
+4. **The X-ray has no artificial latency.** The screen is local and instant,
+   so `reading` stays in the state machine (and renders a skeleton) but is not
+   faked with a timeout — INSPIRATION.md's rule about not implying a service
+   is working when the feature is local.
+5. **The drill has no error or loading state.** Scenarios are local; the
+   four-state rule (addendum rule 1) is satisfied by the X-ray, the data
+   screen. A reload mid-drill drops to idle, which the spec pins.
+6. **Shell contrast fix (found by the first `/app` axe pass).** `.harbour-tabs`
+   had a hard-coded ivory background (`rgba(255, 253, 247, 0.94)`) that never
+   re-themed: in dark mode its pale labels sat at **1.6:1**. Now
+   `color-mix(in srgb, var(--bg-elevated) 94%, transparent)`. This is the
+   ported shell's own defect, exposed because no spec had ever scanned `/app`
+   in dark mode below 1024px — worth re-checking the other legacy chrome.
+7. **`vitest` 5.0.4 added** (exact pin, node environment, `npm test`). It was
+   on the Brick 5 dependency list and had never been installed.
+8. **Artwork is drawn, not generated.** `ScamXrayScene` is an original SVG —
+   a message card under a lens, three signal dots, a slow sweep inside the
+   lens and the Harbour wave at its centre. Token colours, `aria-hidden`
+   decoration, transform/opacity only, static under reduced motion and calm
+   mode. The standing "ask before generating any art" decision was not
+   triggered; if a generated asset is wanted later, that is a separate call.
+9. **Dashboard gets a contained ambient scene layer — 14 Oct 2026,
+   user-approved.** `docs/DASHBOARD_DESIGN_SPEC.md` §7 item 9 read "continuous
+   parallax … one-shot reveals only". The user approved relaxing that for a
+   single, contained, purely decorative backdrop on `/app/dashboard`
+   (`DashboardScene.tsx` + `.dash-scene` in `dashboard.css`): a low-opacity
+   harbour wash plus 4–6 drifting elements (three mascots — `seahorse`, `crab`,
+   `pufferfish` — none shared with `PeopleScene`; three abstract shapes — buoy,
+   rings, wave). Same proven pattern as `/app/home` and `/app/people`. Motion
+   is CSS `@keyframes` on transform/opacity only, inside one
+   `no-preference` block additionally scoped to `:root:not([data-calm='true'])`,
+   so reduced motion **and** calm mode render an identical still frame. No JS,
+   no pointer handler, no rAF loop; the layer is `aria-hidden`,
+   `pointer-events: none`, `z-index: -1` in the page's isolated context, and
+   `overflow: hidden`, so it can never touch a pointer or add a scrollbar.
+   Noise tints reuse the §3 `--chart-N` tokens (one per element) and the
+   off-scale percentage insets are `--drifter-dash-*` tokens in `tokens.css`
+   (the `--drifter-*` family Stylelint already permits in `inset-*`). Spec §2,
+   §6 (new §6.4) and §7 item 9 were amended to record it; scroll hijacking and
+   auto-advancing carousels stay banned. `/app/home`, `/app/people` and every
+   other page are untouched.
+
+### Gate results
+
+- `typecheck` — clean (both tsconfigs).
+- `npm test` (vitest) — **27/27**.
+- `lint:css` — `scam-shield.css` clean; the harbour-tabs edit passes too.
+  (Pre-existing failures remain in `entry-story.css` / `translate.css`, owned
+  by the concurrent rebuild work.)
+- `lint` — my files clean.
+- `build` — passes (needs `CODEBUDDY_SAFE_DELETE_ENABLED=0` on this drive).
+- `test:e2e` — `e2e/scam-shield.spec.ts` **20/20**: 12 matrix runs
+  (dark + light × 320/360/390/768/1024/1440, no horizontal overflow, axe
+  clean), the tabs' keyboard pattern, the X-ray read with its redaction count,
+  the SAMPLE panel's unclickable `hxxps://`, a full drill to debrief, the
+  reload-resets case, the recovery section, and reduced motion. The first e2e
+  to enter the guarded app lane: it seeds `harbour-profile` (the legacy key
+  the guard reads) through `addInitScript`.
+
+### Still open
+
+- Emergency numbers are on this page (recovery copy, `SafetyRail`, the X-ray's
+  support line) behind the same standing UNVERIFIED flag as everywhere else.
+- The X-ray's Scameter+ link was ported from the old build and has not been
+  checked against the live ADCC page.
+- The drill debrief references the checklist handoff; `/app/checklist` is
+  still the ported legacy page at this point.

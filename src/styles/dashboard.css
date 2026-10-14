@@ -1,0 +1,455 @@
+/* ==========================================================================
+   Harbour — dashboard (docs/DASHBOARD_DESIGN_SPEC.md)
+
+   The `/app/dashboard` lane: the left icon rail, the two-layer grid, and the
+   eleven module surfaces.
+
+   Unlayered on purpose. The ported legacy stylesheets are unlayered too, so an
+   unlayered rule here beats a Tailwind utility of equal specificity and — since
+   `index.css` imports this file last — wins wherever the legacy lane would
+   otherwise override a dashboard rule. Nothing here writes a raw colour, a px
+   beyond the hairline, or a spacing value off the spec §6 scale.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Layer 1 — the page grid (spec §4.1). Rail is column 1, content is column 2.
+
+   `position: relative; isolation: isolate` give the page its own stacking
+   context, so the ambient scene below sits at `z-index: -1` *inside* the
+   dashboard and can never fall behind the shell's aurora or escape the page.
+   -------------------------------------------------------------------------- */
+.dash-page {
+  position: relative;
+  isolation: isolate;
+  padding-block: var(--section-padding-block);
+}
+
+/* --------------------------------------------------------------------------
+   Ambient scene backdrop (spec §2 / §6.4).
+
+   A harbour concept-art wash plus a glass tint at `z-index: -1`, exactly as
+   `/app/home` and `/app/people` do. Decoration only: `aria-hidden`, no pointer
+   events, and contained by `overflow: hidden`, so it can never intercept a
+   click or add a scrollbar. The wash is dimmer than the other two pages (0.23)
+   because the dashboard is the densest content page — the scene must read as
+   texture behind the data, never compete with it.
+   -------------------------------------------------------------------------- */
+.dash-scene {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.dash-scene__wash {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.23;
+}
+
+.dash-scene__tint {
+  position: absolute;
+  inset: 0;
+  background: var(--glass-tint);
+}
+
+/* --------------------------------------------------------------------------
+   The drifting elements — decoration, matching the `.app-people-drifter`
+   precedent. `--drift-accent` is set per element from a §3 chart token, so no
+   two share a colour and the whole layer re-themes with dark and light.
+
+   Placement is by percentage inset token (tokens.css) so a drifter sits in the
+   page gutter, clear of the left rail and the content column's core. Sizes are
+   `--space-*` steps. Motion is transform-only and lives in a single
+   `no-preference` block below, additionally parked by calm mode.
+   -------------------------------------------------------------------------- */
+.dash-drift {
+  position: absolute;
+  display: block;
+  color: var(--drift-accent, var(--accent-text));
+  opacity: 0.16;
+}
+
+.dash-drift__body {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+/* Percentages here are the `width`/`height` of an SVG child — allowed — not
+   `inset-*` values, which is why they need no token indirection. */
+.dash-drift__shapes {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  color: inherit;
+}
+
+.dash-drift--a {
+  inset-block-start: var(--space-10);
+  inset-inline-start: var(--drifter-dash-a-start);
+  inline-size: var(--space-9);
+  block-size: var(--space-9);
+}
+
+.dash-drift--b {
+  inset-block-start: var(--space-7);
+  inset-inline-end: var(--drifter-dash-b-end);
+  inline-size: var(--space-8);
+  block-size: var(--space-8);
+}
+
+.dash-drift--c {
+  inset-block-start: var(--drifter-dash-c-top);
+  inset-inline-start: var(--drifter-dash-c-start);
+  inline-size: var(--space-10);
+  block-size: var(--space-10);
+}
+
+.dash-drift--d {
+  inset-block-start: var(--drifter-dash-d-top);
+  inset-inline-end: var(--drifter-dash-d-end);
+  inline-size: var(--space-9);
+  block-size: var(--space-9);
+}
+
+.dash-drift--e {
+  inset-block-end: var(--space-12);
+  inset-inline-start: var(--drifter-dash-e-start);
+  inline-size: var(--space-8);
+  block-size: var(--space-8);
+}
+
+.dash-drift--f {
+  inset-block-end: var(--space-16);
+  inset-inline-end: var(--drifter-dash-f-end);
+  inline-size: var(--space-10);
+  block-size: var(--space-10);
+}
+
+/* Below 64em the content fills the width and the rail is gone, so the gutters
+   close. Park the elements that would sit over text; keep the two lowest, which
+   still land in the page's foot margin. */
+@media (width < 64em) {
+  .dash-drift--a,
+  .dash-drift--b {
+    display: none;
+  }
+
+  .dash-drift--e {
+    inset-inline-start: var(--space-4);
+  }
+
+  .dash-drift--f {
+    inset-inline-end: var(--space-4);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   The drift animations. One `no-preference` block, additionally scoped to
+   `:root:not([data-calm='true'])`, so reduced motion **and** the shell's calm
+   mode both render the identical static still frame: the wash, the tint and
+   the elements frozen where they sit. Transform/opacity only; a pure
+   CSS substitute for a rAF parallax handler, which this page does not need.
+
+   Durations 18–34s with offset delays, so no two move in lockstep.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-calm='true']) .dash-drift--a {
+    animation: dash-drift-a 22s ease-in-out infinite alternate;
+  }
+
+  :root:not([data-calm='true']) .dash-drift--b {
+    animation: dash-drift-b 27s ease-in-out infinite alternate;
+  }
+
+  :root:not([data-calm='true']) .dash-drift--c {
+    animation: dash-drift-c 31s ease-in-out infinite alternate-reverse;
+  }
+
+  :root:not([data-calm='true']) .dash-drift--d {
+    animation: dash-drift-a 19s ease-in-out infinite alternate-reverse;
+  }
+
+  :root:not([data-calm='true']) .dash-drift--e {
+    animation: dash-drift-b 34s ease-in-out infinite alternate;
+  }
+
+  :root:not([data-calm='true']) .dash-drift--f {
+    animation: dash-drift-c 24s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes dash-drift-a {
+  from {
+    transform: translateY(-0.75rem) rotate(-5deg);
+  }
+
+  to {
+    transform: translateY(1rem) rotate(6deg);
+  }
+}
+
+@keyframes dash-drift-b {
+  from {
+    transform: translateY(1rem) translateX(-0.5rem) rotate(4deg);
+  }
+
+  to {
+    transform: translateY(-0.75rem) translateX(0.5rem) rotate(-6deg);
+  }
+}
+
+@keyframes dash-drift-c {
+  from {
+    transform: translateY(0.5rem) rotate(3deg) scale(0.98);
+  }
+
+  to {
+    transform: translateY(-1.25rem) rotate(-3deg) scale(1.02);
+  }
+}
+
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+  inline-size: 100%;
+  max-inline-size: var(--container-max-inline-size);
+  margin-inline: auto;
+  padding-inline: var(--container-padding-inline);
+  align-items: start;
+}
+
+@media (width >= 64em) {
+  .dash-grid {
+    grid-template-columns: var(--dash-rail-w) minmax(0, 1fr);
+    gap: var(--space-7);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Layer 1 — the sticky icon rail (module 8, spec §4.6).
+
+   Hidden below 64em: the shell's bottom tab bar and More panel already reach
+   every destination, so the rail adds nothing there and never renders a second
+   top bar.
+
+   `overflow: visible` rather than `overflow-y: auto`: any scroll container
+   clips the other axis too, which would clip the hover/focus labels that reveal
+   to the right of the rail. `--dash-rail-cap` still caps the rail's block-size,
+   and the page scroll keeps every destination reachable on a short viewport.
+   -------------------------------------------------------------------------- */
+.dash-rail {
+  display: none;
+  position: sticky;
+  inset-block-start: var(--dash-rail-top);
+  max-block-size: var(--dash-rail-cap);
+  z-index: var(--z-raised);
+}
+
+@media (width >= 64em) {
+  .dash-rail {
+    display: block;
+  }
+}
+
+.dash-rail__link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--touch-target);
+  block-size: var(--touch-target);
+  border: var(--hairline) solid transparent;
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  text-decoration: none;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.dash-rail__link:hover {
+  color: var(--text);
+  background-color: var(--glass-fill);
+}
+
+.dash-rail__link[aria-current='page'] {
+  color: var(--accent-text);
+  background-color: var(--glass-fill-strong);
+  border-color: var(--border);
+}
+
+/* The label is a real tooltip, revealed on hover **and** `:focus-visible`, never
+   hover-only (spec §6). It sits to the right of the button via a transform, so
+   it never affects layout and the rail never moves. */
+.dash-rail__label {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  display: flex;
+  align-items: center;
+  padding-inline: var(--space-3);
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-pill);
+  background-color: var(--bg-elevated);
+  color: var(--text);
+  font-size: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(calc(var(--touch-target) + var(--space-2)));
+  transition: opacity var(--dur-fast) var(--ease-out);
+  pointer-events: none;
+}
+
+.dash-rail__link:hover .dash-rail__label,
+.dash-rail__link:focus-visible .dash-rail__label {
+  opacity: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Layer 2 — the content grid is `<Bento>` (layout.css); nothing new here.
+   The classes below are the GSAP entrance targets and the module internals.
+   -------------------------------------------------------------------------- */
+
+/* KPI figures and the tide balance line up on a tabular grid so a count-up does
+   not shift the digits as they change. */
+.dash-metric__figure,
+.dash-balance {
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   Module 3 — the activity chart box (spec Appendix A) and the 28-day heat
+   strip. The chart's aspect ratio and the heat cell's fluid edge are the only
+   `clamp()`/ratio values the dashboard introduces.
+   -------------------------------------------------------------------------- */
+.dash-chart-box {
+  aspect-ratio: var(--dash-chart-ratio);
+  min-block-size: 10rem;
+  max-block-size: 18rem;
+  inline-size: 100%;
+}
+
+.dash-heat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.dash-heat__grid {
+  display: grid;
+  grid-template-columns: repeat(7, auto);
+  gap: var(--space-1);
+  inline-size: fit-content;
+}
+
+.dash-heat-cell {
+  inline-size: var(--dash-heat-cell);
+  block-size: var(--dash-heat-cell);
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-sm);
+  background-color: var(--glass-fill-strong);
+}
+
+.dash-heat-cell[data-level='1'] {
+  background-color: color-mix(in srgb, var(--chart-1) 25%, transparent);
+}
+
+.dash-heat-cell[data-level='2'] {
+  background-color: color-mix(in srgb, var(--chart-1) 55%, transparent);
+}
+
+.dash-heat-cell[data-level='3'] {
+  background-color: var(--chart-1);
+}
+
+.dash-heat__legend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--text-subtle);
+  font-size: var(--type-label);
+}
+
+/* --------------------------------------------------------------------------
+   The legacy lane's link colour, beaten locally.
+
+   `src/legacy/styles/harbour-ui.css:84` declares `a { color: var(--teal-700) }`
+   in the **unlayered** legacy lane. An unlayered rule beats anything inside
+   Tailwind's layers regardless of order, so it overrides the `text-on-accent`
+   that `button-variants.ts` puts on a filled Button — on any `<a>`. Measured
+   before this rule existed, the nudge CTA's label was `rgb(79,227,208)` on a
+   `rgb(79,227,208)` fill in dark: contrast 1.00, i.e. invisible. `landing.css`
+   already carries the same patch for the landing page; this is the dashboard's.
+
+   A class-level selector wins on specificity (0,2,1 against `a`'s 0,0,1), and
+   `index.css` imports this file last, so it wins on order too.
+   -------------------------------------------------------------------------- */
+
+/* A link rendered as a filled Button keeps the fill's ink. */
+.dash-page a.bg-accent-fill,
+.dash-page a.bg-danger {
+  color: var(--on-accent);
+}
+
+/* A link rendered as a secondary or ghost Button keeps the body ink — the
+   secondary variant already declares `text-text`, but the legacy lane's link
+   colour was overriding it, so a secondary Button read as a link. */
+.dash-page a.bg-glass-fill-strong,
+.dash-page a.bg-transparent {
+  color: var(--text);
+}
+
+/* --------------------------------------------------------------------------
+   Module 9 — the concept-art box (spec Appendix A). The ratio matches the
+   FeatureConceptArt viewBox (0 0 520 210) so the sketch fills the box.
+   -------------------------------------------------------------------------- */
+.dash-art-box {
+  aspect-ratio: var(--dash-art-ratio);
+  inline-size: 100%;
+}
+
+.dash-art-box > svg {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+/* Module 9 — a tool card and its action link are one unit. The card grows to
+   fill the grid row so the "Open …" buttons sit on a shared baseline across the
+   four cards instead of floating wherever each card's text happens to end. */
+.dash-tool {
+  block-size: 100%;
+}
+
+.dash-tool__card {
+  flex: 1 1 auto;
+}
+
+/* --------------------------------------------------------------------------
+   Module 6 — a friend is a mascot image avatar wrapped in a link. The link is
+   inline-flex so the avatar never adds descender space to the row.
+   -------------------------------------------------------------------------- */
+.dash-friend {
+  display: inline-flex;
+  border-radius: var(--radius-pill);
+}
+
+/* --------------------------------------------------------------------------
+   The lazy-route fallback. A v2 skeleton inside the same container the page
+   uses, so the two do not jump between each other.
+   -------------------------------------------------------------------------- */
+.dash-fallback {
+  max-inline-size: var(--container-max-inline-size);
+  margin-inline: auto;
+  padding-inline: var(--container-padding-inline);
+}

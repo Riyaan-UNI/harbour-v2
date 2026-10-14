@@ -5,8 +5,8 @@
  * writes a colour, a px value or an off-scale space; a vendored shadcn file
  * that does is fixed to the §6 table rather than excused from the gate.
  *
- * Brick 2b adds the complex ones: Combobox and CountryCombobox, Dialog and
- * Sheet, Tabs, the progress ring and bar, and the interactive-card effects.
+ * Brick 2b adds the complex ones: Combobox, Dialog and Sheet, Tabs, the
+ * progress ring, and the interactive-card effects.
  */
 export { Button, type ButtonProps } from './button';
 export {
@@ -36,7 +36,21 @@ export {
 } from './interactive-card';
 export { Chip, type ChipProps } from './chip';
 export { chipVariants } from './chip-variants';
+export { Mascot, type MascotKind } from './mascot';
 export { ProgressRing, type ProgressRingProps, type ProgressRingSize } from './progress-ring';
+export {
+  Tabs,
+  TabsList,
+  TabsPanel,
+  TabsTrigger,
+  type TabsListProps,
+  type TabsPanelProps,
+  type TabsProps,
+  type TabsTriggerProps,
+} from './tabs';
+export { tabVariants, type TabVariantsProps } from './tabs-variants';
+export { Combobox, type ComboboxOption, type ComboboxProps } from './combobox';
+export { comboboxVariants, type ComboboxVariantsProps } from './combobox-variants';
 export { StatusBadge, type StatusBadgeProps, type StatusTone } from './status-badge';
 export { DemoBadge, type DemoBadgeProps } from './demo-badge';
 export {

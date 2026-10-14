@@ -1,16 +1,47 @@
 import {
   AlertTriangle as LucideAlertTriangle,
+  ArrowLeftRight as LucideArrowLeftRight,
   ArrowRight as LucideArrowRight,
   ArrowUpRight as LucideArrowUpRight,
+  Bell as LucideBell,
+  Bookmark as LucideBookmark,
+  Camera as LucideCamera,
+  Check as LucideCheck,
   CheckCircle as LucideCheckCircle,
+  ChevronDown as LucideChevronDown,
+  Copy as LucideCopy,
   EyeOff as LucideEyeOff,
   GraduationCap as LucideGraduationCap,
+  Home as LucideHome,
   Info as LucideInfo,
+  Languages as LucideLanguages,
+  LayoutDashboard as LucideLayoutDashboard,
+  ListChecks as LucideListChecks,
   LoaderCircle,
+  Globe as LucideGlobe,
+  MessageSquare as LucideMessageSquare,
   Menu as LucideMenu,
+  Mic as LucideMic,
+  Pause as LucidePause,
+  PenLine as LucidePenLine,
   Phone as LucidePhone,
+  Play as LucidePlay,
+  Plus as LucidePlus,
+  Heart as LucideHeart,
+  MapPin as LucideMapPin,
+  MessageCircle as LucideMessageCircle,
+  Search as LucideSearch,
+  Share2 as LucideShare2,
+  Star as LucideStar,
   RefreshCw as LucideRefreshCw,
+  Send as LucideSend,
   ShieldAlert as LucideShieldAlert,
+  Sparkles as LucideSparkles,
+  Type as LucideType,
+  Volume2 as LucideVolume2,
+  User as LucideUser,
+  Users as LucideUsers,
+  Wallet as LucideWallet,
   X as LucideX,
   type LucideIcon,
 } from 'lucide-react';
@@ -92,6 +123,12 @@ export const ShieldAlert = createIcon(LucideShieldAlert, 'ShieldAlert');
 /** Green — a clear or safe result. */
 export const CheckCircle = createIcon(LucideCheckCircle, 'CheckCircle');
 
+/** A plain check, for a selected row in a listbox or a confirmed choice. */
+export const Check = createIcon(LucideCheck, 'Check');
+
+/** The disclosure arrow on a select, combobox or expander trigger. */
+export const ChevronDown = createIcon(LucideChevronDown, 'ChevronDown');
+
 /** Info — neutral guidance, never a verdict. */
 export const InfoCircle = createIcon(LucideInfo, 'InfoCircle');
 
@@ -118,3 +155,93 @@ export const CloseIcon = createIcon(LucideX, 'CloseIcon');
 
 /** The generic mark for a university box with no bundled logo file. */
 export const GraduationCap = createIcon(LucideGraduationCap, 'GraduationCap');
+
+/** A bell, used for notifications and warnings. */
+export const Bell = createIcon(LucideBell, 'Bell');
+
+/** A bookmark, used for saved items. */
+export const Bookmark = createIcon(LucideBookmark, 'Bookmark');
+
+/** A camera, used for visual translate features. */
+export const Camera = createIcon(LucideCamera, 'Camera');
+
+/** A home, for the bottom nav landing page. */
+export const Home = createIcon(LucideHome, 'Home');
+
+/** A languages globe, for the translation feature. */
+export const Languages = createIcon(LucideLanguages, 'Languages');
+
+/** A microphone, for the voice translation feature. */
+export const Mic = createIcon(LucideMic, 'Mic');
+
+/** A pause, paired with a Play to toggle an audio source. */
+export const Pause = createIcon(LucidePause, 'Pause');
+
+/** A pen, used for text input variants. */
+export const PenLine = createIcon(LucidePenLine, 'PenLine');
+
+/** A play arrow, paired with a Pause to toggle an audio source. */
+export const Play = createIcon(LucidePlay, 'Play');
+
+/** A plus glyph, for compact add-create controls. */
+export const Plus = createIcon(LucidePlus, 'Plus');
+
+/** A paper airplane send, for messaging input submit. */
+export const Send = createIcon(LucideSend, 'Send');
+
+/** Four-point sparkles, for AI/enhance hints. */
+export const Sparkles = createIcon(LucideSparkles, 'Sparkles');
+
+/** A typography "T", for the text translate feature card. */
+export const Type = createIcon(LucideType, 'Type');
+
+/** A user, for the bottom nav profile tab. */
+export const User = createIcon(LucideUser, 'User');
+
+/** A left-to-right arrows pair, for swapping the source and target language. */
+export const ArrowLeftRight = createIcon(LucideArrowLeftRight, 'ArrowLeftRight');
+
+/** Two overlapping sheets, the copy affordance. */
+export const Copy = createIcon(LucideCopy, 'Copy');
+
+/** A speaker, to play a translated phrase aloud. */
+export const Volume2 = createIcon(LucideVolume2, 'Volume2');
+
+/** A group of users, for the people directory. */
+export const Users = createIcon(LucideUsers, 'Users');
+
+/** A checklist, for the settle-in steps. */
+export const ListChecks = createIcon(LucideListChecks, 'ListChecks');
+
+/** A message square, for the Ask Harbour chat. */
+export const MessageSquare = createIcon(LucideMessageSquare, 'MessageSquare');
+
+/** A dashboard, for the progress overview. */
+export const LayoutDashboard = createIcon(
+  LucideLayoutDashboard,
+  'LayoutDashboard',
+);
+
+/** A globe, for the community overview. */
+export const Globe = createIcon(LucideGlobe, 'Globe');
+
+/** A wallet, for the Tide Bank demo balance. */
+export const Wallet = createIcon(LucideWallet, 'Wallet');
+
+/** A filled heart — the "like" state in the people directory. */
+export const Heart = createIcon(LucideHeart, 'Heart');
+
+/** A location pin, for where someone is settling in. */
+export const MapPin = createIcon(LucideMapPin, 'MapPin');
+
+/** A speech bubble — comments and replies. */
+export const MessageCircle = createIcon(LucideMessageCircle, 'MessageCircle');
+
+/** A magnifier — search fields. Always paired with a label or placeholder. */
+export const Search = createIcon(LucideSearch, 'Search');
+
+/** A share arrow — send a card to someone else. */
+export const Share2 = createIcon(LucideShare2, 'Share2');
+
+/** A star — featured or favourite. */
+export const Star = createIcon(LucideStar, 'Star');

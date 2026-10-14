@@ -1,0 +1,395 @@
+/* ==========================================================================
+   Harbour — Translate (Cantonese helper), v2 component sheet.
+
+   This page is Harbour, re-skinned through the same token layer as AppHome:
+   the global teal/gold palette, the shared Card/Button/Chip surface, and the
+   layout primitives. It carries over the inspiration's *features* — language
+   selection, a composer with sample phrases, voice and camera entry points,
+   a recent-translations list, and an offline phrase pack — without borrowing
+   the inspiration's pink/magenta brand. The one chapter accent is gold, the
+   same accent the AppHome "Cantonese helper" tile uses.
+
+   Token-only. No raw colours, no px except the 1px hairline, and every
+   padding / margin / gap / inset comes from the ten --space-* steps.
+   ========================================================================== */
+
+@layer components {
+  .translate-page {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* --- Language pair selector ----------------------------------------- */
+  .translate-langs {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .translate-lang {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-pill);
+    border: var(--hairline) solid var(--border-strong);
+    background: var(--bg-elevated);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: var(--type-small);
+    font-weight: 600;
+    line-height: var(--leading-small);
+    cursor: pointer;
+    transition:
+      background-color var(--dur-fast) var(--ease-out),
+      border-color var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
+  }
+
+  .translate-lang:hover {
+    background: var(--glass-fill-strong);
+    border-color: var(--accent-text);
+  }
+
+  .translate-lang:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .translate-lang[aria-pressed='true'] {
+    border-color: var(--accent-text);
+    color: var(--accent-text);
+  }
+
+  .translate-lang--target {
+    border-color: var(--accent-text);
+    color: var(--accent-text);
+    cursor: default;
+  }
+
+  .translate-lang__name {
+    display: grid;
+    gap: var(--space-1);
+    text-align: start;
+  }
+
+  .translate-lang__sub {
+    font-family: var(--font-mono);
+    font-size: var(--type-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+
+  /* Round flag used by the language chips and the recent-translation list. */
+  .translate-flag {
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+    flex: none;
+    border: var(--hairline) solid var(--border-strong);
+    background: var(--bg-elevated);
+  }
+
+  .translate-flag--lg {
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+  }
+
+  .translate-flag > img {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+
+  .translate-langs__swap {
+    display: grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border-radius: var(--radius-pill);
+    border: var(--hairline) solid var(--border-strong);
+    background: var(--bg-elevated);
+    color: var(--accent-text);
+    cursor: pointer;
+    transition:
+      background-color var(--dur-fast) var(--ease-out),
+      border-color var(--dur-fast) var(--ease-out),
+      transform var(--dur-fast) var(--ease-out);
+  }
+
+  .translate-langs__swap:hover {
+    background: var(--glass-fill-strong);
+    transform: scale(1.06);
+  }
+
+  .translate-langs__swap:active {
+    transform: scale(0.96);
+  }
+
+  .translate-langs__swap:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  /* --- Result card ---------------------------------------------------- */
+  .translate-result {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .translate-result__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .translate-result__cantonese {
+    font-family: var(--font-heading);
+    font-size: var(--type-h2);
+    line-height: var(--leading-h2);
+    color: var(--text);
+    margin: 0;
+  }
+
+  .translate-result__jyutping {
+    font-family: var(--font-mono);
+    font-size: var(--type-small);
+    line-height: var(--leading-small);
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  /* --- Sample phrase chips -------------------------------------------- */
+  .translate-samples {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .translate-sample {
+    appearance: none;
+    border: var(--hairline) solid var(--border);
+    background: var(--glass-fill);
+    color: var(--text-muted);
+    font-family: var(--font-body);
+    font-size: var(--type-label);
+    line-height: var(--leading-small);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition:
+      background-color var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out),
+      border-color var(--dur-fast) var(--ease-out);
+  }
+
+  .translate-sample:hover {
+    color: var(--text);
+    border-color: var(--accent-text);
+  }
+
+  .translate-sample:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  /* --- Voice card ----------------------------------------------------- */
+  .translate-voice {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-5);
+    text-align: center;
+  }
+
+  .translate-voice__orb {
+    position: relative;
+    inline-size: 7rem;
+    block-size: 7rem;
+    border-radius: var(--radius-pill);
+    background:
+      radial-gradient(
+        circle at 32% 28%,
+        var(--accent-fill) 0%,
+        var(--aurora-1) 42%,
+        var(--bg-elevated) 82%
+      );
+    box-shadow:
+      inset 0.5rem 0.5rem 1.5rem var(--glass-fill),
+      inset -0.5rem -0.5rem 1.25rem var(--shadow-glass),
+      0 1rem 2rem var(--shadow-glass);
+    flex: none;
+  }
+
+  .translate-voice__orb[data-listening='true'] {
+    animation: translate-voice-pulse var(--dur-base) var(--ease-in-out) infinite alternate;
+  }
+
+  .translate-voice__transcript {
+    display: grid;
+    gap: var(--space-3);
+    min-block-size: 4.5rem;
+  }
+
+  .translate-voice__line {
+    font-family: var(--font-heading);
+    font-size: var(--type-h3);
+    line-height: var(--leading-h3);
+    color: var(--text);
+  }
+
+  .translate-voice__line--gloss {
+    font-family: var(--font-body);
+    font-size: var(--type-body);
+    line-height: var(--leading-body);
+    color: var(--text-muted);
+  }
+
+  /* --- Camera preview ------------------------------------------------- */
+  .translate-camera {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+    text-align: center;
+  }
+
+  .translate-camera__frame {
+    inline-size: 100%;
+    max-inline-size: 20rem;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-md);
+    border: var(--hairline) dashed var(--border-strong);
+    background: var(--glass-fill);
+    display: grid;
+    place-items: center;
+    color: var(--text-subtle);
+  }
+
+  /* --- Recent translations ------------------------------------------- */
+  .translate-recent__list {
+    display: grid;
+    gap: var(--space-3);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .translate-recent__item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    border: var(--hairline) solid var(--border);
+    background: var(--bg-elevated);
+  }
+
+  .translate-recent__copy {
+    display: grid;
+    gap: var(--space-1);
+    min-inline-size: 0;
+  }
+
+  .translate-recent__primary {
+    font-family: var(--font-body);
+    font-size: var(--type-small);
+    line-height: var(--leading-small);
+    font-weight: 600;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .translate-recent__secondary {
+    font-family: var(--font-mono);
+    font-size: var(--type-label);
+    letter-spacing: var(--tracking-label);
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* --- Offline phrase pack ------------------------------------------- */
+  .translate-phrases {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .translate-phrases__group {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .translate-phrases__label {
+    font-family: var(--font-mono);
+    font-size: var(--type-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--accent-text);
+  }
+
+  .translate-phrase {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    border: var(--hairline) solid var(--border);
+    background: var(--bg-elevated);
+  }
+
+  .translate-phrase__copy {
+    display: grid;
+    gap: var(--space-1);
+    min-inline-size: 0;
+  }
+
+  .translate-phrase__en {
+    font-family: var(--font-body);
+    font-size: var(--type-small);
+    line-height: var(--leading-small);
+    color: var(--text);
+  }
+
+  .translate-phrase__yue {
+    font-family: var(--font-heading);
+    font-size: var(--type-body);
+    line-height: var(--leading-body);
+    color: var(--accent-text);
+  }
+
+  .translate-phrase__jyut {
+    font-family: var(--font-mono);
+    font-size: var(--type-label);
+    color: var(--text-muted);
+  }
+
+  /* --- Motion --------------------------------------------------------- */
+  @keyframes translate-voice-pulse {
+    from {
+      transform: scale(0.96);
+    }
+
+    to {
+      transform: scale(1.04);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .translate-voice__orb[data-listening='true'] {
+      animation: none;
+    }
+  }
+}

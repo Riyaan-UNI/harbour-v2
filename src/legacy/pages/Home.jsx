@@ -116,7 +116,6 @@ export default function Home() {
       <div className="portal-extra-links">
         <Link to="/dashboard"><span aria-hidden="true"><Icon name="dashboard" size={20} /></span><strong>Your dashboard</strong><small>Progress and profile details</small></Link>
         <Link to="/people"><span aria-hidden="true"><Icon name="users" size={20} /></span><strong>Find your people</strong><small>Search the sample directory</small></Link>
-        <Link to="/bunny-garden"><span aria-hidden="true"><Icon name="rabbit" size={20} /></span><strong>Bunny’s garden</strong><small>A happy little break</small></Link>
         <Link to="/community"><span aria-hidden="true"><Icon name="globe" size={20} /></span><strong>Community</strong><small>See all sample events</small></Link>
         <Link to="/voice-sos"><span aria-hidden="true"><Icon name="sos" size={20} /></span><strong>Voice SOS</strong><small>Open the support preview</small></Link>
       </div>

@@ -62,6 +62,9 @@ declare module '@legacy/context/ProfileContext.jsx' {
     socials: Record<string, string>;
     avatar?: string;
     photo?: string;
+    id?: string;
+    createdAt?: string;
+    mascotId?: string;
     tourDone?: boolean;
   };
 
@@ -69,7 +72,32 @@ declare module '@legacy/context/ProfileContext.jsx' {
 
   export function useProfile(): {
     profile: LegacyProfileShape | null;
-    saveProfile: (value: LegacyProfileShape) => void;
+    profiles: LegacyProfileShape[];
+    saveProfile: (value: LegacyProfileShape) => boolean;
+    selectProfile: (id: string) => boolean;
     clearProfile: () => void;
+    removeProfile: (id: string) => void;
   };
+}
+
+/**
+ * The legacy API transport.
+ */
+declare module '@legacy/lib/api.js' {
+  export function translateText(text: string): Promise<{ translation?: string }>;
+  export function sendChat(
+    message: string,
+    history?: Array<{ role: 'user' | 'harbour'; content: string }>,
+  ): Promise<{ reply: string; demo?: boolean }>;
+}
+
+/** The offline Cantonese phrase pack — draft wording, review before release. */
+declare module '@legacy/data/essentialCantonesePhrases.js' {
+  export type EssentialCantonesePhrase = {
+    category: string;
+    english: string;
+    cantonese: string;
+    jyutping: string;
+  };
+  export const essentialCantonesePhrases: readonly EssentialCantonesePhrase[];
 }

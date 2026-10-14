@@ -27,6 +27,14 @@ export type AvatarProps = HTMLAttributes<HTMLSpanElement> & {
   size?: AvatarSize;
   /** Give the avatar an accessible name. Omit it beside a visible name. */
   label?: string;
+  /**
+   * An image source — the mascot avatars (dashboard module 6). Additive: when
+   * present the avatar renders as an `<img>` with the same `.ui-avatar`
+   * geometry (square, pill radius, `object-fit: cover`), and `alt` is the name
+   * unless an explicit `label` is given. When absent, the initials span renders
+   * exactly as it always has — no existing path changes.
+   */
+  src?: string;
 };
 
 /** One or two initials on a 20% chart colour, with the text token on top. */
@@ -35,10 +43,30 @@ export function Avatar({
   tone = 1,
   size = 'md',
   label,
+  src,
   className,
   ...rest
 }: AvatarProps): JSX.Element {
   const chartIndex = (((Math.trunc(tone) - 1) % 5) + 5) % 5 + 1;
+  const toneStyle = {
+    '--avatar-tone': `var(--chart-${chartIndex})`,
+  } as CSSProperties;
+
+  if (src) {
+    return (
+      <img
+        className={cn(
+          'ui-avatar shrink-0 rounded-pill object-cover aspect-square',
+          SIZE_CLASS[size],
+          className,
+        )}
+        style={toneStyle}
+        src={src}
+        alt={label ?? name}
+        {...(rest as HTMLAttributes<HTMLImageElement>)}
+      />
+    );
+  }
 
   return (
     <span
@@ -47,7 +75,7 @@ export function Avatar({
         SIZE_CLASS[size],
         className,
       )}
-      style={{ '--avatar-tone': `var(--chart-${chartIndex})` } as CSSProperties}
+      style={toneStyle}
       role={label ? 'img' : undefined}
       aria-label={label}
       aria-hidden={label ? undefined : 'true'}

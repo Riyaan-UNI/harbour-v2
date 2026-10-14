@@ -1,0 +1,307 @@
+/* ==========================================================================
+   Harbour — App home (v2 redesign)
+
+   Token-only. No raw colours, no px except the 1px hairline, and every
+   padding / margin / gap / inset comes from the ten --space-* steps. The
+   recharts overrides resolve their colours through CSS custom properties, so
+   the activity chart is theme-aware without reading the DOM for values.
+
+   The page is built over a fixed harbour scene backdrop
+   (`art/harbour-scene-1.svg`) sitting at z-index -1 inside `.app-home`.
+   Every text-bearing region that is not already a Card surface wraps itself
+   in `.app-home-glass-text`, which paints the same `--glass-tint` as the body
+   and stacks a backdrop-filter blur on top — so the scene reads as a soft
+   wash, the heading plate reads as a frosted glass plate, and the existing
+   Card tiles (already glass themselves) sit one level higher in the stack.
+   Cards are NEVER nested inside `.app-home-glass-text`: glass on glass.
+   ========================================================================== */
+
+.app-home {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  isolation: isolate;
+}
+
+/* --- Scene backdrop ------------------------------------------------------ */
+.app-home__scene {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.app-home__scene img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.32;
+}
+
+.app-home__scene-tint {
+  position: absolute;
+  inset: 0;
+  background: var(--glass-tint);
+}
+
+/* --- Glass plate behind text ------------------------------------------- */
+.app-home-glass-text {
+  position: relative;
+  isolation: isolate;
+  background: var(--glass-tint);
+  backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  border: var(--hairline) solid var(--glass-highlight);
+  border-radius: var(--radius-md);
+  padding: var(--space-5) var(--space-6);
+  box-shadow: var(--shadow-glass);
+}
+
+/* --- Masthead: greeting + weather, an asymmetric split ---------------- */
+.app-home-masthead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: var(--space-6);
+}
+
+.app-home-masthead__intro {
+  flex: 1 1 20rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  justify-content: center;
+}
+
+.app-home-masthead__aside {
+  flex: 0 1 18rem;
+  min-width: 0;
+}
+
+/* The date / location eyebrow above the greeting. */
+.app-home-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-subtle);
+}
+
+/* --- Section heading block (editorial, left-aligned) ------------------ */
+.app-home-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.app-home-head__lead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 48rem;
+}
+
+/* --- Tool tiles: a glass Card carrying a per-tile accent -------------- */
+.app-home-tile {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  height: 100%;
+}
+
+.app-home-tile__accent {
+  height: var(--space-1);
+  width: var(--space-8);
+  border-radius: var(--radius-pill);
+  background: var(--tile-accent, var(--accent-text));
+}
+
+.app-home-tile__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.app-home-tile__num {
+  font-family: var(--font-mono);
+  font-size: var(--type-h3);
+  line-height: 1;
+  color: var(--tile-accent, var(--accent-text));
+  opacity: 0.85;
+}
+
+.app-home-tile__glyph {
+  display: inline-grid;
+  place-items: center;
+  width: var(--space-8);
+  height: var(--space-8);
+  border-radius: var(--radius-md);
+  color: var(--tile-accent, var(--accent-text));
+  background: var(--glass-fill);
+}
+
+.app-home-tile__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.app-home-tile__foot {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--tile-accent, var(--accent-text));
+}
+
+/* --- Demos column: solid panels, not glass-on-glass, not cards -------- */
+.app-home-demos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  height: 100%;
+}
+
+.app-home-demo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: var(--hairline) solid var(--border-strong);
+  background: var(--bg-elevated);
+}
+
+.app-home-demo__title {
+  font-size: var(--type-h3);
+  line-height: var(--leading-h3);
+  color: var(--text);
+}
+
+.app-home-demo__balance {
+  font-family: var(--font-mono);
+  font-size: var(--type-h2);
+  line-height: 1;
+  color: var(--text);
+}
+
+/* --- Activity chart overrides (recharts is theme-aware via CSS) -------- */
+.app-home-activity .recharts-line-curve {
+  stroke: var(--chart-1);
+}
+
+.app-home-activity .recharts-cartesian-grid line {
+  stroke: var(--border);
+}
+
+.app-home-activity .recharts-cartesian-axis-tick text {
+  fill: var(--text-muted);
+}
+
+.app-home-activity .recharts-dot {
+  fill: var(--bg-elevated);
+  stroke: var(--chart-1);
+}
+
+.app-home-activity .recharts-active-dot circle {
+  fill: var(--chart-1);
+  stroke: var(--bg);
+}
+
+/* --- Community event cards -------------------------------------------- */
+.app-home-event {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  height: 100%;
+}
+
+.app-home-event__date {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.app-home-event__day {
+  font-family: var(--font-heading);
+  font-size: var(--type-h1);
+  line-height: 1;
+  color: var(--text);
+}
+
+.app-home-event__month {
+  font-family: var(--font-mono);
+  font-size: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-subtle);
+}
+
+.app-home-event__copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.app-home-event__foot {
+  margin-top: auto;
+}
+
+/* --- Explore links ---------------------------------------------------- */
+.app-home-explore {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: var(--space-4);
+}
+
+.app-home-explore__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: var(--hairline) solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.app-home-explore__link:hover {
+  background: var(--glass-fill);
+  border-color: var(--border-strong);
+}
+
+.app-home-explore__link:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.app-home-explore__icon {
+  display: inline-grid;
+  place-items: center;
+  width: var(--space-8);
+  height: var(--space-8);
+  border-radius: var(--radius-md);
+  color: var(--accent-text);
+  background: var(--glass-fill);
+  flex: none;
+}
+
+.app-home-explore__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}

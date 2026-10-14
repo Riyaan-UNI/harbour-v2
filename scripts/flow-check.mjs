@@ -23,7 +23,7 @@ const OUT = 'screenshots/phase-1';
 
 const APP_ROUTES = [
   ['/app/home', 'Home'],
-  ['/app/shield', 'Scam X-ray'],
+  ['/app/scam', 'Scam X-ray'],
   ['/app/checklist', 'Settle-in list'],
   ['/app/translate', 'Cantonese helper'],
   ['/app/chat', 'Ask Harbour'],
@@ -166,9 +166,9 @@ async function run() {
   await page.goto(BASE + '/app/home', { waitUntil: 'networkidle' });
   await settled(page);
   await page.screenshot({ path: `${OUT}/home-1440-dark.png` });
-  await page.goto(BASE + '/app/shield', { waitUntil: 'networkidle' });
+  await page.goto(BASE + '/app/scam', { waitUntil: 'networkidle' });
   await settled(page);
-  await page.screenshot({ path: `${OUT}/shield-1440-dark.png` });
+  await page.screenshot({ path: `${OUT}/scam-1440-dark.png` });
 
   // Light theme pass
   await page.emulateMedia({ colorScheme: 'light' });

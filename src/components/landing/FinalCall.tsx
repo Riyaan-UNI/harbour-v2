@@ -22,7 +22,7 @@ export function FinalCall(): JSX.Element {
           or look around first.
         </Text>
         <Cluster gap={3}>
-          <Button asChild size="large">
+          <Button asChild size="large" className="final-call__primary">
             <Link to="/signup">Create your profile</Link>
           </Button>
           <Button asChild variant="ghost" size="large">

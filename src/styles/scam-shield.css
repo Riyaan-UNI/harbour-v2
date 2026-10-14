@@ -1,0 +1,329 @@
+/* ==========================================================================
+   Harbour — Scam Shield (the `/app/scam` lane)
+
+   The v2 rebuild of the old build's Shield page. One BEM block
+   (`scam-shield`, with `scam-xray`, `scam-drill`, `scam-sample`,
+   `scam-selfcheck`, `scam-recovery` and `scam-final` sections inside it) and
+   zero legacy class names — `.page`, `.scam-page` and `.drill` all already
+   exist in the ported lane and must not be re-entered.
+
+   Unlayered on purpose, like `dashboard.css`: the ported stylesheets are
+   unlayered too, and `index.css` imports this file after them, so a
+   class-level rule here wins wherever the legacy lane would otherwise
+   override a rule of equal specificity. `.portal-main` already carries the
+   vertical padding (nav height plus a section), so this lane only sets the
+   horizontal container.
+
+   Compliance notes (stylelint §12): spacing properties (padding/margin/gap/
+   inset/top/right/bottom/left) take tokens, 0 or auto; no raw colours; no px
+   beyond the 1px hairline; type sizes come from the type-* roles in the
+   markup, never from declarations here. All motion is transform/opacity, and
+   the calm-mode (`data-calm`) and reduced-motion rules in base.css cover it.
+   ========================================================================== */
+
+.scam-shield {
+  inline-size: 100%;
+  max-inline-size: var(--container-max-inline-size);
+  margin-inline: auto;
+  padding-inline: var(--container-padding-inline);
+}
+
+/* --- Hero ------------------------------------------------------------- */
+
+/*
+ * The hero is two columns from `md` up — the copy, and the scene beside it —
+ * vertically centred, so the artwork anchors the page without outweighing
+ * the words. On narrow viewports the grid drops to one column and the scene
+ * sits under the copy, capped and centred by its own max-inline-size.
+ */
+.scam-shield__hero {
+  align-items: center;
+}
+
+/* --- The X-ray scene ---------------------------------------------------- */
+
+.scam-scene {
+  inline-size: 100%;
+  max-inline-size: 20rem;
+  margin-inline: auto;
+  overflow: visible;
+}
+
+/* Every colour here is a semantic token: the scene re-themes with the page
+   and no raw colour enters the lane. */
+.scam-scene__card {
+  fill: var(--bg-elevated);
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+
+.scam-scene__bar {
+  fill: var(--border-strong);
+  opacity: 0.5;
+}
+
+.scam-scene__bar--signal {
+  fill: var(--gold-text);
+  opacity: 1;
+}
+
+.scam-scene__lens {
+  fill: var(--bg-elevated);
+  stroke: var(--accent-text);
+  stroke-width: 2;
+}
+
+.scam-scene__handle {
+  stroke: var(--accent-text);
+  stroke-width: 9;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.scam-scene__wave {
+  stroke: var(--accent-text);
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+
+.scam-scene__signal-line {
+  stroke: var(--gold-text);
+  stroke-width: 1;
+  opacity: 0.45;
+}
+
+.scam-scene__signal {
+  fill: var(--gold-text);
+  animation: scam-signal 2.4s var(--ease-out) infinite;
+}
+
+/* The lens sweep: a wedge that turns inside the clipped lens. The origin is
+   the lens centre expressed in viewBox units (210/320, 120/260) — percentages
+   rather than px, per the lane's unit rules. */
+.scam-scene__sweep {
+  transform-box: view-box;
+  transform-origin: 65.625% 46.1538%;
+  animation: scam-sweep 7s linear infinite;
+}
+
+.scam-scene__sweep-stop {
+  stop-color: var(--accent-fill);
+  stop-opacity: 0.2;
+}
+
+.scam-scene__sweep-stop--faded {
+  stop-opacity: 0;
+}
+
+@keyframes scam-sweep {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes scam-signal {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Reduced motion is covered globally by base.css; restated here so the
+   scene's static state is the complete drawing, not a frozen mid-sweep
+   frame. Calm mode (`data-calm`) turns the same effects off. */
+
+@media (prefers-reduced-motion: reduce) {
+  .scam-scene__sweep,
+  .scam-scene__signal {
+    animation: none;
+  }
+}
+
+[data-calm='true'] .scam-scene__sweep,
+[data-calm='true'] .scam-scene__signal {
+  animation: none;
+}
+
+/* --- Tabs ------------------------------------------------------------- */
+
+/*
+ * The tab row gets a hairline underneath so the row reads as one control
+ * with a current tab. The selected state's surface and border come from
+ * `tabVariants`; this is only the row's own structure.
+ */
+.scam-shield__tabs {
+  padding-block-end: var(--space-2);
+  border-block-end: var(--hairline) solid var(--border);
+}
+
+.scam-shield__panel {
+  margin-block-start: var(--space-6);
+}
+
+/* --- X-ray workspace -------------------------------------------------- */
+
+.scam-xray__form,
+.scam-xray__result {
+  min-block-size: 100%;
+}
+
+/* The idle and busy states sit centred in the result card's column. */
+.scam-xray__idle,
+.scam-xray__busy {
+  padding-block: var(--space-8);
+}
+
+/* --- Sample read ------------------------------------------------------ */
+
+.scam-sample__message {
+  border-inline-start: var(--hairline) solid var(--border-strong);
+  padding-inline-start: var(--space-4);
+}
+
+.scam-sample__read {
+  border: var(--hairline) solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+/* The five-dot risk meter. Decoration: `aria-hidden`, and the label below it
+   carries the words. The fill colour arrives as `--meter-fill` per level. */
+.scam-meter__dot {
+  inline-size: var(--space-2);
+  block-size: var(--space-2);
+  background-color: var(--border-strong);
+}
+
+.scam-meter__dot[data-filled='true'] {
+  background-color: var(--meter-fill);
+}
+
+/* --- Self-check (the error state's offline alternative) ---------------- */
+
+.scam-selfcheck {
+  border-inline-start: var(--hairline) solid var(--border-strong);
+  padding-inline-start: var(--space-4);
+}
+
+/* --- Drill ------------------------------------------------------------- */
+
+.scam-drill__start,
+.scam-drill__debrief {
+  border: var(--hairline) solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+}
+
+.scam-drill__thread {
+  /* The thread is where the practice happens: it keeps the bubble, the
+     options and the feedback in one reading column. */
+  max-inline-size: var(--measure-body);
+}
+
+.scam-drill__chip {
+  appearance: none;
+  cursor: pointer;
+  min-block-size: var(--touch-target);
+  padding-inline: var(--space-4);
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-pill);
+  background-color: transparent;
+  color: var(--text-muted);
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.scam-drill__chip:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.scam-drill__chip[aria-pressed='true'] {
+  border-color: var(--border-strong);
+  background-color: var(--glass-fill-strong);
+  color: var(--text);
+}
+
+/* The debrief's signal chips are a record, not controls. */
+.scam-drill__chip.is-static {
+  cursor: default;
+}
+
+.scam-drill__chip.is-static:hover {
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+.scam-drill__bubble {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border: var(--hairline) solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  background-color: var(--bg-elevated);
+}
+
+/* Feedback: colour plus icon plus words — never colour alone. */
+.scam-drill__feedback {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.scam-drill__feedback[data-safe='true'] {
+  color: var(--success);
+}
+
+.scam-drill__feedback[data-safe='false'] {
+  color: var(--gold-text);
+}
+
+.scam-drill__score {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+/* --- Recovery ---------------------------------------------------------- */
+
+.scam-recovery__steps {
+  list-style: none;
+  padding-inline-start: 0;
+}
+
+.scam-recovery__step {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.scam-recovery__number {
+  flex: none;
+  display: grid;
+  place-items: center;
+  inline-size: var(--space-8);
+  block-size: var(--space-8);
+  border: var(--hairline) solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--accent-text);
+}
+
+/* --- Final call -------------------------------------------------------- */
+
+.scam-final {
+  padding-block: var(--space-6);
+  text-align: center;
+}

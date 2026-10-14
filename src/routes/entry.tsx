@@ -1,6 +1,10 @@
+import { useRef } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { useGSAP } from '@gsap/react';
+import { gsap } from 'gsap';
 import Login from '@legacy/pages/Login.jsx';
 import Onboarding from '@legacy/pages/Onboarding.jsx';
+import ArrivalStory from './ArrivalStory';
 import { useProfile } from '@legacy/context/ProfileContext.jsx';
 import { CalmModeProvider, ShellThemeProvider } from '../components/app/ShellTheme';
 import {
@@ -11,12 +15,8 @@ import {
 /**
  * The v2 login and signup routes.
  *
- * **P1 scope:** they render the ported legacy `Login.jsx` and `Onboarding.jsx`
- * inside the legacy entry shell, which is what makes the whole flow work today.
- * P2 replaces the bodies with the real v2 signup (nickname / country /
- * university / avatar) and login picker; the route names, the entry shell and
- * the redirect targets below are already the final ones, so P2 swaps a child
- * rather than a route.
+ * The entry lane renders the local-profile picker, three-step signup, and
+ * skippable arrival story inside the shared theme-aware entry shell.
  *
  * Why the legacy entry shell comes with them: `Login.jsx` and `Onboarding.jsx`
  * were written against `.app-shell.entry-shell` — the full-viewport entry
@@ -24,16 +24,37 @@ import {
  * visual column. Rendering them without it produces an unstyled column. The
  * shell is three lines; it is not product UI.
  *
- * The redirect when a profile already exists: the master prompt's flow is
- * "log out, log in again, and reach `/app/home`", so a signed-in user who opens
- * `/login` goes straight through rather than being shown the picker. Login's
- * own "Create another local profile" link is what offers a second profile.
+ * `/login` remains available when a profile is active so users can choose a
+ * saved local profile or remove one from this browser.
  */
 function EntryShell({ children }: { children: React.ReactNode }): JSX.Element {
+  const root = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const targets = gsap.utils.toArray<HTMLElement>(
+      '.login-visual, .login-panel, .onboarding-entry .entry-top, .onboarding-entry .form-card, .onboarding-entry .entry-disclaimer',
+      root.current,
+    );
+    gsap.fromTo(
+      targets,
+      { autoAlpha: 0, y: 14 },
+      {
+        autoAlpha: 1,
+        y: 0,
+        duration: 0.55,
+        stagger: 0.1,
+        ease: 'power3.out',
+        clearProps: 'all',
+      },
+    );
+  }, { scope: root });
+
   return (
     <ShellThemeProvider>
       <CalmModeProvider>
-        <div className="app-shell entry-shell">
+        <div ref={root} className="app-shell entry-shell">
           <BlobBackground />
           <GrainOverlay />
           <main className="entry-area">{children}</main>
@@ -44,16 +65,21 @@ function EntryShell({ children }: { children: React.ReactNode }): JSX.Element {
 }
 
 export function LoginRoute(): JSX.Element {
-  const { profile } = useProfile();
-  const location = useLocation();
-  const from = (location.state as { from?: string } | null)?.from;
-
-  // Already signed in: honour the guard's `from`, or go to the app home.
-  if (profile) return <Navigate to={from ?? '/app/home'} replace />;
-
   return (
     <EntryShell>
       <Login />
+    </EntryShell>
+  );
+}
+
+export function ArrivalStoryRoute(): JSX.Element {
+  const { profile } = useProfile();
+  const location = useLocation();
+  if (!profile) return <Navigate to="/signup" replace />;
+  const storageWarning = (location.state as { storageWarning?: string } | null)?.storageWarning || '';
+  return (
+    <EntryShell>
+      <ArrivalStory storageWarning={storageWarning} />
     </EntryShell>
   );
 }

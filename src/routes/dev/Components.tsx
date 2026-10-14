@@ -668,6 +668,20 @@ export function Components(): JSX.Element {
               </Cluster>
             </Row>
 
+            <Row label="art variant — concept art per id, decorative (no plate)">
+              <Cluster gap={4} align="center">
+                {UNIVERSITIES.filter((university) => university.art !== null).map((university) => (
+                  <span
+                    key={university.id}
+                    data-testid={`uni-art-${university.id}`}
+                    className="inline-flex"
+                  >
+                    <UniversityLogo id={university.id} size="md" variant="art" />
+                  </span>
+                ))}
+              </Cluster>
+            </Row>
+
             <Row label="sizes — 2rem / 2.5rem / 3rem">
               <Cluster gap={6} align="center">
                 <UniversityLogo id="hku" size="sm" />

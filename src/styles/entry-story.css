@@ -1,0 +1,1883 @@
+/* Signup, arrival story, and post-signup welcome. Colours and spacing use Harbour tokens. */
+
+/* These page-scoped rules intentionally override the legacy entry styles while
+   preserving their original selectors for the rest of the app. */
+/* stylelint-disable no-descending-specificity */
+.signup-entry {
+  display: grid;
+  width: 100%;
+  min-height: 100svh;
+  min-height: 100dvh;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.signup-brand {
+  gap: var(--space-3);
+  color: var(--text-strong);
+  font-size: var(--fs-20);
+  text-align: left;
+}
+
+.signup-brand-mark,
+.arrival-story-logo,
+.login-brand-mark {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 auto;
+}
+
+.signup-brand small {
+  margin-top: var(--space-1);
+  color: var(--text-muted);
+  font-size: .625rem;
+  letter-spacing: .11em;
+}
+
+.signup-returning {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--text-muted);
+  font-size: var(--fs-14);
+}
+
+.signup-entry .entry-top .login-link {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: var(--space-2);
+  padding-inline: var(--space-4);
+  border-color: var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  color: var(--text-strong);
+  font-weight: var(--fw-semibold);
+}
+
+.signup-entry .entry-top {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 90rem;
+  margin-inline: auto;
+  min-height: 3.75rem;
+  padding: 0 var(--container-padding-inline);
+  border-bottom: 1px solid var(--border-soft);
+  background: color-mix(in srgb, var(--surface-page) 76%, transparent);
+  backdrop-filter: blur(1rem);
+}
+
+.signup-layout {
+  display: grid;
+  box-sizing: border-box;
+  grid-template-columns: minmax(0, 0.94fr) minmax(21.25rem, 1fr);
+  gap: var(--space-6);
+  align-items: center;
+  width: min(72.5rem, calc(100% - 3rem));
+  min-height: 0;
+  height: 100%;
+  margin: 0 auto;
+  padding-block: var(--space-2);
+}
+
+.signup-illustration {
+  position: relative;
+  display: grid;
+  min-height: 0;
+  place-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid var(--border-soft);
+  border-radius: 3rem;
+  background:
+    radial-gradient(ellipse at 52% 40%, color-mix(in srgb, var(--gold-fill) 30%, transparent), transparent 43%),
+    linear-gradient(145deg, color-mix(in srgb, var(--teal-700) 95%, var(--surface-page)), color-mix(in srgb, var(--blue-200) 50%, var(--surface-page)) 80%);
+}
+
+.signup-illustration::before,
+.signup-illustration::after {
+  position: absolute;
+  z-index: -1;
+  border: 1px solid color-mix(in srgb, var(--text-on-brand) 26%, transparent);
+  border-radius: 50%;
+  content: "";
+}
+
+.signup-illustration::before {
+  width: 72%;
+  aspect-ratio: 1;
+  transform: translateY(13%);
+}
+
+.signup-illustration::after {
+  width: 52%;
+  aspect-ratio: 1;
+  transform: translateY(16%);
+}
+
+.signup-art-glow {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 70%;
+  height: 60%;
+  margin: auto;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--gold-fill) 32%, transparent);
+  filter: blur(3.375rem);
+}
+
+.signup-mascot {
+  width: min(78%, 27.5rem);
+  max-height: 68%;
+  object-fit: contain;
+  filter: drop-shadow(0 1.5rem 1.375rem color-mix(in srgb, var(--bg) 18%, transparent));
+}
+
+/* The university's concept art, when step 3 has a chosen university. The art
+   SVG carries its own composition, so no drop-shadow or motion is added
+   here — the rotating rings and drifting blobs already supply the colour. */
+.signup-art {
+  width: min(72%, 26rem);
+  height: auto;
+  max-height: 68%;
+  aspect-ratio: 1;
+  object-fit: contain;
+}
+
+/* The toroidal rings and drifting blobs mirror the login stage. Two toruses
+   rotate in opposite directions; two blurred colour clouds breathe between
+   two positions so the illustration reads as alive without anything moving
+   fast. `prefers-reduced-motion: reduce` stops all of it (see bottom). */
+.signup-art-torus {
+  position: absolute;
+  inset: 0;
+  width: 76%;
+  aspect-ratio: 1;
+  margin: auto;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--text-on-brand) 30%, transparent);
+  background:
+    radial-gradient(circle at 50% 50%, transparent 60%, color-mix(in srgb, var(--text-on-brand) 12%, transparent) 60.5%, color-mix(in srgb, var(--text-on-brand) 12%, transparent) 67%, transparent 67.5%);
+  pointer-events: none;
+}
+
+.signup-art-torus--one {
+  width: 76%;
+  transform: translate(0, 0);
+  animation: signup-torus-spin 27s linear infinite;
+}
+
+.signup-art-torus--two {
+  width: 68%;
+  border-color: color-mix(in srgb, var(--gold-fill) 38%, transparent);
+  background:
+    radial-gradient(circle at 50% 50%, transparent 56%, color-mix(in srgb, var(--gold-fill) 14%, transparent) 56.5%, color-mix(in srgb, var(--gold-fill) 14%, transparent) 64%, transparent 64.5%);
+  transform: rotate(30deg);
+  animation: signup-torus-spin-rev 35s linear infinite;
+}
+
+@keyframes signup-torus-spin {
+  from { transform: translate(0, 0) rotate(0deg); }
+  to { transform: translate(0, 0) rotate(360deg); }
+}
+
+@keyframes signup-torus-spin-rev {
+  from { transform: rotate(30deg); }
+  to { transform: rotate(-330deg); }
+}
+
+.signup-art-blob {
+  position: absolute;
+  inset: 0;
+  width: 48%;
+  aspect-ratio: 1;
+  margin: auto;
+  border-radius: 50%;
+  filter: blur(4rem);
+  opacity: .38;
+  pointer-events: none;
+}
+
+.signup-art-blob--teal {
+  background: var(--accent-fill);
+  transform: translate(-25%, -22%) scale(.92);
+  animation: signup-blob-drift-teal 19s var(--ease-in-out, ease-in-out) infinite alternate;
+}
+
+.signup-art-blob--gold {
+  background: var(--gold-fill);
+  transform: translate(25%, 22%) scale(1.05);
+  animation: signup-blob-drift-gold 23s var(--ease-in-out, ease-in-out) infinite alternate;
+}
+
+@keyframes signup-blob-drift-teal {
+  from { transform: translate(-25%, -22%) scale(.92); }
+  to { transform: translate(-19%, -12%) scale(1.12); }
+}
+
+@keyframes signup-blob-drift-gold {
+  from { transform: translate(25%, 22%) scale(1.05); }
+  to { transform: translate(17%, 16%) scale(.9); }
+}
+
+.signup-art-caption {
+  position: absolute;
+  right: var(--space-5);
+  bottom: var(--space-5);
+  left: var(--space-5);
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: var(--space-4);
+  color: var(--text-on-brand);
+}
+
+.signup-progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent-fill);
+  transition: width var(--dur-base) var(--ease-out);
+}
+
+.signup-mascot-preview span {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.arrival-story-header > span {
+  color: color-mix(in srgb, var(--arrival-text) 84%, transparent);
+  font: var(--fw-semibold) var(--fs-12) / 1.4 var(--font-mono);
+  letter-spacing: .1em;
+}
+
+.arrival-story-progress span {
+  display: block;
+  height: 100%;
+  background: var(--arrival-highlight);
+  transition: width .55s var(--ease-out);
+}
+
+.signup-art-caption span {
+  font: var(--fw-semibold) var(--fs-12) / 1.4 var(--font-mono);
+  letter-spacing: .11em;
+}
+
+.signup-progress > span:first-child,
+.signup-progress > span:nth-child(2) {
+  font: var(--fw-semibold) var(--fs-12) / 1.4 var(--font-mono);
+  letter-spacing: .11em;
+}
+
+.signup-art-caption strong {
+  font: var(--fw-semibold) clamp(1.1rem, 2vw, 1.6rem) / 1.12 var(--font-display);
+  text-align: right;
+}
+
+.signup-form-column {
+  width: 100%;
+  max-width: 32.5rem;
+  align-self: center;
+}
+
+.signup-progress {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-2) var(--space-4);
+  align-items: center;
+  margin-bottom: var(--space-6);
+  color: var(--text-muted);
+}
+
+.signup-progress > span:nth-child(2) {
+  color: var(--text-strong);
+}
+
+.signup-progress > span:nth-child(2) i {
+  color: var(--text-muted);
+  font-style: normal;
+}
+
+.signup-progress-track {
+  grid-column: 1 / -1;
+  height: .1875rem;
+  overflow: hidden;
+  border-radius: 99rem;
+  background: var(--border-soft);
+}
+
+.signup-form-column .page-heading {
+  margin-bottom: var(--space-5);
+}
+
+.signup-form-column .page-heading h1 {
+  margin-top: var(--space-2);
+  font-size: clamp(2rem, 3.2vw, var(--fs-40));
+}
+
+.signup-form-column .page-heading p {
+  max-width: 42ch;
+}
+
+.signup-form {
+  gap: var(--space-5);
+}
+
+.signup-form label {
+  display: grid;
+  gap: var(--space-2);
+  color: var(--text-strong);
+  font-weight: var(--fw-semibold);
+}
+
+.signup-form label input,
+.signup-form label select {
+  width: 100%;
+  min-height: 3.5rem;
+}
+
+.signup-form label input {
+  padding-inline: var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface-card);
+  color: var(--text-strong);
+  box-shadow: 0 .25rem .9rem color-mix(in srgb, var(--bg) 12%, transparent);
+  font-size: var(--fs-18);
+}
+
+.signup-form label input::placeholder {
+  color: var(--text-muted);
+  opacity: .82;
+}
+
+.signup-form label input:focus-visible {
+  border-color: var(--accent-fill);
+  outline: .1875rem solid var(--focus-ring);
+  outline-offset: .1875rem;
+  box-shadow: 0 0 0 .35rem color-mix(in srgb, var(--accent-fill) 19%, transparent);
+}
+
+.country-trigger,
+.university-trigger {
+  display: grid;
+  width: 100%;
+  min-height: 4.5rem;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface-card);
+  color: var(--text-strong);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--dur-micro) var(--ease-out), background var(--dur-micro) var(--ease-out), box-shadow var(--dur-micro) var(--ease-out);
+}
+
+.country-trigger:hover,
+.university-trigger:hover {
+  border-color: var(--accent-fill);
+  background: var(--bg-elevated);
+}
+
+/* The two-letter code tile. Still what the picker shows for the "Another
+   region / prefer not to say" row, for an unset value, and whenever a country
+   has no flag file. */
+.country-flag-code,
+.university-trigger-icon {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: 0 0 2.75rem;
+  place-items: center;
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--accent-fill) 15%, var(--surface-card));
+  color: var(--accent-text);
+  font: var(--fw-bold) var(--fs-12) / 1 var(--font-mono);
+}
+
+/* A flag replaces that tile rather than sitting inside it, so it carries its own
+   boundary and takes none of the tile's fill. It matches the tile's height and
+   takes its width from the ratio, so the two sit in the same column at the same
+   size and a row is the same height whichever one it shows. 4:3 is the ratio of
+   every file in `public/flags/`, so a flag never stretches or letterboxes. */
+.country-flag {
+  display: block;
+  width: auto;
+  height: 2.75rem;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+
+.country-trigger-label,
+.university-trigger-label {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-1);
+  color: var(--text-strong);
+  font-weight: var(--fw-semibold);
+}
+
+.country-trigger-label small,
+.university-trigger-label small {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-regular);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.country-trigger-chevron,
+.university-trigger > b {
+  color: var(--accent-text);
+  font-size: var(--fs-20);
+}
+
+.country-backdrop,
+.signup-entry .university-backdrop {
+  position: fixed;
+  z-index: var(--z-modal);
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  backdrop-filter: blur(.75rem);
+}
+
+.country-dialog,
+.signup-entry .university-dialog {
+  position: relative;
+  display: flex;
+  width: min(39rem, 100%);
+  max-height: min(45rem, calc(100dvh - 2rem));
+  flex-direction: column;
+  gap: var(--space-3);
+  overflow: hidden;
+  padding: var(--space-5);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-card);
+  background: var(--surface-card);
+  color: var(--text-strong);
+  box-shadow: var(--shadow-raised);
+}
+
+.country-dialog h2,
+.signup-entry .university-dialog h2 {
+  margin: 0;
+  color: var(--text-strong);
+  font: var(--fw-bold) clamp(1.6rem, 4vw, 2.25rem) / 1.1 var(--font-display);
+}
+
+.country-dialog > p,
+.signup-entry .university-dialog > p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.country-close,
+.signup-entry .university-close {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border: 1px solid var(--border-soft);
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  color: var(--text-strong);
+  font-size: var(--fs-24);
+  cursor: pointer;
+}
+
+.country-dialog .search-field,
+.signup-entry .university-dialog .search-field {
+  display: grid;
+  grid-template-columns: 1.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-width: 0;
+  min-height: 3.5rem;
+  margin: 0;
+  padding-inline: var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--bg-elevated);
+  color: var(--text-strong);
+}
+
+.country-dialog .search-field input,
+.signup-entry .university-dialog .search-field input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 3rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-strong);
+  box-shadow: none;
+}
+
+.country-dialog .search-field input:focus-visible,
+.signup-entry .university-dialog .search-field input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.country-options {
+  display: grid;
+  min-height: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-1);
+}
+
+/* One column, not two. With a logo, a full name and an acronym in the row, two
+   columns left the name about 10rem — "The Hong Kong University of Science and
+   Technology" wrapped to four lines and ran out of its own card, and the row
+   heights came out uneven. Eight rows scroll perfectly well full width. */
+.signup-entry .university-options {
+  display: grid;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-1);
+}
+
+/* No `min-height` on these rows, deliberately. The list is a grid inside a
+   height-constrained flex column, so an `auto` row can be shrunk down to the
+   item's minimum — and an explicit `min-height` *replaces* the content-based
+   automatic minimum rather than adding to it. At 360px that squeezed the row
+   holding "The Hong Kong University of Science and Technology" to 60px while
+   its text needed 110, so the name spilled out of its own card. Leaving
+   `min-height` unset keeps the content-based minimum: the row grows to fit the
+   name and the list scrolls instead. The 3.75rem floor survives anyway — the
+   2.75rem flag, code tile or logo plus `space-2` of padding is 60px. */
+.country-option,
+.signup-entry .university-option {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-control);
+  background: var(--bg-elevated);
+  color: var(--text-strong);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--dur-micro) var(--ease-out), background var(--dur-micro) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+}
+
+.country-option:hover,
+.country-option.selected,
+.signup-entry .university-option:hover,
+.signup-entry .university-option.selected {
+  border-color: var(--accent-fill);
+  background: color-mix(in srgb, var(--accent-fill) 12%, var(--bg-elevated));
+}
+
+.country-option:hover,
+.signup-entry .university-option:hover { transform: translateY(-1px); }
+
+.country-option > span:nth-child(2),
+.signup-entry .university-option > span:nth-child(2) {
+  min-width: 0;
+  flex: 1;
+}
+
+.country-option-check,
+.signup-entry .university-option > b { color: var(--accent-text); }
+
+.signup-entry .university-option > span:nth-child(2) {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.signup-entry .university-option strong {
+  color: var(--text-strong);
+  font-size: var(--fs-14);
+  line-height: var(--lh-snug);
+}
+
+.signup-entry .university-option small { color: var(--text-muted); }
+
+/* The logo plate is wider than it is tall. Every institution's mark is a
+   different shape — HKU's is a 5:1 lockup, HKUST's is a tall emblem — so a
+   square box either shrinks the wide ones to a smear or clips the tall ones.
+   3.5rem by 2.75rem, with the component's own `object-fit: contain`, fits both
+   and leaves a consistent column for the name to start from. The art variant
+   is a square composition (orbital rings + a centred mark on a white bed), so
+   its box is square — 2.75rem on a side — and the border is dropped, since the
+   art SVG carries its own bed. */
+.university-option .ui-logo,
+.university-trigger .ui-logo {
+  width: 3.5rem;
+  height: 2.75rem;
+  border-radius: var(--radius-sm);
+}
+
+.university-option .ui-logo--art,
+.university-trigger .ui-logo--art {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+/* A university name is long by nature. Let it wrap inside its column rather
+   than push the row wider than the dialog. */
+.signup-entry .university-option strong { overflow-wrap: anywhere; }
+
+.signup-entry .university-option > b { flex: 0 0 auto; }
+
+.country-empty,
+.university-empty {
+  grid-column: 1 / -1;
+  padding: var(--space-4);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.signup-entry .university-dialog .university-skip {
+  min-height: 2.75rem;
+  align-self: flex-start;
+  padding-inline: var(--space-3);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--accent-text);
+  font: var(--fw-semibold) var(--fs-14) var(--font-body);
+  text-decoration: underline;
+  text-underline-offset: .2em;
+  cursor: pointer;
+}
+
+.signup-mascot-preview small {
+  color: var(--text-muted);
+}
+
+.saved-profile-copy small {
+  color: var(--text-muted);
+}
+
+.signup-form label small {
+  color: var(--text-muted);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-regular);
+}
+
+.signup-step-announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.signup-mascot-choice {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-card);
+  background: var(--surface-page);
+}
+
+.signup-mascot-preview {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.signup-mascot-preview img {
+  width: 3.75rem;
+  height: 3.75rem;
+  object-fit: contain;
+  border-radius: 50%;
+  background: var(--blue-100);
+}
+
+.signup-mascot-preview strong {
+  color: var(--text-strong);
+}
+
+.signup-shuffle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 0 0 auto;
+}
+
+.signup-skip {
+  justify-self: start;
+  min-height: 2.75rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent-text);
+  font: var(--fw-semibold) var(--fs-14) var(--font-body);
+  text-decoration: underline;
+  text-underline-offset: .18em;
+  cursor: pointer;
+}
+
+.signup-university-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+}
+
+.signup-controls {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.signup-controls .signup-next {
+  flex: 1;
+}
+
+.signup-error {
+  margin: 0;
+  color: var(--danger);
+  font-weight: var(--fw-semibold);
+}
+
+.signup-storage-warning {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-control);
+  background: var(--bg-elevated);
+  color: var(--text-strong);
+  font-size: var(--fs-14);
+}
+
+.signup-form .privacy-note {
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.signup-entry .entry-disclaimer {
+  padding: var(--space-2);
+  font-size: var(--fs-12);
+  line-height: var(--lh-snug);
+  text-align: center;
+}
+
+.login-page {
+  min-height: 100svh;
+}
+
+.login-panel {
+  overflow-y: auto;
+}
+
+.login-panel-content {
+  width: 100%;
+  margin: auto;
+}
+
+.saved-profiles {
+  display: grid;
+  gap: var(--space-3);
+  max-height: 60svh;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.saved-profile-option {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+  padding: var(--space-3);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-card);
+  background: var(--paper);
+}
+
+.saved-profile-choice {
+  display: flex;
+  min-width: 0;
+  min-height: 4rem;
+  align-items: center;
+  gap: var(--space-3);
+  border: 0;
+  background: transparent;
+  color: var(--text-strong);
+  text-align: left;
+  cursor: pointer;
+}
+
+.saved-profile-choice > svg {
+  flex: 0 0 auto;
+}
+
+.saved-profile-copy {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 auto;
+  gap: var(--space-1);
+}
+
+.saved-profile-copy strong {
+  overflow-wrap: anywhere;
+}
+
+/* Under the name: the country's flag and its name, then the university when it
+   is one the manifest has no logo for. Wraps rather than pushing the row wider
+   than the panel. */
+.saved-profile-meta {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+}
+
+.saved-profile-country {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.saved-profile-meta .country-flag {
+  height: 1.125rem;
+}
+
+.saved-profile-sep {
+  color: var(--text-muted);
+}
+
+/* The chip's own university mark, sized to the row rather than the dialog.
+   The art variant is a square composition, so its box is square — 2.75rem on a
+   side — and the border is dropped, since the art SVG carries its own bed. */
+.saved-profile-university {
+  width: 3.25rem;
+  height: 2.5rem;
+  border-radius: var(--radius-sm);
+}
+
+.saved-profile-university.ui-logo--art {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.saved-profile-photo {
+  display: grid;
+  width: 3.5rem;
+  height: 3.5rem;
+  flex: 0 0 3.5rem;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--blue-100);
+  color: var(--teal-900);
+  font: var(--fw-bold) var(--fs-24) var(--font-display);
+}
+
+.saved-profile-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.saved-profile-remove {
+  grid-column: 2;
+  min-height: 2.5rem;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font: var(--fw-medium) var(--fs-12) var(--font-body);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.saved-profile-option:focus-within {
+  outline: .125rem solid var(--focus-ring);
+  outline-offset: .125rem;
+}
+
+.login-create-link {
+  text-decoration: none;
+}
+
+.login-privacy {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-12);
+}
+
+.arrival-story {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  min-height: 100svh;
+  overflow: hidden;
+  background: var(--arrival-bg);
+  color: var(--arrival-text);
+  isolation: isolate;
+  --aurora-blob-arrival-ship-left: 12%;
+  --aurora-blob-arrival-ship-bottom: 13%;
+}
+
+.arrival-story-scenes {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--arrival-bg);
+}
+
+.arrival-story-scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.arrival-story-weather {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--arrival-bg) 12%, transparent) 15%, color-mix(in srgb, var(--arrival-bg) 16%, transparent) 42%, color-mix(in srgb, var(--arrival-bg) 78%, transparent) 100%);
+}
+
+.arrival-story-ship {
+  position: absolute;
+  z-index: 2;
+  bottom: var(--aurora-blob-arrival-ship-bottom);
+  left: var(--aurora-blob-arrival-ship-left);
+  width: clamp(18.75rem, 40vw, 37.5rem);
+  max-height: 58svh;
+  object-fit: contain;
+  filter: drop-shadow(0 1.25rem 1.25rem color-mix(in srgb, var(--arrival-bg) 28%, transparent));
+  transform-origin: 50% 65%;
+}
+
+.arrival-story-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 18vw color-mix(in srgb, var(--arrival-bg) 30%, transparent);
+}
+
+.arrival-story-header {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  align-self: start;
+  padding: var(--space-5);
+}
+
+.arrival-story-header > img {
+  width: 2.375rem;
+  height: 2.375rem;
+}
+
+.arrival-story-skip {
+  min-height: 2.75rem;
+  margin-left: auto;
+  padding-inline: var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--arrival-text) 55%, transparent);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--arrival-bg) 32%, transparent);
+  color: var(--arrival-text);
+  font: var(--fw-semibold) var(--fs-14) var(--font-body);
+  cursor: pointer;
+  backdrop-filter: blur(.75rem);
+}
+
+.arrival-story-copy {
+  position: relative;
+  z-index: 3;
+  align-self: end;
+  width: min(47.5rem, calc(100% - 3rem));
+  margin: 0 auto var(--space-7) var(--space-5);
+  padding: var(--space-5);
+  border: 1px solid color-mix(in srgb, var(--arrival-text) 20%, transparent);
+  border-radius: var(--radius-card);
+  background: color-mix(in srgb, var(--arrival-bg) 48%, transparent);
+  box-shadow: 0 1.125rem 3.75rem color-mix(in srgb, var(--arrival-bg) 16%, transparent);
+  backdrop-filter: blur(1.125rem);
+}
+
+.arrival-story-eyebrow {
+  color: var(--arrival-highlight);
+  font: var(--fw-semibold) var(--fs-12) / 1.4 var(--font-mono);
+  letter-spacing: .13em;
+}
+
+.arrival-story-caption {
+  max-width: 32ch;
+  margin: var(--space-3) 0 0;
+  color: var(--arrival-text);
+  font: var(--fw-semibold) clamp(1.4rem, 3vw, 2.6rem) / 1.12 var(--font-display);
+  text-wrap: balance;
+}
+
+.arrival-story-flag {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  color: color-mix(in srgb, var(--arrival-text) 84%, transparent);
+  font-size: var(--fs-14);
+}
+
+/* The bundled flags are 4:3 (see `scripts/sync-flags.mjs`), so the height comes
+   from the ratio rather than a second magic number that would squash them. */
+.arrival-story-flag img {
+  width: 1.875rem;
+  aspect-ratio: 4 / 3;
+  height: auto;
+  border-radius: .125rem;
+  box-shadow: 0 1px .3125rem color-mix(in srgb, var(--arrival-bg) 28%, transparent);
+}
+
+.arrival-story-storage {
+  margin: var(--space-3) 0 0;
+  color: var(--arrival-text);
+  font-size: var(--fs-14);
+}
+
+.arrival-story-continue {
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding-inline: var(--space-5);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--arrival-highlight);
+  color: var(--arrival-on-action);
+  font: var(--fw-semibold) var(--fs-14) var(--font-body);
+  cursor: pointer;
+}
+
+.arrival-story-progress {
+  position: absolute;
+  z-index: 4;
+  inset: auto 0 0;
+  height: .25rem;
+  background: color-mix(in srgb, var(--arrival-text) 20%, transparent);
+}
+
+.arrival-story--still .arrival-story-scene--0,
+.arrival-story--still .arrival-story-scene--1,
+.arrival-story--still .arrival-story-ship {
+  display: none;
+}
+
+.arrival-story--still .arrival-story-scene--2 {
+  opacity: 1 !important;
+}
+
+.harbour-welcome-placeholder {
+  display: grid;
+  min-height: min(70svh, 42.5rem);
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-4);
+  text-align: center;
+}
+
+.welcome-mascot {
+  width: clamp(6.875rem, 18vw, 11.25rem);
+  height: clamp(6.875rem, 18vw, 11.25rem);
+  object-fit: contain;
+}
+
+.harbour-welcome-placeholder .eyebrow,
+.welcome-placeholder-title,
+.welcome-placeholder-copy {
+  margin: 0;
+}
+
+.welcome-placeholder-title {
+  max-width: 18ch;
+  font-size: clamp(2rem, 4vw, var(--fs-48));
+  text-wrap: balance;
+}
+
+.welcome-placeholder-copy {
+  max-width: 48ch;
+  color: var(--text-muted);
+}
+
+.welcome-placeholder-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.welcome-placeholder-actions .quiet-button {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.login-page--harbour {
+  display: grid;
+  box-sizing: border-box;
+  width: min(90rem, calc(100% - 2.5rem));
+  height: min(54rem, calc(100dvh - 2rem));
+  min-height: min(36rem, calc(100dvh - 2rem));
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  margin: var(--space-4) auto;
+  overflow: hidden;
+  border: 1px solid var(--border-soft);
+  border-radius: clamp(1.5rem, 4vw, 3rem);
+  background: color-mix(in srgb, var(--surface-card) 86%, var(--bg));
+  box-shadow: var(--shadow-raised);
+}
+
+.login-page--harbour .login-topbar {
+  display: grid;
+  min-height: 5rem;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--container-padding-inline);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.login-page--harbour .login-brand {
+  position: static;
+  display: inline-flex;
+  width: max-content;
+  gap: var(--space-2);
+  color: var(--text-strong);
+  font-size: var(--fs-20);
+}
+
+.login-topline {
+  color: var(--text-muted);
+  font: var(--fw-semibold) var(--fs-12) / 1.4 var(--font-mono);
+  letter-spacing: .09em;
+  text-align: center;
+}
+
+.login-page--harbour .login-back {
+  justify-self: end;
+  min-height: 2.75rem;
+  padding-inline: var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  color: var(--text-strong);
+  cursor: pointer;
+}
+
+.login-composition {
+  display: grid;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1.05fr) minmax(25rem, .95fr);
+  gap: var(--space-6);
+  align-items: stretch;
+  padding: var(--space-6);
+}
+
+.login-art-stage {
+  position: relative;
+  display: grid;
+  min-height: 0;
+  place-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid var(--border-soft);
+  border-radius: 2rem;
+  background:
+    radial-gradient(ellipse at 50% 48%, color-mix(in srgb, var(--aurora-2) 45%, transparent), transparent 60%),
+    linear-gradient(145deg, color-mix(in srgb, var(--bg) 78%, var(--teal-700)), var(--bg-elevated));
+}
+
+.login-art-stage::before,
+.login-art-stage::after {
+  position: absolute;
+  inset: var(--aurora-blob-login-inset);
+  border: 1px solid color-mix(in srgb, var(--accent-fill) 28%, transparent);
+  border-radius: 50%;
+  content: "";
+}
+
+.login-art-stage::after {
+  inset: var(--aurora-blob-login-inset-inner);
+  border-color: color-mix(in srgb, var(--gold-fill) 35%, transparent);
+}
+
+.login-art-halo {
+  position: absolute;
+  width: 60%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  filter: blur(3rem);
+  opacity: .32;
+}
+
+.login-art-halo--one {
+  background: var(--accent-fill);
+  transform: translate(-22%, -12%);
+}
+
+.login-art-halo--two {
+  background: var(--gold-fill);
+  transform: translate(24%, 18%);
+}
+
+/* The toroidal rings. A torus is a circle with a hollow centre, so it is a
+   transparent disc with a thick stroked border. Two of them, at different
+   angles, slowly rotate opposite directions so the page reads as alive
+   without anything moving fast. `prefers-reduced-motion: reduce` stops both,
+   leaving the static rings on the page. */
+.login-art-torus {
+  position: absolute;
+  inset: 0;
+  width: 78%;
+  aspect-ratio: 1;
+  margin: auto;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--accent-fill) 35%, transparent);
+  background:
+    radial-gradient(circle at 50% 50%, transparent 60%, color-mix(in srgb, var(--accent-fill) 14%, transparent) 60.5%, color-mix(in srgb, var(--accent-fill) 14%, transparent) 67%, transparent 67.5%);
+  pointer-events: none;
+}
+
+.login-art-torus--one {
+  transform: translate(8%, -8%);
+  animation: torus-spin 24s linear infinite;
+}
+
+.login-art-torus--two {
+  width: 70%;
+  border-color: color-mix(in srgb, var(--gold-fill) 42%, transparent);
+  background:
+    radial-gradient(circle at 50% 50%, transparent 56%, color-mix(in srgb, var(--gold-fill) 18%, transparent) 56.5%, color-mix(in srgb, var(--gold-fill) 18%, transparent) 64%, transparent 64.5%);
+  transform: translate(-8%, 8%) rotate(40deg);
+  animation: torus-spin-rev 32s linear infinite;
+}
+
+@keyframes torus-spin {
+  from { transform: translate(8%, -8%) rotate(0deg); }
+  to { transform: translate(8%, -8%) rotate(360deg); }
+}
+
+@keyframes torus-spin-rev {
+  from { transform: translate(-8%, 8%) rotate(40deg); }
+  to { transform: translate(-8%, 8%) rotate(-320deg); }
+}
+
+/* The drifting blobs. Soft, blurred colour clouds that breathe between two
+   positions so the page feels like it has a slow tide. Picked to the page
+   palette so they harmonise with the existing halos. */
+.login-art-blob {
+  position: absolute;
+  inset: 0;
+  width: 52%;
+  aspect-ratio: 1;
+  margin: auto;
+  border-radius: 50%;
+  filter: blur(4.5rem);
+  opacity: .42;
+  pointer-events: none;
+}
+
+.login-art-blob--teal {
+  background: var(--accent-fill);
+  transform: translate(-23%, -19%) scale(.9);
+  animation: blob-drift-teal 17s var(--ease-in-out, ease-in-out) infinite alternate;
+}
+
+.login-art-blob--gold {
+  background: var(--gold-fill);
+  transform: translate(23%, 19%) scale(1.05);
+  animation: blob-drift-gold 21s var(--ease-in-out, ease-in-out) infinite alternate;
+}
+
+@keyframes blob-drift-teal {
+  from { transform: translate(-23%, -19%) scale(.9); }
+  to { transform: translate(-15%, -7%) scale(1.15); }
+}
+
+@keyframes blob-drift-gold {
+  from { transform: translate(23%, 19%) scale(1.05); }
+  to { transform: translate(13%, 11%) scale(.92); }
+}
+
+/* The university's concept art, when the first saved profile belongs to one
+   of the eight. Sized like the mascot so the page layout does not move when
+   the swap occurs — only the image changes, not the box. The art SVG carries
+   its own composition, so no drop-shadow or animation is added here. */
+.login-floating-art {
+  position: relative;
+  z-index: 1;
+  width: min(62%, 22rem);
+  height: auto;
+  max-height: 80%;
+  aspect-ratio: 1;
+  object-fit: contain;
+}
+
+.login-floating-mascot {
+  position: relative;
+  z-index: 1;
+  width: min(68%, 24rem);
+  height: 78%;
+  object-fit: contain;
+  filter: drop-shadow(0 1.5rem 1.75rem color-mix(in srgb, var(--bg) 35%, transparent));
+  animation: mascot-float 5s var(--ease-in-out, ease-in-out) infinite alternate;
+}
+
+@keyframes mascot-float {
+  from { transform: translateY(.5rem) rotate(-1.5deg); }
+  to { transform: translateY(-.65rem) rotate(1.5deg); }
+}
+
+.login-floating-note {
+  position: absolute;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--glass-highlight);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--surface-card) 74%, transparent);
+  color: var(--text-strong);
+  font: var(--fw-semibold) var(--fs-12) / 1.3 var(--font-mono);
+  letter-spacing: .04em;
+  box-shadow: var(--shadow-glass);
+  backdrop-filter: blur(var(--glass-blur));
+}
+
+.login-floating-note > span {
+  color: var(--gold-text);
+  font-size: var(--fs-18);
+}
+
+.login-floating-note--top {
+  top: var(--aurora-blob-login-note-top);
+  right: var(--aurora-blob-login-note-right);
+  transform: rotate(3deg);
+}
+
+.login-floating-note--bottom {
+  bottom: var(--aurora-blob-login-note-bottom);
+  left: var(--aurora-blob-login-note-left);
+  transform: rotate(-3deg);
+}
+
+.login-art-caption {
+  position: absolute;
+  z-index: 2;
+  right: var(--space-5);
+  bottom: var(--space-4);
+  left: var(--space-5);
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-14);
+  text-align: center;
+}
+
+.login-art-caption strong {
+  color: var(--text-strong);
+}
+
+.login-page--harbour .login-panel {
+  display: grid;
+  min-height: 0;
+  align-content: center;
+  padding: var(--space-5);
+  border: 1px solid var(--border-soft);
+  border-radius: 2rem;
+  background: var(--surface-page);
+}
+
+.login-page--harbour .login-panel-content {
+  width: 100%;
+  max-width: 34rem;
+  gap: var(--space-3);
+  margin-inline: auto;
+}
+
+.login-page--harbour .login-panel h1 {
+  margin: 0;
+  font-size: clamp(2rem, 3.2vw, 3.25rem);
+  line-height: 1.02;
+}
+
+.login-page--harbour .login-panel-content > p {
+  margin: 0;
+}
+
+.login-page--harbour .local-login-note {
+  margin-block: var(--space-1);
+  padding: var(--space-3);
+}
+
+.login-page--harbour .saved-profiles {
+  max-height: 13rem;
+  grid-template-columns: 1fr;
+  overflow-y: auto;
+}
+
+.login-page--harbour .saved-profile-option {
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-card);
+}
+
+.login-page--harbour .login-submit {
+  min-height: 3.25rem;
+}
+
+.login-page--harbour .login-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--container-padding-inline);
+  border-top: 1px solid var(--border-soft);
+  color: var(--text-muted);
+  font: var(--fw-semibold) var(--fs-12) / 1.4 var(--font-mono);
+  letter-spacing: .06em;
+}
+
+.arrival-story-logo {
+  display: block;
+}
+
+.arrival-transition {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  overflow: hidden;
+  background: var(--arrival-black);
+  pointer-events: all;
+}
+
+.arrival-transition-blackout,
+.arrival-transition-warp,
+.arrival-transition-ripple {
+  position: absolute;
+  inset: 0;
+}
+
+.arrival-transition-blackout {
+  background: var(--arrival-black);
+}
+
+.arrival-transition-warp {
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, #101226 0, #05060d 46%, #000 100%);
+  opacity: 0;
+}
+
+.fiber-warp {
+  position: absolute;
+  inset: 0;
+  filter: drop-shadow(0 0 .35rem #49d9ff) drop-shadow(0 0 1rem #753cff);
+}
+
+.fiber-warp canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.fiber-warp--fallback {
+  background: radial-gradient(ellipse at center, transparent 0 12%, #48ddff 12.2% 12.35%, transparent 12.6% 22%, #8060ff 22.2% 22.35%, transparent 22.6%), repeating-conic-gradient(from 0deg at 50% 50%, transparent 0deg 2.4deg, #53bfff99 2.6deg 2.75deg, transparent 2.95deg 8deg);
+}
+
+.arrival-transition-terminal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  gap: var(--space-2);
+  width: min(34rem, calc(100% - 3rem));
+  transform: translate(-50%, -50%);
+  color: #d8eaff;
+  font: var(--fw-semibold) var(--fs-14) / 1.6 var(--font-mono);
+  letter-spacing: .1em;
+  opacity: 0;
+  text-align: center;
+  text-shadow: 0 0 1rem #50cbff, 0 0 2.5rem #784cff;
+}
+
+.arrival-terminal-line {
+  overflow: hidden;
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* The blinking block cursor that trails the typewriter reveal. Sits on its own
+   row so it never widens a line mid-reveal (the lines are `white-space: nowrap`
+   and clip, so a trailing glyph would push them past the viewport). */
+.arrival-terminal-cursor {
+  justify-self: center;
+  inline-size: .55em;
+  block-size: .95em;
+  background: currentcolor;
+  box-shadow: 0 0 .5rem var(--arrival-warp-glow);
+  opacity: 0;
+  animation: arrival-cursor-blink 1s steps(2, jump-none) infinite;
+}
+
+@keyframes arrival-cursor-blink {
+  0%,
+  49% { opacity: 1; }
+
+  50%,
+  100% { opacity: 0; }
+}
+
+.arrival-transition-ripple {
+  inset: var(--aurora-blob-transition-center) auto auto var(--aurora-blob-transition-center);
+  width: max(100vw, 100vh);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--text) 0, var(--accent-fill) 19%, var(--aurora-2) 46%, var(--bg) 72%);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(.01);
+}
+
+.signup-entry :is(button, a, input, select):focus-visible,
+.arrival-story :is(button, a):focus-visible {
+  outline: .1875rem solid var(--focus-ring);
+  outline-offset: .1875rem;
+}
+
+@media (width <= 50em) {
+  .signup-entry {
+    display: block;
+    width: auto;
+    min-height: 100dvh;
+  }
+
+  .login-page--harbour {
+    box-sizing: border-box;
+    width: calc(100% - 1rem);
+    height: calc(100dvh - 1rem);
+    min-height: min(36rem, calc(100dvh - 1rem));
+    margin: var(--space-2) auto;
+    gap: 0;
+  }
+
+  .login-page--harbour .login-topbar {
+    min-height: 3.75rem;
+    grid-template-columns: 1fr auto;
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .login-topline { display: none; }
+
+  .login-page--harbour .login-brand { font-size: var(--fs-18); }
+
+  .login-page--harbour .login-back {
+    min-height: 2.5rem;
+    padding-inline: var(--space-3);
+    font-size: var(--fs-12);
+  }
+
+  .login-composition {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+    overflow: hidden;
+    padding: var(--space-3);
+  }
+
+  .login-art-stage {
+    min-height: 8rem;
+    max-height: 26dvh;
+    border-radius: var(--radius-card);
+  }
+
+  .login-floating-mascot {
+    width: auto;
+    height: 92%;
+  }
+
+  .login-floating-note {
+    padding: var(--space-2) var(--space-3);
+    font-size: .625rem;
+  }
+
+  .login-floating-note--top {
+    top: var(--aurora-blob-login-mobile-top);
+    right: var(--aurora-blob-login-mobile-edge);
+  }
+
+  .login-floating-note--bottom {
+    bottom: var(--aurora-blob-login-mobile-bottom);
+    left: var(--aurora-blob-login-mobile-edge);
+  }
+
+  .login-art-caption {
+    display: none;
+  }
+
+  .login-page--harbour .login-panel {
+    padding: var(--space-3);
+    border-radius: var(--radius-card);
+  }
+
+  .login-page--harbour .login-panel-content {
+    gap: var(--space-2);
+  }
+
+  .login-page--harbour .login-panel h1 {
+    font-size: clamp(1.65rem, 7vw, 2.15rem);
+  }
+
+  .login-page--harbour .login-panel-content > p {
+    font-size: var(--fs-14);
+    line-height: var(--lh-snug);
+  }
+
+  .login-page--harbour .local-login-note {
+    padding: var(--space-2);
+  }
+
+  .login-page--harbour .saved-profiles {
+    max-height: 8rem;
+  }
+
+  .login-page--harbour .saved-profile-option {
+    padding: var(--space-1) var(--space-2);
+  }
+
+  .login-page--harbour .login-footer {
+    padding: var(--space-2) var(--space-3);
+    font-size: .5625rem;
+  }
+
+  .signup-entry .entry-top {
+    min-height: 4.5rem;
+  }
+
+  .signup-layout {
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+    width: min(35rem, calc(100% - 2rem));
+    height: auto;
+    min-height: auto;
+    padding-block: var(--space-3) var(--space-7);
+  }
+
+  .signup-illustration {
+    min-height: auto;
+    aspect-ratio: 16 / 8;
+    border-radius: var(--radius-card);
+  }
+
+  .signup-mascot {
+    width: auto;
+    height: 88%;
+    max-width: 70%;
+  }
+
+  .signup-art-caption {
+    right: var(--space-4);
+    bottom: var(--space-3);
+    left: var(--space-4);
+  }
+
+  .signup-art-caption strong {
+    font-size: var(--fs-18);
+  }
+
+  .signup-form-column {
+    max-width: none;
+  }
+
+  .login-page {
+    grid-template-columns: 1fr;
+  }
+
+  .login-visual {
+    min-height: 28svh;
+    max-height: 38svh;
+  }
+
+  .login-visual-caption {
+    display: none;
+  }
+
+  .login-panel {
+    min-height: 62svh;
+    padding: var(--space-4);
+  }
+
+  .login-panel-content {
+    max-width: 35rem;
+  }
+
+  .login-panel h1 br {
+    display: none;
+  }
+
+  .arrival-story-ship {
+
+    --aurora-blob-arrival-ship-bottom: 21%;
+    --aurora-blob-arrival-ship-left: 7%;
+
+    width: clamp(15rem, 68vw, 27.5rem);
+    max-height: 44svh;
+  }
+
+  .arrival-story-copy {
+    width: calc(100% - 1.5rem);
+    margin: 0 auto var(--space-6);
+    padding: var(--space-4);
+  }
+
+  .arrival-story-caption {
+    font-size: clamp(1.35rem, 7vw, 2rem);
+  }
+
+  .arrival-story-header {
+    padding: var(--space-3);
+  }
+
+  .arrival-story-header > span {
+    font-size: var(--fs-12);
+  }
+}
+
+@media (width <= 26.25em) {
+  .signup-entry .entry-top {
+    padding-inline: var(--space-3);
+  }
+
+  .signup-returning {
+    gap: var(--space-1);
+    font-size: var(--fs-12);
+  }
+
+  .signup-entry .entry-top .login-link {
+    min-height: 2.5rem;
+    padding-inline: var(--space-2);
+  }
+
+  .signup-brand small {
+    display: none;
+  }
+
+  /* The country list is the only two-column one left; the university list is
+     already a single column. */
+  .country-options {
+    grid-template-columns: 1fr;
+  }
+
+  .country-dialog,
+  .signup-entry .university-dialog {
+    max-height: calc(100dvh - 1rem);
+    padding: var(--space-4);
+  }
+
+  .login-page--harbour {
+    width: calc(100% - .5rem);
+    height: calc(100dvh - .5rem);
+    min-height: 34rem;
+    margin: var(--space-1) auto;
+    border-radius: 1.25rem;
+  }
+
+  .login-composition {
+    gap: var(--space-2);
+    padding: var(--space-2);
+  }
+
+  .login-art-stage {
+    max-height: 20dvh;
+  }
+
+  .login-page--harbour .login-panel {
+    padding: var(--space-2);
+  }
+
+  .login-page--harbour .login-footer span:last-child {
+    display: none;
+  }
+
+  .signup-layout {
+    width: calc(100% - 1.5rem);
+  }
+
+  .signup-mascot-choice {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .signup-shuffle {
+    align-self: stretch;
+    justify-content: center;
+  }
+
+  .saved-profile-option {
+    gap: var(--space-1) var(--space-2);
+    padding: var(--space-2);
+  }
+
+  .saved-profile-photo {
+    width: 3rem;
+    height: 3rem;
+    flex-basis: 3rem;
+  }
+
+  .arrival-story-copy {
+    gap: var(--space-2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signup-progress-track span,
+  .arrival-story-progress span {
+    transition: none;
+  }
+
+  .login-floating-mascot,
+  .login-art-torus,
+  .login-art-blob,
+  .signup-art-torus,
+  .signup-art-blob { animation: none; }
+
+  /* No blink when stillness is asked for: the cursor holds, steady. */
+  .arrival-terminal-cursor { animation: none; }
+}
+/* stylelint-enable no-descending-specificity */

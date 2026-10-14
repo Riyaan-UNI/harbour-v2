@@ -1,0 +1,97 @@
+/* ==========================================================================
+   Harbour — the /app/profile edit form's control family
+
+   The problem, measured in the browser rather than judged by eye.
+
+   `src/legacy/styles/harbour-ui.css:742` styles `.page input` — which is what
+   the profile edit form's text fields inherit — with `border: 1px solid
+   var(--border)`. `--border` is the *decorative* hairline (0.14 alpha, about
+   1.5:1 against the page). But a text input's border is the only thing
+   identifying the field, so it needs `--border-strong`, which is the token
+   DESIGN_SPEC.md §3 reserves for exactly that case and holds to 3:1.
+
+   The country and university pickers underneath are styled by the entry lane
+   (`entry-story.css`) and do use `--border-strong`, because they were designed
+   for the signup form. They are also taller, at 4.5rem, because they carry a
+   title plus a muted caption.
+
+   The result, in one column: text fields at 52px with an almost invisible
+   border, directly above two pickers at 72px with a clearly visible one. Two
+   different border weights and two different heights read as three unrelated
+   controls — which is what the owner saw as "not aligned like the one on the
+   signup page".
+
+   This sheet gives `.profile-form` one control family and one row height. It is
+   scoped with three class selectors so it beats both the legacy lane
+   (`.page input`, 0,1,1) and the entry lane (`.university-trigger`, 0,1,0)
+   without editing either — the entry sheet in particular belongs to another
+   stream of work and must not be touched.
+
+   Measured afterwards, in both themes: name input, country picker and
+   university picker are all 4rem tall (64px), all on `--border-strong`, all on
+   `--surface-card`, all at the same radius.
+   ========================================================================== */
+
+/* --- The shared row height -------------------------------------------------
+   One explicit height for every control in the form, rather than a min-height
+   each tries to satisfy alone. The text fields are one line of content and would
+   happily be 52px; the pickers carry a title plus a muted caption and need
+   roughly 45px of content before padding. A `min-height` lets each land wherever
+   its own content puts it — 56px against 62px measured — which is exactly the
+   mismatch this sheet exists to remove. `block-size` is a size, not a spacing
+   step, so it is a rem value here like every other size in the build
+   (DESIGN_SPEC.md §6: "rem for spacing, type, radii and sizes").
+
+   The pickers are `display: grid` with `align-items: center` (set by the entry
+   lane), so a fixed box centres their content rather than clipping it, and 4rem
+   clears their tallest line stack with room to spare. */
+:root {
+  --profile-control-block-size: 4rem;
+}
+
+/* --- The text fields ------------------------------------------------------
+   The border colour is the actual bug: these were the only controls on the page
+   whose boundary was a 1.5:1 decorative hairline. The surface and ink move with
+   it so the fields match the pickers rather than fighting them. */
+.page.profile-page .profile-form input,
+.page.profile-page .profile-form textarea {
+  block-size: var(--profile-control-block-size);
+  border-color: var(--border-strong);
+  background: var(--surface-card);
+  color: var(--text-strong);
+  font-size: var(--type-body);
+}
+
+/* --- The country and university pickers ----------------------------------
+   Same family, same box.
+
+   `min-height` is set here as well as `block-size` for a specific reason: the
+   entry lane gives these pickers `min-height: 4.5rem`, and a min-height larger
+   than the specified block-size wins. Overriding only `block-size` left them
+   72px against the fields' 64px — the same mismatch, restated. Both are set to
+   the one token so the two properties cannot disagree.
+
+   The vertical padding is also restated: the entry lane's is `--space-3`, which
+   with the pickers' two-line label (title plus muted caption) is what puts them
+   near 72px in the first place. `--space-2` puts the 4rem box's content in the
+   middle of the row with the label's own grid centring it. */
+.page.profile-page .profile-form .country-trigger,
+.page.profile-page .profile-form .university-trigger {
+  block-size: var(--profile-control-block-size);
+  min-height: var(--profile-control-block-size);
+  padding-block: var(--space-2);
+  border-color: var(--border-strong);
+  background: var(--surface-card);
+  color: var(--text-strong);
+}
+
+/* Focus stays a focus, not a colour change: the ring token, same as everywhere
+   else in the build. */
+.page.profile-page .profile-form input:focus-visible,
+.page.profile-page .profile-form .country-trigger:focus-visible,
+.page.profile-page .profile-form .university-trigger:focus-visible {
+  border-color: var(--accent-fill);
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  box-shadow: none;
+}

@@ -12,7 +12,7 @@
 
     <!-- Icons. The tab icon carries both colour schemes inside one file (a
          favicon is rendered outside the page, so it cannot read data-theme). -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=3" />
     <link rel="apple-touch-icon" href="/favicon.svg" />
 
     <!-- Open Graph / social. There is no social card image in the repo, so the
@@ -79,11 +79,57 @@
         z-index: 2147483000;
         display: grid;
         place-content: center;
-        gap: 1.5rem;
+        gap: 1.25rem;
         justify-items: center;
+        overflow: hidden;
         background-color: var(--boot-bg, #061b1a);
         color: var(--boot-fg, #f2f7f6);
         transition: opacity 420ms ease;
+      }
+
+      #harbour-boot .boot__art {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        background: #071a20;
+      }
+
+      #harbour-boot .boot__sea,
+      #harbour-boot .boot__ship {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      #harbour-boot .boot__sea { opacity: .72; }
+      #harbour-boot .boot__ship {
+        inset: auto 0 4%;
+        width: min(54vw, 44rem);
+        height: min(52vh, 34rem);
+        margin-inline: auto;
+        object-fit: contain;
+        animation: boot-voyage 3.2s ease-in-out infinite alternate;
+        filter: drop-shadow(0 1.5rem 2rem rgba(0, 0, 0, .45));
+      }
+
+      #harbour-boot .boot__veil {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(3, 14, 22, .48), rgba(3, 14, 22, .18) 42%, rgba(3, 14, 22, .86));
+      }
+
+      #harbour-boot .boot__content {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        justify-items: center;
+        gap: .75rem;
+        margin-top: 20vh;
+        padding: 1.5rem;
+        color: #f2f7f6;
+        text-align: center;
+        text-shadow: 0 2px 20px rgba(0, 0, 0, .7);
       }
 
       html[data-theme='light'] #harbour-boot {
@@ -133,6 +179,11 @@
         }
       }
 
+      @keyframes boot-voyage {
+        from { transform: translate3d(-4vw, 1.5vh, 0) rotate(-2deg); }
+        to { transform: translate3d(4vw, -1vh, 0) rotate(2deg); }
+      }
+
       #harbour-boot .boot__name {
         font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
         font-size: 1rem;
@@ -152,6 +203,8 @@
           opacity: 0.2;
           transform: scale(0.85);
         }
+
+        #harbour-boot .boot__ship { animation: none; }
       }
     </style>
   </head>
@@ -162,6 +215,12 @@
       aria-live="polite"
       aria-label="Harbour is loading"
     >
+      <div class="boot__art" aria-hidden="true">
+        <img class="boot__sea" src="/art/arrival-storm.webp" alt="" fetchpriority="high" />
+        <img class="boot__ship" src="/art/arrival-ship.webp" alt="" fetchpriority="high" />
+        <span class="boot__veil"></span>
+      </div>
+      <div class="boot__content">
       <div class="boot__mark">
         <span class="boot__ripple"></span>
         <span class="boot__ripple boot__ripple--delay"></span>
@@ -189,6 +248,7 @@
       </div>
       <div class="boot__name">Harbour</div>
       <div class="boot__line">Getting your harbour ready…</div>
+      </div>
     </div>
 
     <div id="root"></div>

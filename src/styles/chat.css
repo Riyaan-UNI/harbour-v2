@@ -1,0 +1,1063 @@
+/* ==========================================================================
+   Harbour — /app/chat page styles
+
+   Scoped re-theme using the --arrival-* family (same mechanism as the landing
+   page's .hero__section). The page is one bounded app frame: a fixed header
+   strip, the thread as the only scrolling region, and a pinned composer. An
+   aurora field sits behind the frame; a single contained colour field
+   (`.ask-frame__glow`) sits inside it. The thread and the composer are the two
+   glass surfaces; the header is solid, and every nested surface is solid too
+   (glass on glass is the one combination the spec bans).
+
+   Every spacing value is a §6 step, every colour is a token, and the only px
+   value is the 1px hairline.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Scoped re-theme block
+   -------------------------------------------------------------------------- */
+
+.ask-page {
+  /* Semantic aliases — the arrival palette applied to this page. */
+  --bg: var(--arrival-bg);
+  --bg-elevated: var(--arrival-surface);
+  --glass-fill: color-mix(in srgb, var(--arrival-text) 6%, transparent);
+  --glass-fill-strong: color-mix(in srgb, var(--arrival-text) 11%, transparent);
+  --border: color-mix(in srgb, var(--arrival-text) 18%, transparent);
+  --border-strong: var(--arrival-border);
+  --text: var(--arrival-text);
+  --text-muted: var(--arrival-muted);
+  --text-subtle: var(--arrival-muted);
+  --accent-fill: var(--arrival-action);
+  --on-accent: var(--arrival-on-action);
+  --accent-text: var(--arrival-action);
+  --focus-ring: var(--arrival-action);
+  --gold-text: var(--arrival-highlight);
+
+  /* The frozen Tailwind colour bridge must be re-declared in the same scope
+     so utilities like text-text and bg-bg-elevated resolve to the arrival
+     values rather than inheriting the global teal palette. */
+  --color-bg: var(--arrival-bg);
+  --color-bg-elevated: var(--arrival-surface);
+  --color-glass-fill: var(--glass-fill);
+  --color-glass-fill-strong: var(--glass-fill-strong);
+  --color-border: var(--border);
+  --color-border-strong: var(--arrival-border);
+  --color-text: var(--arrival-text);
+  --color-text-muted: var(--arrival-muted);
+  --color-text-subtle: var(--arrival-muted);
+  --color-accent-fill: var(--arrival-action);
+  --color-on-accent: var(--arrival-on-action);
+  --color-accent-text: var(--arrival-action);
+  --color-gold-text: var(--arrival-highlight);
+  --color-focus-ring: var(--arrival-action);
+
+  /* Blob 3 sits off-centre. Percentages are legal inside `transform` (the
+     spacing gate only polices `inset-*`), so the offset lives there rather
+     than in a custom-property workaround. */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  /* Fill exactly what the shell's `.portal-main` padding leaves, so the frame
+     neither overflows the viewport nor floats above its bottom edge. */
+  block-size: var(--ask-frame-block-size);
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   2. Content wrapper + the frame
+   -------------------------------------------------------------------------- */
+
+.ask-page__content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-block-size: 0;
+  position: relative;
+  z-index: var(--z-raised);
+  padding-inline: var(--container-padding-inline);
+  max-inline-size: var(--container-max-inline-size);
+  margin-inline: auto;
+  inline-size: 100%;
+}
+
+.ask-frame {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-block-size: 0;
+  position: relative;
+  isolation: isolate;
+}
+
+/* The one contained colour field. It is covered by the thread's glass, so it
+   may run at the patch cap — the page aurora's lower cap does not apply. */
+.ask-frame__glow {
+  position: absolute;
+  z-index: -1;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  inline-size: 70%;
+  block-size: 45%;
+  border-radius: 43% 57% 37% 63% / 55% 45%;
+  background: radial-gradient(
+    circle at 40% 40%,
+    color-mix(in srgb, var(--chart-3) 22%, transparent) 0%,
+    transparent 70%
+  );
+  opacity: var(--aurora-patch-opacity);
+  filter: blur(var(--aurora-blur));
+  pointer-events: none;
+  animation: ask-frame-glow-drift 24s var(--ease-in-out) infinite alternate;
+}
+
+@keyframes ask-frame-glow-drift {
+  0% {
+    transform: translate(6%, -6%) rotate(0deg);
+  }
+
+  100% {
+    transform: translate(-2%, 4%) rotate(6deg);
+  }
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .ask-frame__glow {
+    opacity: calc(var(--aurora-patch-opacity) * 0.6);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .ask-frame__glow {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. Aurora field (decoration, aria-hidden)
+   -------------------------------------------------------------------------- */
+
+.ask-aurora {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-base);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* The page field. This page puts two glass surfaces over a large part of the
+   viewport, so the blobs are held below the patch cap: they are read through
+   the glass, where they stack, and full strength reads as a wash rather than
+   a field. */
+.ask-aurora__blob {
+  position: absolute;
+  border-radius: 43% 57% 37% 63% / 55% 45%;
+  filter: blur(var(--aurora-blur));
+  opacity: calc(var(--aurora-patch-opacity) * 0.55);
+}
+
+.ask-aurora__blob--1 {
+  inline-size: 50vmax;
+  block-size: 40vmax;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  background: radial-gradient(
+    circle,
+    var(--arrival-art-frame) 0%,
+    transparent 70%
+  );
+  animation: ask-aurora-drift-1 25s ease-in-out infinite alternate;
+}
+
+.ask-aurora__blob--2 {
+  inline-size: 45vmax;
+  block-size: 35vmax;
+  inset-block-end: 0;
+  inset-inline-end: 0;
+  background: radial-gradient(circle, var(--chart-3) 0%, transparent 70%);
+  animation: ask-aurora-drift-2 30s ease-in-out infinite alternate;
+}
+
+.ask-aurora__blob--3 {
+  inline-size: 35vmax;
+  block-size: 30vmax;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  background: radial-gradient(
+    circle,
+    var(--arrival-highlight) 0%,
+    transparent 70%
+  );
+  opacity: calc(var(--aurora-patch-opacity) * 0.6);
+  transform: translate(40%, 30%) rotate(0deg);
+  animation: ask-aurora-drift-3 22s ease-in-out infinite alternate;
+}
+
+@keyframes ask-aurora-drift-1 {
+  0% {
+    transform: translate(-15%, -20%) rotate(0deg);
+  }
+
+  100% {
+    transform: translate(-12%, -18%) rotate(3deg);
+  }
+}
+
+@keyframes ask-aurora-drift-2 {
+  0% {
+    transform: translate(15%, 20%) rotate(0deg);
+  }
+
+  100% {
+    transform: translate(12%, 18%) rotate(-3deg);
+  }
+}
+
+@keyframes ask-aurora-drift-3 {
+  0% {
+    transform: translate(40%, 30%) rotate(0deg);
+  }
+
+  100% {
+    transform: translate(43%, 32%) rotate(2deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ask-aurora__blob--1,
+  .ask-aurora__blob--2,
+  .ask-aurora__blob--3,
+  .ask-frame__glow {
+    animation: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. Header strip (solid, never glass)
+   -------------------------------------------------------------------------- */
+
+.ask-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding-block: var(--space-4) var(--space-3);
+  border-block-end: var(--hairline) solid var(--border);
+  background-color: var(--bg-elevated);
+  padding-inline: var(--space-4);
+  border-start-start-radius: var(--radius-md);
+  border-start-end-radius: var(--radius-md);
+}
+
+.ask-header__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-inline-size: 0;
+}
+
+/* The eyebrow keeps its mono/label treatment but gains a chromatic rule. */
+.ask-header__eyebrow {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.ask-header__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-inline-start: auto;
+  flex-shrink: 0;
+}
+
+/* The live status pill. Solid + hairline, so it is not a third glass. */
+.ask-header__status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-block: var(--space-1);
+  padding-inline: var(--space-3);
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.ask-header__status-dot {
+  inline-size: var(--space-2);
+  block-size: var(--space-2);
+  border-radius: var(--radius-pill);
+  background-color: var(--text-subtle);
+  flex-shrink: 0;
+}
+
+.ask-header__status-dot--idle {
+  background-color: var(--chart-1);
+}
+
+.ask-header__status-dot--sending {
+  background-color: var(--arrival-highlight);
+  animation: ask-status-pulse 1.5s var(--ease-in-out) infinite;
+}
+
+.ask-header__status-dot--error {
+  background-color: var(--chart-4);
+}
+
+@keyframes ask-status-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.4;
+    transform: scale(0.8);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ask-header__status-dot--sending {
+    animation: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   5. Thread (the only scroll container; glass surface #1)
+   -------------------------------------------------------------------------- */
+
+.ask-thread {
+  flex: 1;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-block: var(--space-5);
+  padding-inline: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  background-color: var(--glass-fill);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .ask-thread {
+    background-color: var(--bg-elevated);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .ask-thread {
+    background-color: var(--bg-elevated);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   6. Empty state
+   -------------------------------------------------------------------------- */
+
+.ask-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  padding-block: var(--space-7);
+  text-align: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.ask-empty__text {
+  max-inline-size: var(--measure-body);
+}
+
+/* --------------------------------------------------------------------------
+   7. Suggestion chips
+   -------------------------------------------------------------------------- */
+
+.ask-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  max-inline-size: var(--measure-body);
+}
+
+/* Chips are real buttons here (Chip asChild). Give the button reset a shape
+   that keeps the chip's own look and adds a hover lift. */
+.ask-chips > * {
+  cursor: pointer;
+}
+
+.ask-chips button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.ask-chips button:hover {
+  transform: translateY(calc(var(--space-1) * -0.5));
+  border-color: var(--arrival-action);
+  color: var(--arrival-highlight);
+}
+
+.ask-chips button:focus-visible {
+  outline: var(--hairline) solid var(--focus-ring);
+  outline-offset: var(--space-1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ask-chips button {
+    transition: border-color var(--dur-fast) var(--ease-out);
+  }
+
+  .ask-chips button:hover {
+    transform: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   8. Message groups + bubbles (solid surfaces, never glass)
+   -------------------------------------------------------------------------- */
+
+.ask-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-inline-size: 100%;
+}
+
+.ask-group--user {
+  align-items: flex-end;
+}
+
+.ask-group--harbour {
+  align-items: flex-start;
+}
+
+.ask-bubble {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-inline-size: 75%;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  animation: ask-bubble-in var(--dur-base) var(--ease-out);
+}
+
+@keyframes ask-bubble-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-2));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ask-bubble {
+    animation: none;
+  }
+}
+
+/* User bubble — the accent fill, with the tail corner squared off. */
+.ask-bubble--user {
+  background-color: var(--accent-fill);
+  color: var(--on-accent);
+  border-end-end-radius: var(--radius-sm);
+}
+
+/* Harbour bubble — a solid surface with a chromatic edge, so its text
+   contrast is the solver-verified `--text` on `--bg-elevated`. */
+.ask-bubble--harbour {
+  position: relative;
+  background-color: var(--bg-elevated);
+  color: var(--text);
+  border: var(--hairline) solid var(--border-strong);
+  border-end-start-radius: var(--radius-sm);
+}
+
+.ask-bubble--harbour::before {
+  position: absolute;
+  inset-block: var(--space-3);
+  inset-inline-start: 0;
+  inline-size: var(--hairline);
+  border-start-start-radius: var(--radius-sm);
+  border-end-start-radius: var(--radius-sm);
+  background: linear-gradient(
+    180deg,
+    var(--chart-3),
+    var(--arrival-action),
+    var(--arrival-highlight)
+  );
+  content: '';
+  pointer-events: none;
+}
+
+/* A continuation bubble in a same-speaker run drops its eyebrow spacing. */
+.ask-bubble--continuation {
+  border-start-start-radius: var(--radius-md);
+  border-start-end-radius: var(--radius-md);
+}
+
+.ask-bubble--thinking {
+  opacity: 0.9;
+  box-shadow: 0 0 var(--space-4)
+    color-mix(in srgb, var(--arrival-action) 30%, transparent);
+}
+
+.ask-bubble__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  color: inherit;
+  opacity: 0.7;
+  text-transform: uppercase;
+}
+
+.ask-bubble__eyebrow-dot {
+  inline-size: var(--space-2);
+  block-size: var(--space-2);
+  border-radius: var(--radius-pill);
+  background-color: var(--arrival-highlight);
+  flex-shrink: 0;
+}
+
+.ask-bubble__body {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+.ask-bubble__body p {
+  font-size: var(--type-body);
+  line-height: var(--leading-body);
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ask-bubble__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-block-start: var(--space-1);
+  opacity: 0.85;
+}
+
+/* --------------------------------------------------------------------------
+   9. Thinking art + caret
+   -------------------------------------------------------------------------- */
+
+.ask-bubble__art {
+  position: relative;
+  inline-size: var(--space-8);
+  block-size: var(--space-8);
+  flex-shrink: 0;
+}
+
+.ask-bubble__caret {
+  inline-size: var(--space-1);
+  block-size: var(--space-4);
+  margin-block-start: var(--space-1);
+  border-radius: var(--radius-pill);
+  background-color: var(--arrival-highlight);
+  animation: ask-caret-blink var(--dur-slow) var(--ease-in-out) infinite;
+}
+
+@keyframes ask-caret-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ask-bubble__caret {
+    animation: none;
+  }
+}
+
+.ask-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+/* --------------------------------------------------------------------------
+   10. Error state
+   -------------------------------------------------------------------------- */
+
+.ask-error {
+  align-self: stretch;
+  padding: var(--space-4);
+  border-inline-start: var(--hairline) solid var(--chart-4);
+  border-start-end-radius: var(--radius-md);
+  border-end-end-radius: var(--radius-md);
+  animation: ask-bubble-in var(--dur-base) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ask-error {
+    animation: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   11. Composer (glass surface #2, pinned)
+   -------------------------------------------------------------------------- */
+
+.ask-composer {
+  position: relative;
+  flex: 0 0 auto;
+  isolation: isolate;
+  padding-block: var(--space-4) var(--space-5);
+  padding-inline: var(--space-4);
+  border-block-start: var(--hairline) solid var(--border);
+  background-color: var(--glass-fill);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.4);
+  border-end-start-radius: var(--radius-md);
+  border-end-end-radius: var(--radius-md);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .ask-composer {
+    background-color: var(--bg-elevated);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .ask-composer {
+    background-color: var(--bg-elevated);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* A contained warm field at the composer's edge. Deliberately restrained: the
+   composer already sits over the page aurora, and this is a second colour
+   source on the same glass. */
+.ask-composer__glow {
+  position: absolute;
+  z-index: -1;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  inline-size: 45%;
+  block-size: 100%;
+  background: radial-gradient(
+    ellipse at 8% 110%,
+    color-mix(in srgb, var(--arrival-highlight) 8%, transparent) 0%,
+    transparent 62%
+  );
+  opacity: calc(var(--aurora-patch-opacity) * 0.6);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .ask-composer__glow {
+    display: none;
+  }
+}
+
+.ask-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.ask-form .ask-form__input {
+  min-block-size: 0;
+}
+
+.ask-form__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.ask-form__count--warn {
+  color: var(--gold-text);
+}
+
+/* Send button gains a soft glow in dark; the light theme reads through the
+   accent fill and border instead. */
+.ask-form__send {
+  transition:
+    box-shadow var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.ask-form__send:not(:disabled):hover {
+  transform: translateY(calc(var(--space-1) * -0.5));
+  box-shadow: 0 0 var(--space-4)
+    color-mix(in srgb, var(--arrival-action) 45%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ask-form__send {
+    transition: box-shadow var(--dur-fast) var(--ease-out);
+  }
+
+  .ask-form__send:not(:disabled):hover {
+    transform: none;
+  }
+}
+
+/* The tide sits flush with the composer's base edge. It is a shallow band so
+   the wave reads as a line, not a filled shape. */
+.ask-composer__tide {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline: 0;
+  block-size: var(--space-4);
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+/* --------------------------------------------------------------------------
+   12. Chat art — beacon, ring stack, compass, constellation, tide
+   -------------------------------------------------------------------------- */
+
+.chat-beacon {
+  inline-size: var(--space-8);
+  block-size: var(--space-8);
+  flex-shrink: 0;
+}
+
+.chat-beacon__svg,
+.chat-ring-stack__svg,
+.chat-compass__svg {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.chat-beacon__ring,
+.chat-ring-stack__ring,
+.chat-compass__needle {
+  transform-origin: center;
+}
+
+.chat-beacon--idle .chat-beacon__ring--outer {
+  animation: beacon-breathe 8s ease-in-out infinite;
+}
+
+.chat-beacon--idle .chat-beacon__ring--inner {
+  animation: beacon-breathe 8s ease-in-out infinite reverse;
+}
+
+.chat-beacon--thinking .chat-beacon__ring--outer {
+  animation: beacon-pulse 1.5s ease-in-out infinite;
+}
+
+.chat-beacon--thinking .chat-beacon__ring--inner {
+  animation: beacon-pulse 1.5s ease-in-out infinite;
+  animation-delay: 0.3s;
+}
+
+.chat-beacon--thinking .chat-beacon__core {
+  animation: beacon-pulse 1.5s ease-in-out infinite;
+  animation-delay: 0.15s;
+}
+
+@keyframes beacon-breathe {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes beacon-pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.08);
+  }
+}
+
+/* Ring stack — a gyroscope spinning behind the beacon. */
+.chat-ring-stack {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+/* Inside the thinking bubble's art slot the beacon and ring stack overlay. */
+.ask-bubble__art > .chat-beacon,
+.ask-bubble__art > .chat-ring-stack {
+  position: absolute;
+  inset: 0;
+}
+
+.chat-ring-stack__ring--outer {
+  animation: ringstack-spin 8s linear infinite;
+}
+
+.chat-ring-stack__ring--middle {
+  animation: ringstack-spin 6s linear infinite reverse;
+}
+
+.chat-ring-stack__ring--inner {
+  animation: ringstack-rock 4s var(--ease-in-out) infinite alternate;
+}
+
+.chat-ring-stack__rings {
+  animation: ringstack-breath 3s var(--ease-in-out) infinite;
+}
+
+@keyframes ringstack-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ringstack-rock {
+  0% {
+    transform: rotate(-30deg);
+  }
+
+  100% {
+    transform: rotate(30deg);
+  }
+}
+
+@keyframes ringstack-breath {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Compass — the header mark. */
+.chat-compass {
+  inline-size: var(--space-7);
+  block-size: var(--space-7);
+  flex-shrink: 0;
+}
+
+.chat-compass__ring {
+  animation: compass-breathe 4s var(--ease-in-out) infinite;
+}
+
+.chat-compass__needle {
+  animation: compass-rock 3s var(--ease-in-out) infinite alternate;
+}
+
+@keyframes compass-breathe {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes compass-rock {
+  0% {
+    transform: rotate(-4deg);
+  }
+
+  100% {
+    transform: rotate(4deg);
+  }
+}
+
+/* Constellation — the empty-state field. */
+.chat-constellation {
+  inline-size: 100%;
+  max-inline-size: 24rem;
+}
+
+.chat-constellation__svg {
+  inline-size: 100%;
+  block-size: auto;
+}
+
+.chat-constellation__field {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: constellation-drift 9s var(--ease-in-out) infinite alternate;
+}
+
+.chat-constellation__dot {
+  animation: constellation-pulse 4s var(--ease-in-out) infinite;
+}
+
+@keyframes constellation-drift {
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(calc(var(--space-2) * -1));
+  }
+}
+
+@keyframes constellation-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 0.9;
+  }
+}
+
+/* Tide — the frame's base line. */
+.chat-tide {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.chat-tide__svg {
+  inline-size: 100%;
+  block-size: 100%;
+  display: block;
+}
+
+.chat-tide__drift {
+  transform-box: view-box;
+  transform-origin: center;
+  animation: tide-drift 18s var(--ease-in-out) infinite alternate;
+}
+
+.chat-tide__glow {
+  animation: tide-glow 6s var(--ease-in-out) infinite;
+}
+
+@keyframes tide-drift {
+  0% {
+    transform: translateX(-2%);
+  }
+
+  100% {
+    transform: translateX(2%);
+  }
+}
+
+@keyframes tide-glow {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-beacon__ring,
+  .chat-beacon__core,
+  .chat-ring-stack__ring,
+  .chat-ring-stack__rings,
+  .chat-compass__ring,
+  .chat-compass__needle,
+  .chat-constellation__field,
+  .chat-constellation__dot,
+  .chat-tide__drift,
+  .chat-tide__glow {
+    animation: none !important;
+  }
+
+  /* Named rest frames so the collapsed state is the intended still image. */
+  .chat-ring-stack__rings {
+    opacity: 0.6;
+  }
+
+  .chat-compass__ring {
+    opacity: 1;
+  }
+
+  .chat-constellation__dot {
+    opacity: 0.8;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   13. Mobile
+   -------------------------------------------------------------------------- */
+
+@media (width < 64em) {
+  .ask-header {
+    flex-wrap: wrap;
+    padding-block: var(--space-3);
+  }
+
+  .ask-header__meta {
+    inline-size: 100%;
+    margin-inline-start: 0;
+    justify-content: space-between;
+  }
+}
+
+@media (width < 40em) {
+  .ask-bubble {
+    max-inline-size: 90%;
+  }
+
+  .ask-page__content {
+    padding-inline: 0;
+  }
+
+  .ask-header,
+  .ask-composer {
+    padding-inline: var(--container-padding-inline);
+    border-radius: 0;
+  }
+
+  .ask-thread {
+    padding-inline: var(--container-padding-inline);
+  }
+
+  .ask-empty {
+    padding-block: var(--space-6);
+  }
+}

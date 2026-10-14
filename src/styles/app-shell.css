@@ -1,0 +1,52 @@
+/* ==========================================================================
+   Harbour — App shell (v2 glass on the global nav)
+
+   The legacy lane's top nav is a centred glass pill that floats over the
+   page. On pages where the background carries a busy art backdrop (the home
+   page, for example), the pill's "sides" — the area outside the pill on the
+   left and right — show the scene at full clarity while the pill itself
+   blurs it. That contrast makes the pill look disconnected from the page.
+
+   `.portal-topnav-glass` is a full-width glass backdrop that sits behind the
+   pill, edge to edge, so the entire top region reads as one glass surface.
+   The pill still floats on top; the area around it is also glass, and the
+   scene is blurred as it scrolls up past the bar.
+
+   The More destinations panel (the three-dots dropdown) and its trigger
+   adopt the same teal glass as the rest of the v2 system, so the menu
+   items get the same strong blurred translucent glass that the page text
+   does. Every value here is a token — no raw colours, no px except hairlines
+   (none needed in this file).
+
+   Imported AFTER the legacy lane (alongside dashboard.css and
+   scam-shield.css) so these unlayered class selectors win ties against
+   the ported stylesheets they share the page with.
+   ========================================================================== */
+
+/* --- Full-width glass backdrop behind the top nav pill --------------- */
+.portal-topnav-glass {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(env(safe-area-inset-top, 0) + var(--nav-height) + var(--space-6));
+  z-index: var(--z-raised);
+  background: var(--glass-tint);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  pointer-events: none;
+}
+
+/* --- More destinations panel: adopt the page's teal glass ------------ */
+.nav-more-panel {
+  background: var(--glass-tint);
+  backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+}
+
+/* The More destinations trigger (three-dots button) — same glass. */
+.harbour-more-desktop {
+  background: var(--glass-tint);
+  backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+}

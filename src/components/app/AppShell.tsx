@@ -3,6 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { ThemeToggle } from '../ThemeToggle';
 import { useProfile } from '@legacy/context/ProfileContext.jsx';
 import { Icon } from '@legacy/components/Icons.jsx';
+import { HarbourMark } from '../ui/harbour-mark';
 import { ToastHost } from '@legacy/components/Toast.jsx';
 import { useViewTransitionNavigate } from '@legacy/hooks/useViewTransitionNavigate.js';
 import { useShellTheme } from './shell-theme-context';
@@ -48,10 +49,11 @@ import { AppShellRoutes } from './AppShellRoutes';
 import { appPath } from '../../lib/app-path';
 
 /* Main destinations — shared by the desktop links and the mobile tab bar.
-   The paths are legacy roots; `appPath` adds the prefix at render time. */
+   The paths are legacy roots (plus `/scam`, the v2 Scam Shield page's own
+   address); `appPath` adds the `/app` prefix at render time. */
 const links = [
   ['Home', '/home', 'home'],
-  ['Scam X-ray', '/shield', 'shield'],
+  ['Scam X-ray', '/scam', 'shield'],
   ['Settle-in list', '/checklist', 'checklist'],
   ['Cantonese helper', '/translate', 'translate'],
   ['Ask Harbour', '/chat', 'chat'],
@@ -166,6 +168,12 @@ export function AppShell(): JSX.Element {
         Skip to main content
       </a>
 
+      {/* Full-width glass backdrop behind the top nav pill, so the pill's
+          sides aren't left out against a busy scene backdrop. Sits at
+          z-index var(--z-raised), behind the pill's z-sticky and above the
+          page content. pointer-events: none so it never intercepts clicks. */}
+      <div className="portal-topnav-glass" aria-hidden="true" />
+
       <header className="harbour-topnav">
         <button
           type="button"
@@ -174,7 +182,7 @@ export function AppShell(): JSX.Element {
           aria-label="Harbour home"
         >
           <span className="brand-mark">
-            <img src="/harbour-mark.svg" alt="" />
+            <HarbourMark />
           </span>
           <span>Harbour</span>
         </button>
@@ -226,8 +234,8 @@ export function AppShell(): JSX.Element {
             onClick={() => navigate(appPath('/dashboard'))}
             aria-label={`Open ${profile?.name || 'your'} dashboard`}
           >
-            {profile?.photo ? (
-              <img src={profile.photo} alt="" />
+            {profile?.photo || profile?.avatar ? (
+              <img src={profile.photo || profile.avatar} alt="" />
             ) : (
               <span>{profile?.name?.[0]?.toUpperCase() || 'S'}</span>
             )}

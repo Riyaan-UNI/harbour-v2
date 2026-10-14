@@ -60,6 +60,69 @@
   --logo-plate: #ffffff;
   --logo-plate-ink: #0b3935;
 
+  /* The mascot's ink and shine — the eyes, smile, nose and line detail, plus
+     the eye catch-lights. The ink was once `--bg`, which only works by luck:
+     `--bg` is near-black here but NEAR-WHITE in light mode, so on a light plate
+     the whole face vanished. It is a dedicated per-theme token now — dark ink
+     in both themes would also read, but the dark value is kept byte-identical
+     to the old `--bg` so dark mode does not move. `--mascot-shine` is the
+     catch-light: white against a dark ink in either theme. */
+  --mascot-ink: #061b1a;
+  --mascot-shine: #ffffff;
+
+  /* Arrival chapter: scoped roles, not global palette replacements. */
+  --arrival-bg: #121b29;
+  --arrival-surface: #1e2d40;
+  --arrival-text: #f3f5f8;
+  --arrival-muted: #b8c6d8;
+  --arrival-border: #8193aa;
+  --arrival-action: #b9cbff;
+  --arrival-on-action: #18264c;
+  --arrival-highlight: #f1c96f;
+  --arrival-art-frame: #263952;
+  --arrival-type-display: clamp(2.75rem, 1.4rem + 4.8vw, 5.5rem);
+
+  /* Arrival passage transition and art placement. These extend the motion
+     direction without changing Harbour's foundational light/dark palette. */
+  --arrival-black: #000000;
+
+  /* The cyan bloom on the warp terminal and its cursor. Not a theme colour —
+     the warp is always deep space — so it holds one value in both themes. */
+  --arrival-warp-glow: #50cbff;
+  --aurora-blob-login-inset: 10%;
+  --aurora-blob-login-inset-inner: 20%;
+  --aurora-blob-login-note-top: 12%;
+  --aurora-blob-login-note-right: 8%;
+  --aurora-blob-login-note-bottom: 18%;
+  --aurora-blob-login-note-left: 7%;
+  --aurora-blob-transition-center: 50%;
+  --aurora-blob-login-mobile-edge: 5%;
+  --aurora-blob-login-mobile-top: 8%;
+  --aurora-blob-login-mobile-bottom: 8%;
+
+  /* `/app/people` scene drifters — negative pulls that seat a floating
+     companion against the page edge. Offsets *within* a spacing step, kept
+     here so the stylesheet never writes a raw calc(). */
+  --drifter-pull-4: calc(var(--space-4) * -1);
+  --drifter-pull-6: calc(var(--space-6) * -1);
+
+  /* `/app/dashboard` ambient scene — the percentage insets that seat its six
+     drifters in the page gutters (docs/DASHBOARD_DESIGN_SPEC.md §4). The
+     `--drifter-*` family is the one Stylelint already allows inside an
+     `inset-*` declaration, so these reuse it rather than adding a family to the
+     config; Stylelint does not resolve custom properties, so a percentage is
+     legal *here* and nowhere else. Declared per theme (a hue-agnostic value,
+     repeated so both blocks stay self-describing). Kept off the rail column and
+     off the content core, so a drifter never crosses text. */
+  --drifter-dash-a-start: 6%;
+  --drifter-dash-b-end: 9%;
+  --drifter-dash-c-start: 3%;
+  --drifter-dash-c-top: 34%;
+  --drifter-dash-d-end: 4%;
+  --drifter-dash-d-top: 46%;
+  --drifter-dash-e-start: 13%;
+  --drifter-dash-f-end: 14%;
+
   /* --- §3 Chart and avatar palette ------------------------------------- */
   --chart-1: #4fe3d0;
   --chart-2: #f1c96f;
@@ -76,6 +139,30 @@
      under the white sheen so a glass surface stays legible whatever is behind
      it. See docs/PROGRESS.md for the axe run that forced this. */
   --glass-tint: rgba(6, 27, 26, 0.55);
+
+  /* --- §3 Profile surface family (outputs/profile-design-direction.md §2) ---
+     The radial *peak* of the portrait plate's accent field. People's post field
+     runs the raw `--person-accent` chart token to `--bg-elevated`; at 46% the
+     plate stays a field (a background), never a fill that text sits on — which
+     is why it needs no solver surface: the name/eyebrow live on the intro plate
+     beside it. Not solver-gated by construction; see the direction's stop
+     condition. */
+  --profile-identity-field: color-mix(
+    in srgb,
+    var(--person-accent) 46%,
+    var(--bg-elevated)
+  );
+
+  /* ADDED. The honesty/note bar's solid tint — an alias of `--glass-tint`
+     under its own name on purpose. The bar must read as a *solid tint*, not a
+     frosted surface (no backdrop-filter), so it does not count against the
+     three-glass budget. Same value, different intent; the alias lets the bar
+     change independently later. */
+  --profile-note-bg: rgba(6, 27, 26, 0.55);
+
+  /* ADDED. The mask that fades the portrait plate art into the card, reusing
+     the opaque mask stop. Geometry/mask, not a new colour. */
+  --profile-mask-fade: linear-gradient(180deg, var(--mask-opaque), transparent);
 
   /* --- §4 Aurora background ------------------------------------------- */
   --aurora-blur: 5rem;
@@ -153,6 +240,7 @@
   --tracking-label: 0.08em;
 
   --measure-display: 20ch;
+  --measure-shell: 72rem;
   --measure-body: 65ch;
 
   /* --- §6 Spacing scale ------------------------------------------------
@@ -187,6 +275,22 @@
      jump lands with the section heading clear of the glass. */
   --nav-height: 4.25rem;
 
+  /* The app's mobile bottom tab bar (`.harbour-tabs`, legacy lane). It is
+     `position: fixed`, so a full-height page must reserve room for it or its
+     last row hides behind the bar. The legacy `.portal-main` already reserves
+     this space in its own padding — but a page that wants to fill the shell
+     exactly needs the number. Measured: one 4rem item row. Above 1024px the
+     legacy sheet hides the bar, so the token drops to 0 there. */
+  --ask-tabbar-height: 4rem;
+
+  /* The vertical space `.portal-main` leaves the page, per the legacy lane's
+     padding: top `--topnav-h + --sp-6` (desktop) or `+ --sp-4` (mobile), plus
+     the bottom padding. Held here so `.ask-page` can fill exactly what the
+     shell gives it instead of re-deriving the viewport maths and drifting. */
+  --ask-frame-block-size: calc(
+    100dvh - var(--nav-height) - var(--space-8) - var(--space-6)
+  );
+
   /* --- §6 Hero offset --------------------------------------------------
      The hero's negative pull and its compensating top padding. Both are
      spacing declarations, so (like every other spacing value in the build)
@@ -194,9 +298,7 @@
      component stylesheet — the Stylelint spacing gate only accepts a token,
      `0`, `auto` or the two layout tokens, which is the point of it. */
   --hero-pull-up: calc(var(--nav-height) * -1);
-  --hero-padding-block-start: calc(
-    var(--section-padding-block) + var(--nav-height)
-  );
+  --hero-padding-block-start: calc(var(--nav-height) + var(--space-6));
 
   /* Grid track minimums, spec §6. `md` is the value the spec names (17rem);
      `sm` and `lg` are the smaller and larger steps the Grid primitive exposes. */
@@ -259,6 +361,33 @@
   /* ADDED. The peak tint of the empty art slot's placeholder gradient, over
      `--bg-elevated`. Text sits on it, so it is a surface the script checks. */
   --art-tint-alpha: 8%;
+
+  /* --- Dashboard geometry (docs/DASHBOARD_DESIGN_SPEC.md §3) ------------
+     Five theme-independent geometry tokens for the /app/dashboard rebuild.
+     They are geometry, not colour, so they are not contrast-checked, and they
+     are identical in dark and light — which is why they are declared once
+     here in the default `:root` and inherited by the light theme. No new
+     colour token is introduced (§3).
+
+     `--dash-rail-top` is a sixth, composite value: the sticky rail's offset
+     under the shell nav (§4.6). It is a token for the same reason
+     `--hero-pull-up` is — the Stylelint spacing gate accepts a token in an
+     `inset-*` declaration, never a `calc()` written in a component
+     stylesheet. */
+  --dash-rail-w: 4.5rem;
+  --dash-rail-top: calc(var(--nav-height) + var(--space-6));
+  --dash-rail-cap: calc(100svh - var(--nav-height) - var(--space-6));
+  --dash-heat-cell: clamp(0.5rem, 0.35rem + 0.45vw, 0.75rem);
+  --dash-chart-ratio: 16 / 10;
+  --dash-art-ratio: 520 / 210;
+
+  /* --- Profile geometry (outputs/profile-design-direction.md §2) --------
+     One theme-independent geometry token for the /app/profile portrait plate.
+     `4 / 5` is a portrait crop, deliberately not the 1/1 square the People
+     directory uses for its post field — it reads as a profile photo, and it
+     keeps the own-profile masthead distinct from the directory. Declared once
+     here in the default `:root` and inherited by the light theme. */
+  --profile-plate-ratio: 4 / 5;
 }
 
 /* --------------------------------------------------------------------------
@@ -298,6 +427,23 @@
   --logo-plate: #ffffff;
   --logo-plate-ink: #0b3935;
 
+  /* Mascot ink flips dark here — see the dark block for why it is its own
+     token rather than `--bg`. Near-black ink on the white plates every mascot
+     sits on; the catch-light stays white. */
+  --mascot-ink: #0b2b28;
+  --mascot-shine: #ffffff;
+
+  /* Arrival chapter: paper-blue surfaces, dark cobalt action. */
+  --arrival-bg: #edf2fb;
+  --arrival-surface: #f8faff;
+  --arrival-text: #1d2b43;
+  --arrival-muted: #4b5b73;
+  --arrival-border: #697e9e;
+  --arrival-action: #304cb0;
+  --arrival-on-action: #f8faff;
+  --arrival-highlight: #78550c;
+  --arrival-art-frame: #d5dfef;
+
   /* --- §3 Chart and avatar palette ------------------------------------- */
   --chart-1: #0a6f66;
   --chart-2: #b7791f;
@@ -309,6 +455,18 @@
   --glass-highlight: rgba(255, 255, 255, 0.9);
   --shadow-glass: 0 1.5rem 3rem -1rem rgba(11, 57, 53, 0.18);
   --glass-tint: rgba(242, 247, 246, 0.55);
+
+  /* --- §3 Profile surface family (light) -------------------------------
+     Same expression as dark — it mixes against `--person-accent` (a scoped §3
+     chart token) and `--bg-elevated`, both of which swap with the theme, so the
+     field re-themes without a second literal. The note bar's tint is the light
+     half of the alias pair (see the dark block). */
+  --profile-identity-field: color-mix(
+    in srgb,
+    var(--person-accent) 46%,
+    var(--bg-elevated)
+  );
+  --profile-note-bg: rgba(242, 247, 246, 0.55);
 
   /* Light clears 4.5:1 at full strength: the worst-case stack bottoms out at
      4.62 for --text-subtle, so the cap is a no-op in this theme. */
@@ -333,6 +491,17 @@
   --spotlight-alpha: 12%;
   --overlay-alpha: 80%;
   --art-tint-alpha: 8%;
+
+  /* `/app/dashboard` ambient scene drifter insets — same values as dark; see
+     the dark block for why they are declared here too. */
+  --drifter-dash-a-start: 6%;
+  --drifter-dash-b-end: 9%;
+  --drifter-dash-c-start: 3%;
+  --drifter-dash-c-top: 34%;
+  --drifter-dash-d-end: 4%;
+  --drifter-dash-d-top: 46%;
+  --drifter-dash-e-start: 13%;
+  --drifter-dash-f-end: 14%;
 }
 
 /* --------------------------------------------------------------------------
@@ -356,6 +525,19 @@
 @media (width >= 64em) {
   :root {
     --container-padding-inline: 2rem;
+  }
+}
+
+/* The mobile bottom tab bar is hidden from 1024px up (legacy sheet), so the
+   space a full-height page must reserve for it goes away there. The shell's
+   bottom padding shrinks at the same breakpoint (`--sp-16` on desktop versus
+   `--tabs-h + --sp-8` on mobile), so the frame height changes with it. */
+@media (width >= 64em) {
+  :root {
+    --ask-tabbar-height: 0;
+    --ask-frame-block-size: calc(
+      100dvh - var(--nav-height) - var(--space-8)
+    );
   }
 }
 

@@ -1,125 +1,43 @@
 import { gsap } from 'gsap';
-import { SplitText } from 'gsap/SplitText';
-import { useEffect, useRef, useState } from 'react';
-import { AuroraPatch } from '../AuroraPatch';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { Container, Grid, Heading, Section, Stack, Text } from '../layout';
-import { ArtSlot } from './ArtSlot';
+import { EyeOff } from '../ui/icons';
+import { HarbourJourneyScene } from './HarbourJourneyScene';
 import { HeroCta } from './HeroCta';
 import { WaveLine, type WaveLineHandle } from './WaveLine';
 
-gsap.registerPlugin(SplitText);
-
-/**
- * The hero — Addendum 1 §4.
- *
- * Brick 3b made the hero boxless: the colour field is full-bleed, with a
- * mask-image falloff from the art column (full --aurora-hero-opacity, 0.59 in
- * dark) to the copy column (--aurora-hero-copy-opacity, 0.28). The headline
- * sits on the bare field everywhere; the eyebrow, subhead and CTAs sit on the
- * copy column's weaker field. All three are small text, so the copy cap is held
- * to 4.5:1 — solved by scripts/solve-aurora-cap.mjs, not guessed.
- *
- * The WaveLine sits across the lower third, below the copy rather than behind
- * it, so nothing has to be positioned over the line to be readable.
- *
- * The entrance is a single GSAP timeline: SplitText reveals the headline lines
- * (0.6 s, 0.08 s stagger, ease-out), then the eyebrow, subhead and CTAs fade
- * up together, then the WaveLine settles. Reduced motion shows the final state
- * immediately.
- */
 export type HeroProps = {
-  /** Passed straight through to the CTA block. */
   savedNickname?: string | null;
 };
 
+/** Arrival chapter. Content and actions are available before any animation runs. */
 export function Hero({ savedNickname = null }: HeroProps): JSX.Element {
-  const eyebrowRef = useRef<HTMLParagraphElement>(null);
-  const headlineRef = useRef<HTMLHeadingElement>(null);
-  const subheadRef = useRef<HTMLParagraphElement>(null);
-  const ctaWrapRef = useRef<HTMLDivElement>(null);
+  const copyRef = useRef<HTMLDivElement>(null);
   const waveLineRef = useRef<WaveLineHandle>(null);
+  const [entrance, setEntrance] = useState<'entering' | 'entered'>('entering');
 
-  /**
-   * The entrance's own state marker, on the section itself.
-   *
-   * The CTA block fades up from `opacity: 0`, and an axe scan that runs
-   * mid-tween measures the button against its half-painted background — a
-   * contrast failure that is the animation's doing, not the design's. The
-   * tests wait for `data-entrance="entered"` before scanning, which is the
-   * moment every element in the hero is at its final opacity.
-   */
-  const [entrance, setEntrance] = useState<'entering' | 'entered'>(
-    'entering',
-  );
-
-  useEffect(() => {
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduced) {
-      waveLineRef.current?.settle();
-      setEntrance('entered');
-      return;
-    }
-
-    const headline = headlineRef.current;
-    const eyebrow = eyebrowRef.current;
-    const subhead = subheadRef.current;
-    const ctaWrap = ctaWrapRef.current;
-    if (!headline || !eyebrow || !subhead || !ctaWrap) return;
-
-    // Hide the supporting copy before the first paint so there is no flash.
-    gsap.set([eyebrow, subhead, ctaWrap], { opacity: 0, y: 12 });
-
-    let split: SplitText | null = null;
-    let tl: gsap.core.Timeline | null = null;
-    let cancelled = false;
-
-    const run = async (): Promise<void> => {
-      // SplitText measures rendered lines, so it must wait for fonts.
-      await document.fonts.ready;
-      if (cancelled) return;
-
-      split = new SplitText(headline, { type: 'lines' });
-      gsap.set(split.lines, { opacity: 0, y: 20 });
-
-      tl = gsap.timeline({
-        onComplete: () => {
-          if (!cancelled) setEntrance('entered');
-        },
-      });
-
-      // 1. Headline lines reveal.
-      tl.to(split.lines, {
-        y: 0,
-        opacity: 1,
-        duration: 0.6,
-        stagger: 0.08,
-        ease: 'power2.out',
-      });
-
-      // 2. Eyebrow, subhead and CTAs fade up.
-      tl.to(
-        [eyebrow, subhead, ctaWrap],
+  useLayoutEffect(() => {
+    // No font-loading gate, hidden controls, or split-line DOM: resizing and
+    // text enlargement must never leave an action waiting for an entrance.
+    const media = gsap.matchMedia();
+    media.add('(prefers-reduced-motion: no-preference)', () => {
+      const tween = gsap.fromTo(
+        copyRef.current,
+        { y: 16 },
         {
           y: 0,
-          opacity: 1,
-          duration: 0.5,
-          stagger: 0.06,
-          ease: 'power2.out',
+          duration: 0.6,
+          ease: 'power3.out',
+          onComplete: () => setEntrance('entered'),
         },
-        '-=0.2',
       );
-
-      // 3. WaveLine settles.
-      tl.add(() => waveLineRef.current?.settle());
-    };
-
-    run();
-
-    return () => {
-      cancelled = true;
-      tl?.kill();
-      split?.revert();
-    };
+      return () => tween.revert();
+    });
+    waveLineRef.current?.settle();
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setEntrance('entered');
+    }
+    return () => media.revert();
   }, []);
 
   return (
@@ -130,44 +48,41 @@ export function Hero({ savedNickname = null }: HeroProps): JSX.Element {
       className="hero__section"
       data-entrance={entrance}
     >
-      <AuroraPatch variant="hero">
-        <Container>
-          <Stack gap={8} className="hero__content">
-            <Grid min="lg" gap={8} className="items-center lg:grid-cols-2">
-              <Stack gap={6}>
-                <Text role="label" tone="muted" ref={eyebrowRef}>
-                  For international students in Hong Kong
+      <Container>
+        <Stack gap={6} className="hero__content">
+          <Grid min="lg" gap={7} className="hero__grid">
+            <Stack gap={6} ref={copyRef} className="hero__copy">
+              <Text role="label" tone="muted" className="hero__eyebrow">
+                For international students in Hong Kong, China
+              </Text>
+              <Heading
+                level={1}
+                role="display"
+                id="hero-headline"
+                className="hero__headline"
+              >
+                Your <span className="hero__emphasis">safe harbour</span> in Hong Kong.
+              </Heading>
+              <Text tone="muted" className="hero__description">
+                Scams, language, paperwork, loneliness — the things nobody
+                warns you about. Harbour helps you through them, one small
+                step at a time.
+              </Text>
+              <Stack gap={4}>
+                <HeroCta savedNickname={savedNickname} className="hero__actions" />
+                <Text role="small" tone="muted" className="hero__privacy">
+                  <EyeOff />
+                  A local profile. No account or password. Saved on this device.
                 </Text>
-
-                <Heading
-                  level={1}
-                  role="display"
-                  id="hero-headline"
-                  ref={headlineRef}
-                >
-                  Your safe harbour in Hong Kong.
-                </Heading>
-
-                <Text tone="muted" ref={subheadRef}>
-                  Scams, language, paperwork, loneliness — the things nobody
-                  warns you about. Harbour helps you through them, one small
-                  step at a time.
-                </Text>
-
-                <div ref={ctaWrapRef}>
-                  <HeroCta savedNickname={savedNickname} />
-                </div>
               </Stack>
-
-              <ArtSlot priority ratio="4 / 3" className="w-full" />
-            </Grid>
-
-            <div className="hero__wave">
-              <WaveLine ref={waveLineRef} />
-            </div>
-          </Stack>
-        </Container>
-      </AuroraPatch>
+            </Stack>
+            <HarbourJourneyScene />
+          </Grid>
+          <div className="hero__wave" aria-hidden="true">
+            <WaveLine ref={waveLineRef} />
+          </div>
+        </Stack>
+      </Container>
     </Section>
   );
 }

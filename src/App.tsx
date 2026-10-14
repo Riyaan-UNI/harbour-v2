@@ -4,7 +4,7 @@ import { Stack, Text } from './components/layout';
 import { Toaster } from './components/ui';
 import { ProfileProvider } from '@legacy/context/ProfileContext.jsx';
 import { GuardedApp } from './components/app/AppGuard';
-import { LoginRoute, SignupRoute } from './routes/entry';
+import { ArrivalStoryRoute, LoginRoute, SignupRoute } from './routes/entry';
 import { Landing } from './routes/Landing';
 
 /**
@@ -13,8 +13,8 @@ import { Landing } from './routes/Landing';
  * Three lanes, in one table:
  *
  *   - `/` plus the dev pages — the v2 lane.
- *   - `/login` and `/signup` — the entry lane. P1 renders the ported legacy
- *     pages inside the legacy entry shell; P2 replaces the bodies.
+ *   - `/login`, `/signup`, and `/arrival` — local profile selection, onboarding,
+ *     and the post-signup story.
  *   - `/app/*` — the ported legacy app, behind `AppGuard`, which sends an
  *     unauthenticated visit to `/login`.
  *
@@ -83,6 +83,7 @@ export function App(): JSX.Element {
         {/* The entry lane. Both routes own their full-viewport shell. */}
         <Route path="/login" element={<LoginRoute />} />
         <Route path="/signup" element={<SignupRoute />} />
+        <Route path="/arrival" element={<ArrivalStoryRoute />} />
         {/* The old build called it `/onboarding`; the link lives on in case a
             bookmark or an old internal link still points at it. */}
         <Route path="/onboarding" element={<Navigate to="/signup" replace />} />

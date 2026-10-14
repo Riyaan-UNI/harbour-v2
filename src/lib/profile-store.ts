@@ -30,6 +30,8 @@ export type LegacyProfile = {
   socials: Record<string, string>;
   /** Not part of the legacy contract, but harmless to carry. */
   avatar?: string;
+  mascotId?: string;
+  id?: string;
   photo?: string;
   /** Set when a guided tour has been completed; Brick 4's tour reads it. */
   tourDone?: boolean;
@@ -107,10 +109,10 @@ export function activeProfileId(): string | null {
  * saved profile — and a user who signs up and never opens the app this session
  * should still see a personalised landing page when they come back.
  */
-export function saveProfile(
+export function persistProfile(
   input: Omit<StoredProfile, 'id' | 'createdAt'> &
     Partial<Pick<StoredProfile, 'id' | 'createdAt'>>,
-): StoredProfile {
+): { record: StoredProfile; persisted: boolean } {
   const record: StoredProfile = {
     ...input,
     id: input.id ?? makeId(),
@@ -119,13 +121,21 @@ export function saveProfile(
 
   const rows = listProfiles().filter((row) => row.id !== record.id);
   rows.unshift(record);
-  safeWrite(PROFILES_KEY, rows);
-  safeWrite(ACTIVE_ID_KEY, record.id);
-  activateProfile(record);
+  const profilesSaved = safeWrite(PROFILES_KEY, rows);
+  const activeSaved = safeWrite(ACTIVE_ID_KEY, record.id);
+  const legacySaved = activateProfile(record);
 
   // The legacy context listens for this and re-reads `harbour-profile`.
   window.dispatchEvent(new Event('harbour-profile-change'));
-  return record;
+  return { record, persisted: profilesSaved && activeSaved && legacySaved };
+}
+
+/** Backwards-compatible profile writer for callers that only need the record. */
+export function saveProfile(
+  input: Omit<StoredProfile, 'id' | 'createdAt'> &
+    Partial<Pick<StoredProfile, 'id' | 'createdAt'>>,
+): StoredProfile {
+  return persistProfile(input).record;
 }
 
 /**
@@ -133,7 +143,7 @@ export function saveProfile(
  * means. The legacy reader is the app's own source of truth, so this is the
  * step that actually signs someone in.
  */
-export function activateProfile(record: StoredProfile): void {
+export function activateProfile(record: StoredProfile): boolean {
   const legacy: LegacyProfile = {
     name: record.name,
     country: record.country,
@@ -141,15 +151,18 @@ export function activateProfile(record: StoredProfile): void {
     socials: record.socials ?? {},
     avatar: record.avatar ?? '',
     photo: record.photo ?? '',
+    id: record.id,
+    mascotId: record.mascotId ?? '',
     tourDone: record.tourDone ?? false,
   };
-  safeWrite(LEGACY_PROFILE_KEY, legacy);
+  const profileSaved = safeWrite(LEGACY_PROFILE_KEY, legacy);
   // The legacy context also reads a plain-string name key as a fallback.
   try {
     localStorage.setItem('harbour-name', record.name);
   } catch {
     /* Storage unavailable; the JSON key above is the one that matters. */
   }
+  return profileSaved;
 }
 
 /** Sign in as a saved profile by id. Returns the record, or null if unknown. */
@@ -179,8 +192,7 @@ export function removeProfile(id: string): void {
 
   if (activeProfileId() === id) {
     safeRemove(ACTIVE_ID_KEY);
-    safeRemove(LEGACY_PROFILE_KEY);
-    safeRemove('harbour-name');
+    for (const key of [LEGACY_PROFILE_KEY, 'harbour-name', 'harbour-user', 'harbour-local-profile', 'harbour-account', 'harbour-current-user', 'profile', 'user']) safeRemove(key);
   }
   window.dispatchEvent(new Event('harbour-profile-change'));
 }
@@ -213,6 +225,8 @@ export function readLegacyProfile(): LegacyProfile | null {
       socials: value.socials ?? {},
       avatar: value.avatar ?? '',
       photo: value.photo ?? '',
+      mascotId: value.mascotId ?? '',
+      id: value.id,
       tourDone: value.tourDone ?? false,
     };
   } catch {

@@ -1,0 +1,610 @@
+/* ==========================================================================
+   Harbour — Find your people (v2 redesign)
+
+   Token-only. No raw colours, no px except the 1px hairline, and every
+   padding / margin / gap / inset comes from the ten --space-* steps. Each card
+   carries a `--person-accent` scope (a §3 chart token) that tints the mascot,
+   the hashtags, the pfp ring and the post field, so the whole directory
+   re-themes with the page in dark and light alike.
+   ========================================================================== */
+
+.app-people {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  isolation: isolate;
+}
+
+/* The reading column — capped and centred so a dozen cards read as a
+   directory, not as a row of banners stretched across a wide screen. */
+.app-people__shell {
+  width: 100%;
+  max-width: var(--measure-shell);
+  margin-inline: auto;
+}
+
+/* --- Scene backdrop ------------------------------------------------------ */
+.app-people__scene {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.app-people__scene img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.26;
+}
+
+.app-people__scene-tint {
+  position: absolute;
+  inset: 0;
+  background: var(--glass-tint);
+}
+
+/* Drifting companions — decoration only. Reduced motion parks them. */
+.app-people-drifter {
+  position: absolute;
+  display: block;
+  color: var(--accent-text);
+  opacity: 0.16;
+}
+
+.app-people-drifter__body {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.app-people-drifter--a {
+  inset-block-start: var(--drifter-pull-4);
+  inset-inline-end: var(--space-8);
+  width: var(--space-10);
+  height: var(--space-10);
+}
+
+.app-people-drifter--b {
+  inset-block-start: var(--space-10);
+  inset-inline-start: var(--drifter-pull-6);
+  width: var(--space-9);
+  height: var(--space-9);
+}
+
+.app-people-drifter--c {
+  inset-block-end: var(--space-10);
+  inset-inline-end: var(--drifter-pull-6);
+  width: var(--space-9);
+  height: var(--space-9);
+}
+
+.app-people-drifter--d {
+  inset-block-end: var(--space-6);
+  inset-inline-start: var(--space-10);
+  width: var(--space-8);
+  height: var(--space-8);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .app-people-drifter--a {
+    animation: app-people-float-a 11s ease-in-out infinite alternate;
+  }
+
+  .app-people-drifter--b {
+    animation: app-people-float-b 14s ease-in-out infinite alternate;
+  }
+
+  .app-people-drifter--c {
+    animation: app-people-float-a 13s ease-in-out infinite alternate-reverse;
+  }
+
+  .app-people-drifter--d {
+    animation: app-people-float-b 17s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes app-people-float-a {
+  from {
+    transform: translateY(-0.6rem) rotate(-4deg);
+  }
+
+  to {
+    transform: translateY(0.9rem) rotate(5deg);
+  }
+}
+
+@keyframes app-people-float-b {
+  from {
+    transform: translateY(0.8rem) rotate(4deg);
+  }
+
+  to {
+    transform: translateY(-0.7rem) rotate(-5deg);
+  }
+}
+
+/* --- Masthead — editorial, left-aligned --------------------------------- */
+.app-people-intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.app-people-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+
+.app-people-lede {
+  max-width: var(--measure-body);
+}
+
+/* --- Honesty banner ------------------------------------------------------ */
+.app-people-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: var(--hairline) solid var(--border-strong);
+  background: var(--bg-elevated);
+}
+
+/* --- Controls ------------------------------------------------------------ */
+.app-people-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.app-people-search {
+  position: relative;
+  flex: none;
+}
+
+.app-people-search__icon {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: var(--space-3);
+  display: grid;
+  place-items: center;
+  color: var(--text-subtle);
+  pointer-events: none;
+}
+
+.app-people-search__icon svg {
+  width: var(--space-5);
+  height: var(--space-5);
+}
+
+.app-people-search__input {
+  width: 100%;
+  padding-inline-start: var(--space-8);
+}
+
+.app-people-chips {
+  flex-wrap: wrap;
+}
+
+.app-people-chip {
+  padding-inline: var(--space-4);
+  padding-block: var(--space-2);
+  border-radius: var(--radius-pill);
+  border: var(--hairline) solid var(--border-strong);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-size: var(--type-small);
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.app-people-chip:hover {
+  background: var(--glass-fill-strong);
+  border-color: var(--accent-text);
+  color: var(--text);
+}
+
+.app-people-chip[aria-pressed='true'] {
+  background: var(--accent-fill);
+  border-color: transparent;
+  color: var(--on-accent);
+}
+
+.app-people-chip:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* --- Results header ------------------------------------------------------ */
+.app-people-profilelink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--accent-text);
+  font-size: var(--type-small);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.app-people-profilelink:hover {
+  text-decoration: underline;
+}
+
+.app-people-profilelink:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-sm);
+}
+
+.app-people-grid {
+  align-items: stretch;
+}
+
+/* --- The Instagram-style card ------------------------------------------- */
+.app-person {
+  height: 100%;
+  overflow: hidden;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .app-person:hover {
+    transform: translateY(-0.25rem);
+  }
+}
+
+/* Post field — a square, the mascot centred on its own accent wash. */
+.app-person__media {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: radial-gradient(
+    120% 90% at 50% -15%,
+    var(--person-accent),
+    var(--bg-elevated) 62%
+  );
+}
+
+/* A soft top sheen, so the field reads as a photo, not a flat block. */
+.app-person__media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--logo-plate) 0%, transparent 30%);
+  opacity: 0.07;
+  pointer-events: none;
+}
+
+.app-person__mascot {
+  width: 54%;
+  height: 54%;
+}
+
+/* The institution's concept-art badge, pinned to the photo's top corner. */
+.app-person__crest {
+  position: absolute;
+  inset-block-start: var(--space-3);
+  inset-inline-end: var(--space-3);
+}
+
+.app-person__stickershape {
+  position: absolute;
+  inset-block-start: var(--space-3);
+  inset-inline-start: var(--space-3);
+  transform: rotate(-3deg);
+}
+
+/* The place pill pinned to the foot of the photo. */
+.app-person__place {
+  position: absolute;
+  inset-block-end: var(--space-3);
+  inset-inline-start: var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding-inline: var(--space-3);
+  padding-block: var(--space-1);
+  border-radius: var(--radius-pill);
+  font-size: var(--type-label);
+  color: var(--text);
+  background: var(--glass-fill-strong);
+  backdrop-filter: blur(var(--glass-blur));
+}
+
+.app-person__place svg {
+  width: var(--space-4);
+  height: var(--space-4);
+}
+
+/* Body — header, actions, meta. */
+.app-person__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+.app-person__identity {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.app-person__identity:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-md);
+}
+
+/* The mascot pfp — a 1px accent ring around the creature. */
+.app-person__pfp {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--space-7);
+  height: var(--space-7);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  background: var(--bg-elevated);
+  box-shadow: 0 0 0 var(--hairline) var(--person-accent);
+}
+
+.app-person__pfp-img {
+  width: 86%;
+  height: 86%;
+}
+
+.app-person__who {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.app-person__handle {
+  font-size: var(--type-small);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.app-person__place-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--type-label);
+  color: var(--text-subtle);
+  min-width: 0;
+}
+
+/* The home-region flag, sized against the label line it sits in. */
+.app-person__flag {
+  flex: none;
+  display: block;
+  width: var(--space-4);
+  height: var(--space-3);
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  box-shadow: 0 0 0 var(--hairline) var(--border);
+}
+
+/* --- The same mascot, inside the legacy public profile ------------------ */
+
+/* `.public-avatar` in the legacy lane is a 56px teal circle that centres a
+   single text glyph. The mascot needs the circle's inner box to flex-centre
+   an SVG instead, and a light plate behind it so a chart-tinted body keeps
+   its contrast against the dark teal. Both are handled here, in the v2 lane
+   that loads after the legacy sheet, so the legacy CSS stays untouched. */
+.public-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+}
+
+.public-avatar__plate {
+  display: grid;
+  place-items: center;
+  width: 82%;
+  height: 82%;
+  border-radius: var(--radius-pill);
+  background: var(--bg-elevated);
+}
+
+.profile-mascot {
+  width: 84%;
+  height: 84%;
+}
+
+/* The friend rows are compact; the creature lives directly in the initial's
+   span, so it inherits that circle's centring and only needs its own size. */
+.profile-friend-mascot {
+  width: 80%;
+  height: 80%;
+}
+
+/* The institution line on the public profile gains the concept-art badge,
+   so the fact row needs to align the badge with its text. */
+.profile-uni {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Action bar — like, comment, share; save pinned to the right. */
+.app-person__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.app-person-action {
+  display: inline-grid;
+  place-items: center;
+  padding: var(--space-2);
+  border: none;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.app-person-action svg {
+  width: var(--space-6);
+  height: var(--space-6);
+}
+
+.app-person-action:hover {
+  color: var(--text);
+  background: var(--glass-fill);
+}
+
+.app-person-action:active {
+  transform: scale(0.92);
+}
+
+.app-person-action:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Liked and saved states — the icon fills with an accent token. CSS fill
+   wins over the presentation attribute, so a single colour themes both the
+   stroke and the interior. */
+.app-person-action--like.is-active {
+  color: var(--danger);
+}
+
+.app-person-action--like.is-active svg {
+  fill: var(--danger);
+}
+
+.app-person-action--save.is-active {
+  color: var(--gold-text);
+}
+
+.app-person-action--save.is-active svg {
+  fill: var(--gold-text);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .app-person-action--like.is-active svg,
+  .app-person-action--save.is-active svg {
+    animation: app-people-pop var(--dur-base) var(--ease-out);
+  }
+}
+
+@keyframes app-people-pop {
+  0%, 100% {
+    transform: scale(1);
+  }
+
+  45% {
+    transform: scale(1.3);
+  }
+}
+
+/* Likes, caption and the footer row. */
+.app-person__caption {
+  color: var(--text-muted);
+}
+
+.app-person__caption-name {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.app-person__tag {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent-text);
+  font-size: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.app-person__tag:hover {
+  text-decoration: underline;
+}
+
+.app-person__tag:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-sm);
+}
+
+.app-person__comments {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text-subtle);
+  font-size: var(--type-label);
+  cursor: pointer;
+}
+
+.app-person__comments:hover {
+  color: var(--text-muted);
+  text-decoration: underline;
+}
+
+.app-person__comments:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.app-person__time {
+  font-family: var(--font-mono);
+  font-size: var(--type-label);
+  letter-spacing: var(--tracking-label);
+  color: var(--text-subtle);
+  text-transform: uppercase;
+}
+
+/* --- Empty state --------------------------------------------------------- */
+.app-people-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-8) var(--space-4);
+  border-radius: var(--radius-lg);
+  border: var(--hairline) solid var(--border-strong);
+  background: var(--glass-fill);
+  text-align: center;
+}
+
+.app-people-empty__glyph {
+  display: grid;
+  place-items: center;
+  width: var(--space-10);
+  height: var(--space-10);
+  border-radius: var(--radius-pill);
+  color: var(--text-subtle);
+  background: var(--bg-elevated);
+}
+
+.app-people-empty .app-people-empty__glyph svg {
+  width: var(--space-6);
+  height: var(--space-6);
+}

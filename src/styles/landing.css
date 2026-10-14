@@ -66,13 +66,48 @@ html.lenis body {
   }
 }
 
+/* Landing chrome uses the arrival theme in both modes, rather than inheriting
+   the older global teal palette. Re-declare Tailwind's bridge at the scope:
+   those variables are computed where declared and otherwise stay frozen to
+   the global theme values. */
+.landing-nav,
+.landing-footer,
+.landing-nav__sheet {
+  --bg: var(--arrival-bg);
+  --bg-elevated: var(--arrival-surface);
+  --glass-tint: color-mix(in srgb, var(--arrival-bg) 92%, transparent);
+  --glass-fill: color-mix(in srgb, var(--arrival-text) 6%, transparent);
+  --glass-fill-strong: color-mix(in srgb, var(--arrival-text) 11%, transparent);
+  --border: color-mix(in srgb, var(--arrival-text) 18%, transparent);
+  --border-strong: var(--arrival-border);
+  --text: var(--arrival-text);
+  --text-muted: var(--arrival-muted);
+  --text-subtle: var(--arrival-muted);
+  --accent-fill: var(--arrival-action);
+  --on-accent: var(--arrival-on-action);
+  --accent-text: var(--arrival-action);
+  --focus-ring: var(--arrival-action);
+  --gold-text: var(--arrival-highlight);
+
+  --color-bg: var(--arrival-bg);
+  --color-bg-elevated: var(--arrival-surface);
+  --color-glass-fill: var(--glass-fill);
+  --color-glass-fill-strong: var(--glass-fill-strong);
+  --color-border: var(--border);
+  --color-border-strong: var(--arrival-border);
+  --color-text: var(--arrival-text);
+  --color-text-muted: var(--arrival-muted);
+  --color-text-subtle: var(--arrival-muted);
+  --color-accent-fill: var(--arrival-action);
+  --color-on-accent: var(--arrival-on-action);
+  --color-accent-text: var(--arrival-action);
+  --color-gold-text: var(--arrival-highlight);
+  --color-focus-ring: var(--arrival-action);
+}
+
 /* --- Nav ------------------------------------------------------------------
-   The bar is sticky and starts **bare**: no glass, no border, so the hero's
-   colour field runs underneath it and there is no hard edge where the two
-   meet. The glass arrives only once the page has scrolled (`data-scrolled` on
-   the header), which is the moment the bar actually needs a background to sit
-   its links on. `--nav-height` is the measured height both the hero's negative
-   margin and `scroll-padding-top` below are derived from. */
+   The sticky header starts bare over the hero. Once the page moves, the header
+   itself becomes the frosted surface so the blur covers the entire nav width. */
 html {
   scroll-padding-block-start: var(--nav-height);
 }
@@ -81,19 +116,7 @@ html {
   position: sticky;
   inset-block-start: 0;
   z-index: var(--z-nav);
-}
-
-/* The 1px sentinel the observer watches, parked at the document's very top so
-   it leaves the viewport exactly when the page starts scrolling. */
-.landing-nav__sentinel {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline: 0;
-  block-size: 1px;
-  pointer-events: none;
-}
-
-.landing-nav__bar-surface {
+  isolation: isolate;
   border-block-end: var(--hairline) solid transparent;
   background-color: transparent;
   transition:
@@ -102,15 +125,90 @@ html {
     backdrop-filter var(--dur-base) var(--ease-out);
 }
 
-.landing-nav[data-scrolled='true'] .landing-nav__bar-surface {
+.landing-nav__bar-surface {
+  background-color: transparent;
+}
+
+.landing-nav[data-scrolled='true'] {
   border-block-end-color: var(--border);
-  background-color: var(--glass-fill);
+  background-color: color-mix(in srgb, var(--arrival-bg) 88%, transparent);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.2);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.2);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .landing-nav[data-scrolled='true'] {
+    background-color: var(--arrival-bg);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .landing-nav[data-scrolled='true'] {
+    background-color: var(--arrival-bg);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+.landing-nav a {
+  color: var(--arrival-text);
+}
+
+.landing-nav .landing-nav__action {
+  border-color: transparent;
+  background-color: var(--arrival-action);
+  color: var(--arrival-on-action);
+  text-decoration: none;
+}
+
+.landing-nav .landing-nav__action:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--arrival-action) 90%,
+    var(--arrival-text)
+  );
+}
+
+/* The Radix sheet is portalled to <body>, so it needs its own arrival-theme
+   scope. Keep the backdrop behind the sheet, and blur/dim the page as one layer. */
+.landing-nav__sheet {
+  z-index: calc(var(--z-modal) + 1);
+  border: var(--hairline) solid var(--arrival-border);
+  background-color: var(--arrival-surface);
+  color: var(--arrival-text);
+
+  --color-bg: var(--arrival-bg);
+  --color-bg-elevated: var(--arrival-surface);
+  --color-glass-fill: var(--glass-fill);
+  --color-glass-fill-strong: var(--glass-fill-strong);
+  --color-border: var(--border);
+  --color-border-strong: var(--arrival-border);
+  --color-text: var(--arrival-text);
+  --color-text-muted: var(--arrival-muted);
+  --color-text-subtle: var(--arrival-muted);
+  --color-accent-fill: var(--arrival-action);
+  --color-on-accent: var(--arrival-on-action);
+  --color-accent-text: var(--arrival-action);
+  --color-focus-ring: var(--arrival-action);
+  --color-gold-text: var(--arrival-highlight);
+}
+
+.landing-nav__overlay {
+  background-color: color-mix(
+    in srgb,
+    var(--arrival-bg) var(--overlay-alpha),
+    transparent
+  );
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   backdrop-filter: blur(var(--glass-blur));
 }
 
-/* The glass surface's own hairline would double the one above. */
-.landing-nav[data-scrolled='true'] .landing-nav__bar-surface.glass {
-  border-block-end-color: var(--border);
+.landing-nav__sheet .landing-nav__menu-link {
+  color: var(--arrival-text);
+}
+
+.landing-nav__sheet a.landing-nav__action {
+  color: var(--arrival-on-action);
 }
 
 .landing-nav__bar {
@@ -118,13 +216,8 @@ html {
   padding-block: var(--space-3);
 }
 
-/* The wordmark slot. Brick 3 set the name in the heading face here as a
-   placeholder; Brick 3b puts the real lockup in it — the mark plus the name in
-   the same heading face, so the nav and the footer share one component. The
-   type now comes from `.brand-lockup__word` in ui.css, so this rule only has to
-   be the link. */
 .landing-nav__wordmark {
-  color: var(--text);
+  color: var(--arrival-text);
   text-decoration: none;
 }
 
@@ -133,14 +226,14 @@ html {
   align-items: center;
   min-block-size: var(--touch-target);
   padding-inline: var(--space-2);
-  color: var(--text-muted);
+  color: var(--arrival-muted);
   font-size: var(--type-small);
   text-decoration: none;
   transition: color var(--dur-fast) var(--ease-out);
 }
 
 .landing-nav__link:hover {
-  color: var(--text);
+  color: var(--arrival-text);
 }
 
 /* --- Hero -----------------------------------------------------------------
@@ -154,16 +247,127 @@ html {
    the strip. `padding-block-start` on the content adds the same height back,
    so the copy keeps its original distance from the top of the viewport. */
 .hero__section {
+  /* Scoped semantic aliases allow the shared primitives to work unchanged. */
+  --bg: var(--arrival-bg);
+  --bg-elevated: var(--arrival-surface);
+  --text: var(--arrival-text);
+  --text-muted: var(--arrival-muted);
+  --text-subtle: var(--arrival-muted);
+  --border-strong: var(--arrival-border);
+  --accent-fill: var(--arrival-action);
+  --on-accent: var(--arrival-on-action);
+  --accent-text: var(--arrival-action);
+  --focus-ring: var(--arrival-action);
+  --gold-text: var(--arrival-highlight);
+  --type-display: var(--arrival-type-display);
+
+  /* The Tailwind colour bridge is a second, *frozen* copy of these values:
+     tokens.css declares `--color-text: var(--text)` on :root, and a custom
+     property is computed where it is declared, then inherited. Overriding
+     `--text` alone therefore never reaches a `text-text` utility. Every
+     bridge variable a hero utility uses has to be re-declared in the same
+     scope, which is what this second list is for. */
+  --color-bg: var(--arrival-bg);
+  --color-bg-elevated: var(--arrival-surface);
+  --color-text: var(--arrival-text);
+  --color-text-muted: var(--arrival-muted);
+  --color-text-subtle: var(--arrival-muted);
+  --color-border: var(--arrival-border);
+  --color-border-strong: var(--arrival-border);
+  --color-accent-fill: var(--arrival-action);
+  --color-on-accent: var(--arrival-on-action);
+  --color-accent-text: var(--arrival-action);
+  --color-gold-text: var(--arrival-highlight);
+
   margin-block-start: var(--hero-pull-up);
   padding-block: 0;
+  background: var(--arrival-bg);
 }
 
 .hero__content {
-  padding-block: var(--hero-padding-block-start) var(--section-padding-block);
+  padding-block: var(--hero-padding-block-start) var(--space-6);
+}
+
+.hero__grid {
+  align-items: center;
+}
+
+.hero__copy {
+  min-inline-size: 0;
+}
+
+.hero__headline {
+  /* Legacy `h1, h2, h3 { color: var(--text-strong) }` is unlayered, so it
+     beats Tailwind's layered `text-text` utility no matter the source order.
+     A class selector outranks that element selector and restores the scoped
+     value. Same reason for the two link rules below. */
+  color: var(--text);
+  max-inline-size: 13ch;
+  text-wrap: balance;
+}
+
+.hero__emphasis {
+  color: var(--arrival-highlight);
+}
+
+.hero__description {
+  max-inline-size: 43ch;
+}
+
+.hero__eyebrow {
+  max-inline-size: 42ch;
+}
+
+.hero__privacy {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  max-inline-size: 42ch;
+}
+
+.hero__privacy svg {
+  flex: none;
+  transform: translateY(0.15rem);
+}
+
+.hero__actions {
+  align-items: stretch;
+}
+
+.hero__actions > a {
+  max-inline-size: 100%;
+  white-space: normal;
+  text-align: center;
+}
+
+/* Legacy `a { color: var(--teal-700) }` would otherwise paint the primary
+   button's label in the page accent on an accent fill. The primary is the
+   first child, the ghost link the second. */
+.hero__actions > a + a {
+  color: var(--text);
+}
+
+.hero__actions > a:first-child {
+  color: var(--arrival-on-action);
+}
+
+.final-call__primary {
+  color: var(--on-accent);
 }
 
 .hero__wave {
-  block-size: clamp(5rem, 3rem + 9vw, 11rem);
+  block-size: var(--space-7);
+  opacity: 0.6;
+}
+
+@media (width >= 64em) {
+  .hero__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .hero__wave {
+    block-size: var(--space-8);
+  }
 }
 
 .wave-line {
@@ -229,6 +433,8 @@ html {
 .landing-footer {
   padding-block: var(--section-padding-block);
   border-block-start: var(--hairline) solid var(--border);
+  background-color: var(--arrival-bg);
+  color: var(--arrival-text);
 }
 
 /* --- Brick 4: sections below the hero ------------------------------------- */
@@ -244,6 +450,542 @@ html {
   border: var(--hairline) solid var(--border);
   border-radius: var(--radius-md);
   background-color: var(--bg-elevated);
+}
+
+/* Each post-hero chapter gets a quiet colour field and a soft, oversized
+   organic shape. The content stays in normal flow above the decoration. */
+.landing-motion-sections > .layout-section {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  background-color: color-mix(in srgb, var(--bg) 86%, var(--section-wash, var(--chart-1)));
+}
+
+.landing-motion-sections > .layout-section::before {
+  position: absolute;
+  z-index: -1;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  inline-size: clamp(12rem, 34vw, 32rem);
+  aspect-ratio: 1;
+  border-radius: 43% 57% 62% 38% / 52% 38% 62% 48%;
+  background: radial-gradient(ellipse at 36% 38%, color-mix(in srgb, var(--section-wash) 22%, transparent), transparent 70%);
+  content: '';
+  pointer-events: none;
+  animation: section-blob-drift 18s ease-in-out infinite alternate;
+  transform: translate(24%, -24%) rotate(-14deg);
+}
+
+.landing-motion-sections > .layout-section::after {
+  position: absolute;
+  z-index: -1;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  inline-size: clamp(8rem, 20vw, 18rem);
+  aspect-ratio: 1;
+  border-radius: 61% 39% 34% 66% / 44% 58% 42% 56%;
+  background: radial-gradient(ellipse at 62% 42%, color-mix(in srgb, var(--section-wash) 15%, transparent), transparent 72%);
+  content: '';
+  pointer-events: none;
+  animation: section-blob-drift 18s ease-in-out -9s infinite alternate;
+  transform: translate(-26%, 25%) rotate(22deg);
+}
+
+.landing-motion-sections > .layout-section:nth-of-type(1) {
+  --section-wash: var(--chart-1);
+}
+
+.landing-motion-sections > .layout-section:nth-of-type(2) {
+  --section-wash: var(--chart-4);
+}
+
+.landing-motion-sections > .layout-section:nth-of-type(3) {
+  --section-wash: var(--chart-5);
+}
+
+.landing-motion-sections > .layout-section:nth-of-type(4) {
+  --section-wash: var(--chart-3);
+}
+
+.landing-motion-sections > .layout-section:nth-of-type(5) {
+  --section-wash: var(--chart-2);
+}
+
+.landing-motion-sections > .layout-section:nth-of-type(6) {
+  --section-wash: var(--chart-4);
+}
+
+.landing-motion-sections > .layout-section:nth-of-type(7) {
+  --section-wash: var(--chart-1);
+}
+
+.landing-motion-sections > .layout-section:nth-of-type(8) {
+  --section-wash: var(--chart-5);
+}
+
+.landing-motion-sections > .layout-section:nth-of-type(9) {
+  --section-wash: var(--chart-3);
+}
+
+.section-transition {
+  --transition-ink: var(--chart-1);
+  --transition-pop: var(--chart-3);
+
+  position: relative;
+  display: grid;
+  min-block-size: clamp(4rem, 8vw, 7rem);
+  place-items: center;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--bg) 94%, var(--transition-ink));
+  isolation: isolate;
+}
+
+.section-transition--safety {
+  --transition-ink: var(--chart-4);
+  --transition-pop: var(--chart-2);
+}
+
+.section-transition--words {
+  --transition-ink: var(--chart-5);
+  --transition-pop: var(--chart-1);
+}
+
+.section-transition--community {
+  --transition-ink: var(--chart-3);
+  --transition-pop: var(--chart-4);
+}
+
+.section-transition__art {
+  position: relative;
+  z-index: 1;
+  inline-size: min(100%, 52rem);
+  block-size: auto;
+  overflow: visible;
+}
+
+.section-transition__tide {
+  stroke: color-mix(in srgb, var(--transition-ink) 52%, transparent);
+  stroke-dasharray: 7 10;
+  stroke-linecap: round;
+  stroke-width: 2;
+  animation: harbour-tide-drift 18s linear infinite;
+}
+
+.section-transition__motif {
+  fill: color-mix(in srgb, var(--transition-pop) 20%, var(--bg-elevated));
+  stroke: var(--transition-ink);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: harbour-float 5s ease-in-out infinite;
+}
+
+.section-transition__motif--two { animation-delay: -1.7s; }
+.section-transition__motif--three { animation-delay: -3.2s; }
+
+.section-transition__glow {
+  position: absolute;
+  z-index: -1;
+  inline-size: clamp(8rem, 20vw, 16rem);
+  aspect-ratio: 1;
+  border-radius: 47% 53% 67% 33% / 42% 60% 40% 58%;
+  background: color-mix(in srgb, var(--transition-pop) 13%, transparent);
+  filter: blur(var(--space-5));
+  animation: harbour-blob 12s ease-in-out infinite alternate;
+}
+
+.section-transition__glow--one {
+  inset-inline-start: 0;
+  transform: translateX(24%);
+}
+
+.section-transition__glow--two {
+  inset-inline-end: 0;
+  animation-delay: -6s;
+  transform: translateX(-24%);
+}
+
+@keyframes section-blob-drift {
+  from {
+    border-radius: 43% 57% 62% 38% / 52% 38% 62% 48%;
+    transform: translate(24%, -24%) rotate(-14deg);
+  }
+
+  to {
+    border-radius: 61% 39% 40% 60% / 58% 38% 62% 42%;
+    transform: translate(19%, -20%) rotate(12deg);
+  }
+}
+
+@keyframes harbour-float {
+  0%, 100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+
+  50% {
+    transform: translateY(calc(var(--space-2) * -1)) rotate(2deg);
+  }
+}
+
+@keyframes harbour-tide-drift {
+  to {
+    stroke-dashoffset: -68;
+  }
+}
+
+@keyframes harbour-blob {
+  from {
+    border-radius: 47% 53% 67% 33% / 42% 60% 40% 58%;
+    transform: translateY(-4%);
+  }
+
+  to {
+    border-radius: 61% 39% 40% 60% / 58% 38% 62% 42%;
+    transform: translateY(5%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-motion-sections > .layout-section::before,
+  .landing-motion-sections > .layout-section::after,
+  .section-transition__tide,
+  .section-transition__motif,
+  .section-transition__glow {
+    animation: none;
+  }
+}
+
+/* Four equally visible choices. Small rotations keep the hand-picked feel,
+   while a responsive grid makes every title and illustration discoverable. */
+.tools-showcase__intro {
+  justify-content: space-between;
+}
+
+.tools-showcase__instruction {
+  max-inline-size: 35ch;
+}
+
+.tool-deck {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+  gap: var(--space-4);
+  isolation: isolate;
+}
+
+.tool-deck__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 19rem;
+  padding: var(--space-4);
+  overflow: hidden;
+  border: var(--hairline) solid color-mix(in srgb, var(--feature-tone) 52%, var(--border-strong));
+  border-radius: var(--radius-lg);
+  background-color: color-mix(in srgb, var(--feature-tone) 9%, var(--bg-elevated));
+  color: var(--text);
+  text-align: start;
+  cursor: pointer;
+  transform-origin: center;
+  transform: rotate(var(--deck-rotation, 0deg));
+  transition:
+    transform var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
+}
+
+.tool-deck__card--scam {
+  --feature-tone: var(--chart-4);
+  --deck-rotation: -1.5deg;
+}
+
+.tool-deck__card--settle {
+  --feature-tone: var(--chart-1);
+  --deck-rotation: 1deg;
+}
+
+.tool-deck__card--cantonese {
+  --feature-tone: var(--chart-5);
+  --deck-rotation: -1deg;
+}
+
+.tool-deck__card--ask {
+  --feature-tone: var(--chart-3);
+  --deck-rotation: 1.5deg;
+}
+
+.tool-deck__card[data-selected='true'] {
+  z-index: 10;
+  border-color: var(--feature-tone);
+  box-shadow: var(--shadow-glass);
+  transform: translateY(calc(var(--space-2) * -1)) rotate(0deg) scale(1.02);
+}
+
+.tool-deck__card-meta {
+  align-self: flex-end;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--type-label);
+  letter-spacing: 0.08em;
+}
+
+.feature-art {
+  display: block;
+  inline-size: 100%;
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow: visible;
+  color: var(--text);
+}
+
+.feature-art--scam {
+  --feature-tone: var(--chart-4);
+}
+
+.feature-art--settle {
+  --feature-tone: var(--chart-1);
+}
+
+.feature-art--cantonese {
+  --feature-tone: var(--chart-5);
+}
+
+.feature-art--ask {
+  --feature-tone: var(--chart-3);
+}
+
+.feature-art__backdrop {
+  fill: color-mix(in srgb, var(--feature-tone) 8%, var(--bg-elevated));
+  stroke: color-mix(in srgb, var(--feature-tone) 30%, var(--border));
+  stroke-width: 2;
+}
+
+.feature-art__halo {
+  fill: color-mix(in srgb, var(--feature-tone) 23%, var(--bg-elevated));
+}
+
+.feature-art__halo--second {
+  opacity: 0.72;
+}
+
+.feature-art__halo--third {
+  opacity: 0.48;
+}
+
+.feature-art__ground {
+  fill: none;
+  stroke: color-mix(in srgb, var(--feature-tone) 60%, var(--text-muted));
+  stroke-linecap: round;
+  stroke-width: 3;
+}
+
+.feature-art__ink {
+  fill: none;
+  stroke: var(--text);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+}
+
+.feature-art__paper {
+  fill: var(--bg-elevated);
+  stroke: color-mix(in srgb, var(--feature-tone) 64%, var(--text));
+  stroke-width: 3;
+}
+
+.feature-art__line {
+  fill: none;
+  stroke: var(--text-muted);
+  stroke-linecap: round;
+  stroke-width: 3;
+}
+
+.feature-art__tone-line {
+  fill: none;
+  stroke: var(--feature-tone);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 4;
+}
+
+.feature-art__tone-fill {
+  fill: var(--feature-tone);
+  stroke: color-mix(in srgb, var(--feature-tone) 42%, var(--text));
+  stroke-width: 3;
+}
+
+.feature-art__alert {
+  fill: var(--danger);
+  stroke: color-mix(in srgb, var(--danger) 60%, var(--text));
+  stroke-linecap: round;
+  stroke-width: 4;
+}
+
+.feature-art__dot {
+  fill: var(--gold-fill);
+  stroke: color-mix(in srgb, var(--gold-fill) 58%, var(--text));
+  stroke-width: 2;
+}
+
+.tool-deck__concepts {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--type-label);
+  line-height: 1.3;
+}
+
+.tool-deck__concepts span {
+  max-inline-size: 33%;
+}
+
+.tool-deck__card-title {
+  display: block;
+  margin-block-start: var(--space-3);
+  font-family: var(--font-heading);
+  font-size: var(--type-h3);
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: end;
+}
+
+.tool-deck__card-tagline {
+  display: block;
+  margin-block-start: var(--space-2);
+  color: var(--text-muted);
+  font-size: var(--type-small);
+  line-height: 1.4;
+  text-align: end;
+}
+
+.tool-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: var(--space-8);
+  padding-block-start: var(--space-6);
+  scroll-margin-block-start: var(--section-scroll-margin);
+  border-block-start: var(--hairline) solid var(--border);
+}
+
+.tool-panel__story {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  max-inline-size: 48ch;
+}
+
+.tool-panel__tagline {
+  color: var(--text);
+}
+
+.tool-panel__sample {
+  min-inline-size: 0;
+  padding-inline-start: var(--space-7);
+  border-inline-start: var(--hairline) solid var(--border);
+}
+
+.tool-panel__sample-content {
+  max-inline-size: 65ch;
+}
+
+.tool-panel:focus-visible {
+  border-radius: var(--radius-sm);
+}
+
+@media (width < 48em) {
+  .tools-showcase__intro {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .tool-deck {
+    display: flex;
+    gap: var(--space-3);
+    overflow-x: auto;
+    padding-block: var(--space-4);
+    scroll-snap-type: inline mandatory;
+    overscroll-behavior-inline: contain;
+  }
+
+  .tool-deck__card {
+    position: relative;
+    flex: 0 0 min(78%, 21rem);
+    inline-size: auto;
+    min-block-size: 17rem;
+    scroll-snap-align: center;
+  }
+
+  .tool-deck__card--scam {
+    --deck-rotation: -0.8deg;
+  }
+
+  .tool-deck__card--settle {
+    --deck-rotation: 0.6deg;
+  }
+
+  .tool-deck__card--cantonese {
+    --deck-rotation: -0.6deg;
+  }
+
+  .tool-deck__card--ask {
+    --deck-rotation: 0.8deg;
+  }
+
+  .tool-deck__card[data-selected='true'] {
+    transform: translateY(calc(var(--space-2) * -1)) rotate(0deg);
+  }
+
+  .tool-panel {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+
+  .tool-panel__sample {
+    padding-inline-start: 0;
+    padding-block-start: var(--space-5);
+    border-inline-start: 0;
+    border-block-start: var(--hairline) solid var(--border);
+  }
+}
+
+@media (width >= 34em) and (width < 64em) {
+  .tool-deck {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+  }
+
+  .tool-deck__card {
+    min-block-size: 18rem;
+  }
+}
+
+@media (width < 34em) {
+  .tool-deck {
+    display: flex;
+  }
+
+  .tool-deck__card {
+    min-block-size: 15rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tool-deck__card {
+    transition: none;
+  }
+
+  .tool-deck__card[data-selected='true'] {
+    transform: none;
+  }
 }
 
 /* Cards in a bento or a grid stretch to the row, so a row of cards shares one
@@ -270,4 +1012,63 @@ html {
   border: var(--hairline) solid var(--border-strong);
   border-radius: var(--radius-pill);
   color: var(--text-muted);
+}
+
+/* Art and its caption are siblings in normal flow, never a covering card. */
+.journey-scene {
+  container-type: inline-size;
+  min-inline-size: 0;
+  margin: 0;
+  padding: var(--space-2);
+  border-radius: var(--radius-lg);
+  background: var(--arrival-art-frame);
+}
+
+.journey-scene__art {
+  overflow: hidden;
+  border-radius: var(--radius-md);
+}
+
+.journey-scene__art img {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  aspect-ratio: 1200 / 900;
+  object-fit: contain;
+}
+
+.journey-scene__sample {
+  padding: var(--space-5) var(--space-4);
+  color: var(--arrival-text);
+}
+
+.journey-scene__sample-top {
+  justify-content: space-between;
+}
+
+.journey-scene__steps {
+  padding: 0;
+  list-style: none;
+}
+
+.journey-scene__step {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.journey-scene__step-icon {
+  flex: none;
+  color: var(--arrival-text);
+  transform: translateY(0.15rem);
+}
+
+@container (width >= 30em) {
+  .journey-scene__steps {
+    flex-flow: row wrap;
+  }
+
+  .journey-scene__step {
+    flex: 1 1 8rem;
+  }
 }

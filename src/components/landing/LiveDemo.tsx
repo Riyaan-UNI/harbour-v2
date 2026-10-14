@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useReducedMotion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import {
   Cluster,
   Heading,
@@ -155,26 +155,33 @@ export function LiveDemo(): JSX.Element {
             ) : null}
 
             {phase === 'done' ? (
-              <Stack gap={3} className="landing-quote">
-                <Cluster gap={3} align="center">
-                  <DemoBadge variant="demo" />
-                  <Text role="label" tone="muted">
-                    What Harbour would say
+              <motion.div
+                key={example.id}
+                initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <Stack gap={3} className="landing-quote">
+                  <Cluster gap={3} align="center">
+                    <DemoBadge variant="demo" />
+                    <Text role="label" tone="muted">
+                      What Harbour would say
+                    </Text>
+                  </Cluster>
+                  <Text>{example.english}</Text>
+                  <Text lang="zh-HK">{example.cantonese}</Text>
+                  <Text role="small" tone="muted" className="font-mono">
+                    {example.jyutping}
                   </Text>
-                </Cluster>
-                <Text>{example.english}</Text>
-                <Text lang="zh-HK">{example.cantonese}</Text>
-                <Text role="small" tone="muted" className="font-mono">
-                  {example.jyutping}
-                </Text>
-                <Text role="small">
-                  <span className="text-accent-text">Tone: </span>
-                  {example.tone}
-                </Text>
-                <VisuallyHidden>
-                  This is a prepared example, not a live translation.
-                </VisuallyHidden>
-              </Stack>
+                  <Text role="small">
+                    <span className="text-accent-text">Tone: </span>
+                    {example.tone}
+                  </Text>
+                  <VisuallyHidden>
+                    This is a prepared example, not a live translation.
+                  </VisuallyHidden>
+                </Stack>
+              </motion.div>
             ) : null}
 
             {phase === 'idle' ? (

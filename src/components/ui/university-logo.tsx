@@ -10,18 +10,29 @@ import { universityById, type UniversityId } from './university-logos';
  * 2rem and 2.5rem. The image is contained, lazily loaded, and its alt text is
  * the full institution name.
  *
- * **Where the file comes from.** Pass `id` and the name, acronym and path are
- * resolved from the typed manifest in `university-logos.ts`, so a signup
+ * **Two variants.** The default `mark` is the plain institutional mark — what
+ * identifies the institution and what alt text describes. The `art` variant
+ * uses the bundled concept-art SVG instead: a coloured field with orbital
+ * rings, a near-white bed, and the mark on top. Art is decorative — the
+ * institution is already named in nearby text — so the box drops its white
+ * plate, removes the border, and the image itself carries the colour. The
+ * art SVG is `prefers-reduced-motion: reduce`-aware: motion users see a
+ * slowly rotating / breathing composition, reduced-motion users see the same
+ * composition static, so the variant is safe at every preference.
+ *
+ * **Where the file comes from.** Pass `id` and the name, acronym and paths
+ * are resolved from the typed manifest in `university-logos.ts`, so a signup
  * dropdown cannot drift out of step with the spec's table. Passing `src`,
  * `name` and `acronym` directly is still supported for a one-off box (the
  * gallery uses that form to show the error case on purpose).
  *
- * **Three fallbacks, all without a layout shift.** A load error, or no `src` at
- * all, swaps the image for the acronym in Geist Mono 600, dark teal on the
+ * **Three fallbacks, all without a layout shift.** A load error, or no `src`
+ * at all, swaps the image for the acronym in Geist Mono 600, dark teal on the
  * plate. An entry with no acronym (`other`) shows a generic graduation-cap mark
  * instead. Both fallbacks are sized in container units, so a three-letter code
  * fits at 2rem and at 3rem without a per-size font size, and the box never
- * changes size when the swap happens.
+ * changes size when the swap happens. The art variant does not fall back to
+ * the acronym — when the art is missing the box swaps to the plain mark.
  */
 export type UniversityLogoSize = 'sm' | 'md' | 'lg';
 
@@ -35,6 +46,13 @@ const SIZE: Record<UniversityLogoSize, { box: string; radius: string }> = {
 type SharedProps = {
   size?: UniversityLogoSize;
   className?: string;
+  /**
+   * `mark` (default) is the plain institutional mark on a white plate.
+   * `art` swaps in the bundled concept-art SVG with no plate and no border —
+   * for surfaces where the institution is already named in nearby text and
+   * the mark is decorative colour, not identification.
+   */
+  variant?: 'mark' | 'art';
 };
 
 /**
@@ -55,6 +73,7 @@ export function UniversityLogo({
   name,
   acronym,
   size = 'md',
+  variant = 'mark',
   className,
 }: UniversityLogoProps): JSX.Element {
   const [failed, setFailed] = useState(false);
@@ -63,29 +82,48 @@ export function UniversityLogo({
 
   const resolvedName = name ?? entry?.name ?? '';
   const resolvedAcronym = acronym ?? entry?.acronym ?? '';
-  const resolvedSrc = src ?? entry?.logo ?? undefined;
+  const markSrc = src ?? entry?.logo ?? undefined;
+  const artSrc = variant === 'art' ? (src ?? entry?.art ?? undefined) : undefined;
 
   // A new source deserves a fresh attempt.
   useEffect(() => {
     setFailed(false);
-  }, [resolvedSrc]);
+  }, [markSrc, artSrc]);
 
-  const showFallback = failed || !resolvedSrc;
+  const isArt = variant === 'art' && Boolean(artSrc);
+  const activeSrc = isArt ? artSrc : markSrc;
+  const showFallback = failed || !activeSrc;
 
+  // The art variant drops the white plate and the border — the SVG carries its
+  // own coloured field and white bed, so a plate around it would just clip the
+  // colour. The size tokens are kept on the box in both variants so an art box
+  // swaps cleanly for a mark box in the same row without a layout shift.
   return (
     <span
       className={cn(
         'ui-logo inline-grid shrink-0 place-items-center overflow-hidden',
-        'border border-border bg-logo-plate p-2',
+        isArt ? 'ui-logo--art' : cn('border border-border bg-logo-plate p-2', SIZE[size].radius),
         SIZE[size].box,
-        SIZE[size].radius,
         className,
       )}
       data-size={size}
+      data-variant={variant}
       data-university-id={id}
     >
       {showFallback ? (
-        resolvedAcronym ? (
+        isArt && entry?.logo ? (
+          // Art asked for, but the art SVG failed (or this entry has none).
+          // Fall back to the plain mark — the institution still needs to be
+          // identifiable. Keeps the white plate off, since the art surround
+          // carries its own bed.
+          <img
+            src={entry.logo}
+            alt={resolvedName}
+            loading="lazy"
+            decoding="async"
+            className="size-full object-contain"
+          />
+        ) : resolvedAcronym ? (
           <span className="ui-logo__acronym text-logo-plate-ink">
             {resolvedAcronym}
           </span>
@@ -94,9 +132,18 @@ export function UniversityLogo({
             <GraduationCap className="size-full" />
           </span>
         )
+      ) : isArt ? (
+        // Decorative — the institution is named in nearby text.
+        <img
+          src={activeSrc}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="ui-logo__art size-full"
+        />
       ) : (
         <img
-          src={resolvedSrc}
+          src={activeSrc}
           alt={resolvedName}
           loading="lazy"
           decoding="async"

@@ -7,7 +7,11 @@ import Button from "../components/Button.jsx";
 import { Icon } from "../components/Icons.jsx";
 import { toast } from "../components/Toast.jsx";
 import { countryName } from "../lib/countries.js";
-const directory = [{ id: "lina-chen", name: "Lina Chen", country: "Taiwan, China", university: "City University of Hong Kong", note: "Finding little cafés around Kowloon." }, { id: "arjun-mehta", name: "Arjun Mehta", country: "India", university: "The University of Hong Kong", note: "Always up for a campus walk." }, { id: "mei-wong", name: "Mei Wong", country: "Malaysia", university: "Hong Kong Polytechnic University", note: "Learning the city one MTR stop at a time." }, { id: "sara-kim", name: "Sara Kim", country: "South Korea", university: "Hong Kong Baptist University", note: "New here too. Sharing small discoveries." }];
+import { Mascot, UniversityLogo } from "../../components/ui/index.ts";
+import { SAMPLE_PEOPLE } from "../../lib/sample-people.ts";
+// The directory now comes from the one shared roster, so a sample person's
+// mascot is the same creature here as it is on /app/people.
+const directory = SAMPLE_PEOPLE;
 function readFriends() { try { return JSON.parse(localStorage.getItem("harbour-friends") || "[]"); } catch { return []; } }
 export default function Profile() {
   const { userId } = useParams(); const { profile, saveProfile, clearProfile } = useProfile(); const navigate = useNavigate(); const inputRef = useRef(null);
@@ -19,19 +23,19 @@ export default function Profile() {
   function toggleFriend() { const next = isFriend ? friends.filter(id => id !== userId) : [...friends, userId]; setFriends(next); localStorage.setItem("harbour-friends", JSON.stringify(next)); toast(isFriend ? `${person.name} removed from friends.` : `${person.name} added to friends.`, { tone: isFriend ? "default" : "success" }); }
   function handlePhoto(event) { const file = event.target.files?.[0]; if (!file) return; if (!file.type.startsWith("image/")) return; if (file.size > 1_500_000) { toast("Choose an image under 1.5 MB.", { tone: "warning" }); return; } const reader = new FileReader(); reader.onload = () => { const nextPhoto = String(reader.result); setPhoto(nextPhoto); saveProfile({ ...profile, photo: nextPhoto }); toast("Profile photo updated.", { tone: "success" }); }; reader.readAsDataURL(file); }
   function save(event) { event.preventDefault(); saveProfile({ ...profile, name: name.trim() || "Student", country, university: university.trim(), socials, photo }); setEditing(false); toast("Profile saved on this device.", { tone: "success" }); }
-  function logout() { clearProfile(); navigate("/", { replace: true }); }
-  if (userId) return <section className="page profile-page figma-toolpage"><div className="profile-topline"><Link to="/people">← People directory</Link><span className="demo-badge">SAMPLE PROFILE</span></div><article className="public-profile-card"><div className="public-avatar">{person.name.slice(0, 1)}</div><div className="public-profile-copy"><span className="eyebrow">HARBOUR COMMUNITY</span><h1>{person.name}</h1><p>{person.note}</p><div className="profile-facts"><span>{person.university}</span><span>From {person.country}</span></div></div><button className={`friend-action ${isFriend ? "is-friend" : ""}`} onClick={toggleFriend} aria-pressed={isFriend}><Icon name={isFriend ? "check" : "plus"} size={16} />{isFriend ? "Added to friends" : "Add friend"}</button></article><p className="local-demo-note">This is a sample profile. Friend connections are saved locally for this demo.</p></section>;
+  function logout() { clearProfile(); navigate("/login", { replace: true }); }
+  if (userId) return <section className="page profile-page figma-toolpage"><div className="profile-topline"><Link to="/people">← People directory</Link><span className="demo-badge">SAMPLE PROFILE</span></div><article className="public-profile-card"><div className="public-avatar"><span className="public-avatar__plate"><Mascot kind={person.mascot} className="profile-mascot" style={{ color: person.accent }} title={`${person.name}’s mascot`} /></span></div><div className="public-profile-copy"><span className="eyebrow">HARBOUR COMMUNITY</span><h1>{person.name}</h1><p>{person.note}</p><div className="profile-facts"><span className="profile-uni"><UniversityLogo id={person.universityId} size="sm" variant="art" />{person.university}</span><span>From {person.country}</span></div></div><button className={`friend-action ${isFriend ? "is-friend" : ""}`} onClick={toggleFriend} aria-pressed={isFriend}><Icon name={isFriend ? "check" : "plus"} size={16} />{isFriend ? "Added to friends" : "Add friend"}</button></article><p className="local-demo-note">This is a sample profile. Friend connections are saved locally for this demo.</p></section>;
   return <section className="page profile-page figma-toolpage">
     <div className="profile-topline"><span className="eyebrow">YOUR SPACE · PROFILE</span><Link to="/dashboard">Dashboard ↗</Link></div>
     <div className="profile-layout">
       <aside className="profile-identity">
-        <div className="profile-photo-wrap">{photo ? <img src={photo} alt={`${profile.name} profile`}/> : <span>{profile?.name?.[0]?.toUpperCase() || "S"}</span>}</div>
+        <div className="profile-photo-wrap">{photo || profile?.avatar ? <img src={photo || profile.avatar} alt={`${profile.name} profile`}/> : <span>{profile?.name?.[0]?.toUpperCase() || "S"}</span>}</div>
         <h1>{profile?.name || "Your profile"}</h1>
         <p>{profile?.university || "Make your Harbour profile yours."}</p>
         <button type="button" className="button secondary" onClick={() => inputRef.current?.click()} icon="user">{photo ? "Change photo" : "Add profile photo"}</button>
         <input ref={inputRef} className="visually-hidden" type="file" accept="image/*" onChange={handlePhoto} aria-label="Upload a profile photo"/>
         <small>Image stays on this device · max 1.5 MB</small>
-        <button className="logout-button" onClick={logout}>Log out of this device <Icon name="external" size={16} /></button>
+        <button className="logout-button" onClick={logout}>Log out · keep this profile here <Icon name="external" size={16} /></button>
       </aside>
 
       <div className="profile-details">
@@ -51,7 +55,7 @@ export default function Profile() {
             </>}
         <div className="profile-friends">
           <div className="panel-heading"><span><small>YOUR COMMUNITY</small><h2>Friends</h2></span><Link to="/people">Find people ↗</Link></div>
-          {friends.length ? friends.map(id => { const friend = directory.find(item => item.id === id); return friend ? <Link className="profile-friend-row" key={id} to={`/profile/${id}`}><span>{friend.name[0]}</span><strong>{friend.name}</strong><small>{friend.university}</small><b>↗</b></Link> : null; }) : <p>Your friend list is empty. Search the demo directory to find people.</p>}
+          {friends.length ? friends.map(id => { const friend = directory.find(item => item.id === id); return friend ? <Link className="profile-friend-row" key={id} to={`/profile/${id}`}><span><Mascot kind={friend.mascot} className="profile-friend-mascot" style={{ color: friend.accent }} /></span><strong>{friend.name}</strong><small>{friend.university}</small><b>↗</b></Link> : null; }) : <p>Your friend list is empty. Search the demo directory to find people.</p>}
         </div>
       </div>
     </div>

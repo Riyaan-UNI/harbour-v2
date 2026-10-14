@@ -29,7 +29,7 @@ const post = (path, body) => request(path, { method: "POST", body: JSON.stringif
 const get = (path) => request(path);
 export const analyzeScam = (text) => post("/api/scam/analyze", { text });
 export const translateText = (text) => post("/api/translate", { text });
-export const sendChat = (message) => post("/api/chat", { message });
+export const sendChat = (message, history = []) => post("/api/chat", { message, history });
 export const getChecklist = (country) => get(`/api/checklist?country=${encodeURIComponent(country || "")}`);
 export const getRecentScams = () => get("/api/scams/recent");
 export const getServices = () => get("/api/services");
