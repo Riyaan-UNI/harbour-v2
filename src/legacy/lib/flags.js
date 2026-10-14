@@ -1,3 +1,5 @@
+import { publicUrl } from "../../lib/public-url.ts";
+
 /**
  * Flag artwork for the country picker.
  *
@@ -22,5 +24,5 @@ const CODE = /^[A-Z]{2}$/;
  */
 export function flagSrc(code) {
   if (typeof code !== "string" || !CODE.test(code)) return null;
-  return `/flags/${code.toLowerCase()}.svg`;
+  return publicUrl(`/flags/${code.toLowerCase()}.svg`);
 }

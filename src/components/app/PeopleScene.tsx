@@ -1,4 +1,5 @@
 import { Mascot, type MascotKind } from '../ui';
+import { publicUrl } from '../../lib/public-url';
 
 /**
  * PeopleScene — the "calm & alive" backdrop behind `/app/people`.
@@ -34,7 +35,7 @@ const DRIFTERS: readonly Drifter[] = [
 export function PeopleScene(): JSX.Element {
   return (
     <div className="app-people__scene" aria-hidden="true">
-      <img src="/art/harbour-scene-1.svg" alt="" />
+      <img src={publicUrl('/art/harbour-scene-1.svg')} alt="" />
       <div className="app-people__scene-tint" />
       {DRIFTERS.map((drifter) => (
         <span

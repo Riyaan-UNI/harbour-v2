@@ -7,6 +7,7 @@ import CountryFlag from "../components/CountryFlag.jsx";
 import { HarbourMark } from "../../components/ui/harbour-mark";
 import { UniversityLogo } from "../../components/ui/university-logo";
 import { UNIVERSITY_ART_BY_ID } from "../../components/ui/university-logos";
+import { publicUrl } from "../../lib/public-url.ts";
 
 /**
  * What sits under a saved profile's name: the flag and the country it belongs
@@ -77,7 +78,7 @@ export default function Login() {
           const art = firstProfileArtSrc(profiles);
           return art
             ? <img className="login-floating-art" src={art} alt="" aria-hidden="true" />
-            : <img className="login-floating-mascot" src={profiles[0]?.avatar || profiles[0]?.photo || "/art/mascot-crane.webp"} alt="" />;
+            : <img className="login-floating-mascot" src={profiles[0]?.avatar || profiles[0]?.photo || publicUrl("/art/mascot-crane.webp")} alt="" />;
         })()}
         <span className="login-floating-note login-floating-note--bottom"><span>⌂</span> Hong Kong, at your pace</span>
         <p className="login-art-caption">A new city is a lot to carry.<br/><strong>You don’t have to carry it alone.</strong></p>

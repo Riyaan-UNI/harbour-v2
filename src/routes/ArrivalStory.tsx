@@ -4,11 +4,12 @@ import { gsap } from 'gsap';
 import { HarbourMark } from '../components/ui/harbour-mark';
 import { FiberWarp } from '../components/arrival/FiberWarp';
 import { ARRIVAL_DESTINATION, TERMINAL_LINES } from '../components/arrival/arrivalTransition';
+import { publicUrl } from '../lib/public-url';
 
 const scenes = [
-  { src: '/art/arrival-storm.webp', alt: 'A small boat heads into a dark, windy sea.' },
-  { src: '/art/arrival-horizon.webp', alt: 'Hong Kong appears beyond the waves as the storm begins to clear.' },
-  { src: '/art/arrival-dock.webp', alt: 'A calm Hong Kong harbor and lantern-lit landing dock at sunrise.' },
+  { src: publicUrl('/art/arrival-storm.webp'), alt: 'A small boat heads into a dark, windy sea.' },
+  { src: publicUrl('/art/arrival-horizon.webp'), alt: 'Hong Kong appears beyond the waves as the storm begins to clear.' },
+  { src: publicUrl('/art/arrival-dock.webp'), alt: 'A calm Hong Kong harbor and lantern-lit landing dock at sunrise.' },
 ];
 
 const captions = [
@@ -122,7 +123,7 @@ export default function ArrivalStory({ storageWarning = '' }: { storageWarning?:
           draggable="false"
         />)}
         <span className="arrival-story-weather" />
-        <img ref={shipRef} className="arrival-story-ship" src="/art/arrival-ship.webp" alt="" draggable="false" />
+        <img ref={shipRef} className="arrival-story-ship" src={publicUrl('/art/arrival-ship.webp')} alt="" draggable="false" />
         <span className="arrival-story-vignette" />
       </div>
 
@@ -136,7 +137,7 @@ export default function ArrivalStory({ storageWarning = '' }: { storageWarning?:
         <span className="arrival-story-eyebrow">{beat < 3 ? `THE CROSSING · 0${beat + 1}` : 'YOU’RE HERE · HONG KONG'}</span>
         <h1 id="arrival-story-title" className="sr-only">Your arrival in Hong Kong</h1>
         <p ref={copyRef} className="arrival-story-caption">{beat < 3 ? captions[beat] : ending}</p>
-        {beat === 3 && <div className="arrival-story-flag"><img src="/flags/hk.svg" alt="Hong Kong flag"/><span>Hong Kong</span></div>}
+        {beat === 3 && <div className="arrival-story-flag"><img src={publicUrl('/flags/hk.svg')} alt="Hong Kong flag"/><span>Hong Kong</span></div>}
         {storageWarning && <p className="arrival-story-storage" role="status">{storageWarning}</p>}
         {finished && <button ref={continueRef} type="button" className="arrival-story-continue" onClick={continueToHarbour}>Continue to Harbour <span aria-hidden="true">→</span></button>}
       </section>

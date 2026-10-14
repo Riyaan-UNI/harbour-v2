@@ -8,6 +8,7 @@ import {
   removeProfile as removeStoredProfile,
   selectProfile as selectStoredProfile,
 } from "../../lib/profile-store.ts";
+import { publicUrl } from "../../lib/public-url.ts";
 
 const ProfileContext = createContext(null);
 // One source of truth for the mascot kinds. Must stay in exact sync with
@@ -25,7 +26,7 @@ const MASCOT_KINDS = [
 // Only these kinds have a raster on disk (`public/art/mascot-*.webp`). Every
 // other kind falls back to the same raster path as "otter", which exists.
 const RASTER_MASCOTS = ["crane", "fox", "otter", "turtle"];
-const avatarFor = id => `/art/mascot-${RASTER_MASCOTS.includes(id) ? id : "otter"}.webp`;
+const avatarFor = id => publicUrl(`/art/mascot-${RASTER_MASCOTS.includes(id) ? id : "otter"}.webp`);
 
 function normalize(value, key) {
   if (typeof value === "string") {

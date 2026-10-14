@@ -85,6 +85,16 @@
   /* Arrival passage transition and art placement. These extend the motion
      direction without changing Harbour's foundational light/dark palette. */
   --arrival-black: #000000;
+  --arrival-warp-center: #101226;
+  --arrival-warp-edge: #05060d;
+  --arrival-warp-cyan: #49d9ff;
+  --arrival-warp-violet: #753cff;
+  --arrival-warp-fallback-cyan: #48ddff;
+  --arrival-warp-fallback-violet: #8060ff;
+  --arrival-warp-fallback-line: #53bfff99;
+  --arrival-warp-terminal-text: #d8eaff;
+  --arrival-warp-terminal-shadow: #784cff;
+  --arrival-transition-center: 50%;
 
   /* The cyan bloom on the warp terminal and its cursor. Not a theme colour —
      the warp is always deep space — so it holds one value in both themes. */

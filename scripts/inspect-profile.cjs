@@ -1,9 +1,13 @@
+// This is intentionally CommonJS so it can be run as a standalone probe.
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { chromium } = require('playwright');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { tmpdir } = require('node:os');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const path = require('node:path');
 
 async function run() {
-  const browser = await chromium.launch({
-    executablePath: 'C:/Users/patan/AppData/Local/ms-playwright/chromium-1248/chrome-win64/chrome.exe',
-  });
+  const browser = await chromium.launch();
 
   const ctx = await browser.newContext({ viewport: { width: 360, height: 720 }, deviceScaleFactor: 1 });
   const page = await ctx.newPage();
@@ -12,7 +16,7 @@ async function run() {
       localStorage.setItem('harbour-profile', JSON.stringify({
         id: 'me', name: 'Avery Lam', country: 'HK', university: 'hkust', mascotId: 'otter', photo: '', socials: { instagram: 'avery.hk' },
       }));
-    } catch (e) {}
+    } catch {}
   });
   await page.goto('http://127.0.0.1:5173/', { timeout: 30000 });
   await page.waitForTimeout(1200);
@@ -38,7 +42,10 @@ async function run() {
   });
   console.log('PUBLIC PLATE @360:', JSON.stringify(info));
 
-  await page.screenshot({ path: 'C:/Users/patan/AppData/Local/Temp/sample-360.png', fullPage: false });
+  await page.screenshot({
+    path: path.join(tmpdir(), 'harbour-profile-inspect.png'),
+    fullPage: false,
+  });
   await browser.close();
 }
 

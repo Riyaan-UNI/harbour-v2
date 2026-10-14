@@ -616,6 +616,7 @@
   color: var(--text-strong);
   font-size: var(--fs-14);
   line-height: var(--lh-snug);
+  overflow-wrap: anywhere;
 }
 
 .signup-entry .university-option small { color: var(--text-muted); }
@@ -643,10 +644,6 @@
   border: 0;
   background: transparent;
 }
-
-/* A university name is long by nature. Let it wrap inside its column rather
-   than push the row wider than the dialog. */
-.signup-entry .university-option strong { overflow-wrap: anywhere; }
 
 .signup-entry .university-option > b { flex: 0 0 auto; }
 
@@ -1502,15 +1499,17 @@
 }
 
 .arrival-transition-warp {
+  display: grid;
+  place-items: center;
   overflow: hidden;
-  background: radial-gradient(ellipse at center, #101226 0, #05060d 46%, #000 100%);
+  background: radial-gradient(ellipse at center, var(--arrival-warp-center) 0, var(--arrival-warp-edge) 46%, var(--arrival-black) 100%);
   opacity: 0;
 }
 
 .fiber-warp {
   position: absolute;
   inset: 0;
-  filter: drop-shadow(0 0 .35rem #49d9ff) drop-shadow(0 0 1rem #753cff);
+  filter: drop-shadow(0 0 .35rem var(--arrival-warp-cyan)) drop-shadow(0 0 1rem var(--arrival-warp-violet));
 }
 
 .fiber-warp canvas {
@@ -1520,23 +1519,23 @@
 }
 
 .fiber-warp--fallback {
-  background: radial-gradient(ellipse at center, transparent 0 12%, #48ddff 12.2% 12.35%, transparent 12.6% 22%, #8060ff 22.2% 22.35%, transparent 22.6%), repeating-conic-gradient(from 0deg at 50% 50%, transparent 0deg 2.4deg, #53bfff99 2.6deg 2.75deg, transparent 2.95deg 8deg);
+  background: radial-gradient(ellipse at center, transparent 0 12%, var(--arrival-warp-fallback-cyan) 12.2% 12.35%, transparent 12.6% 22%, var(--arrival-warp-fallback-violet) 22.2% 22.35%, transparent 22.6%), repeating-conic-gradient(from 0deg at var(--arrival-transition-center) var(--arrival-transition-center), transparent 0deg 2.4deg, var(--arrival-warp-fallback-line) 2.6deg 2.75deg, transparent 2.95deg 8deg);
 }
 
 .arrival-transition-terminal {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: var(--arrival-transition-center);
+  left: var(--arrival-transition-center);
   display: grid;
   gap: var(--space-2);
   width: min(34rem, calc(100% - 3rem));
   transform: translate(-50%, -50%);
-  color: #d8eaff;
+  color: var(--arrival-warp-terminal-text);
   font: var(--fw-semibold) var(--fs-14) / 1.6 var(--font-mono);
   letter-spacing: .1em;
   opacity: 0;
   text-align: center;
-  text-shadow: 0 0 1rem #50cbff, 0 0 2.5rem #784cff;
+  text-shadow: 0 0 1rem var(--arrival-warp-glow), 0 0 2.5rem var(--arrival-warp-terminal-shadow);
 }
 
 .arrival-terminal-line {

@@ -36,6 +36,7 @@ import {
   Mic,
   Volume2,
 } from '../components/ui/icons';
+import { publicUrl } from '../lib/public-url';
 
 /**
  * Translate — the Cantonese helper, rebuilt in Harbour's own design language.
@@ -62,15 +63,15 @@ type SourceLang = {
 };
 
 const SOURCE_LANGS: SourceLang[] = [
-  { id: 'en', label: 'English', flag: '/flags/gb.svg' },
-  { id: 'es', label: 'Español', flag: '/flags/es.svg' },
-  { id: 'fr', label: 'Français', flag: '/flags/fr.svg' },
-  { id: 'ro', label: 'Română', flag: '/flags/ro.svg' },
+  { id: 'en', label: 'English', flag: publicUrl('/flags/gb.svg') },
+  { id: 'es', label: 'Español', flag: publicUrl('/flags/es.svg') },
+  { id: 'fr', label: 'Français', flag: publicUrl('/flags/fr.svg') },
+  { id: 'ro', label: 'Română', flag: publicUrl('/flags/ro.svg') },
 ];
 
-const TARGET_LANG: SourceLang = { id: 'yue', label: 'Cantonese · 廣東話', flag: '/flags/hk.svg' };
+const TARGET_LANG: SourceLang = { id: 'yue', label: 'Cantonese · 廣東話', flag: publicUrl('/flags/hk.svg') };
 
-const INITIAL_SOURCE: SourceLang = SOURCE_LANGS[0] ?? { id: 'en', label: 'English', flag: '/flags/gb.svg' };
+const INITIAL_SOURCE: SourceLang = SOURCE_LANGS[0] ?? { id: 'en', label: 'English', flag: publicUrl('/flags/gb.svg') };
 
 const SAMPLES = [
   'Where is the nearest MTR station?',
@@ -273,7 +274,7 @@ export default function Translate(): JSX.Element {
         id: `${Date.now()}`,
         sourceId: 'voice',
         sourceLabel: 'Voice',
-        flag: '/flags/hk.svg',
+        flag: publicUrl('/flags/hk.svg'),
         phrase: text,
         cantonese,
         at: Date.now(),

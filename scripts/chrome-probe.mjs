@@ -107,7 +107,6 @@ const PROBE = () => {
   }
 
   const main = document.querySelector('.portal-main');
-  const mainRect = main ? main.getBoundingClientRect() : null;
   const mainStyle = main ? getComputedStyle(main) : null;
 
   return {

@@ -20,6 +20,7 @@ import {
 } from '../components/ui/icons';
 import { SAMPLE_PEOPLE, SAMPLE_TAGS, type SamplePerson } from '../lib/sample-people';
 import { PeopleScene } from '../components/app/PeopleScene';
+import { publicUrl } from '../lib/public-url';
 
 /**
  * People — the redesigned `/app/people`.
@@ -290,7 +291,7 @@ function PersonCard({
               <span className="app-person__place-inline">
                 <img
                   className="app-person__flag"
-                  src={`/flags/${person.countryCode}.svg`}
+                  src={publicUrl(`/flags/${person.countryCode}.svg`)}
                   alt=""
                   aria-hidden="true"
                   loading="lazy"
@@ -382,4 +383,3 @@ function PersonCard({
     </Card>
   );
 }
-

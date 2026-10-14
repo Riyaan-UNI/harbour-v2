@@ -1,5 +1,6 @@
 import { type CSSProperties } from 'react';
 import { Mascot, type MascotKind } from '../ui';
+import { publicUrl } from '../../lib/public-url';
 
 /**
  * DashboardScene — the ambient backdrop behind `/app/dashboard`.
@@ -156,7 +157,7 @@ function Shape({ shape }: { shape: ShapeDrifter['shape'] }): JSX.Element {
 export function DashboardScene(): JSX.Element {
   return (
     <div className="dash-scene" aria-hidden="true">
-      <img className="dash-scene__wash" src="/art/harbour-scene-1.svg" alt="" />
+      <img className="dash-scene__wash" src={publicUrl('/art/harbour-scene-1.svg')} alt="" />
       <div className="dash-scene__tint" />
 
       {MASCOTS.map((drifter) => (

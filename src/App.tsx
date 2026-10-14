@@ -3,9 +3,26 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { Stack, Text } from './components/layout';
 import { Toaster } from './components/ui';
 import { ProfileProvider } from '@legacy/context/ProfileContext.jsx';
-import { GuardedApp } from './components/app/AppGuard';
-import { ArrivalStoryRoute, LoginRoute, SignupRoute } from './routes/entry';
-import { Landing } from './routes/Landing';
+
+const Landing = lazy(() =>
+  import('./routes/Landing').then((module) => ({ default: module.Landing })),
+);
+const LoginRoute = lazy(() =>
+  import('./routes/entry').then((module) => ({ default: module.LoginRoute })),
+);
+const SignupRoute = lazy(() =>
+  import('./routes/entry').then((module) => ({ default: module.SignupRoute })),
+);
+const ArrivalStoryRoute = lazy(() =>
+  import('./routes/entry').then((module) => ({
+    default: module.ArrivalStoryRoute,
+  })),
+);
+const GuardedApp = lazy(() =>
+  import('./components/app/AppGuard').then((module) => ({
+    default: module.GuardedApp,
+  })),
+);
 
 /**
  * Routing.
@@ -29,7 +46,7 @@ const devPagesEnabled =
   import.meta.env.DEV || Boolean(import.meta.env.VITE_ENABLE_GALLERY);
 
 /**
- * The three dev pages are `lazy`, so Rollup emits them as their own chunks and
+ * The four dev pages are `lazy`, so Rollup emits them as their own chunks and
  * a production build does not carry them. Their named exports are mapped to a
  * default here, which keeps each page file exporting only what it renders.
  */
@@ -77,64 +94,68 @@ function RouteFallback(): JSX.Element {
 export function App(): JSX.Element {
   return (
     <ProfileProvider>
-      <Routes>
-        <Route path="/" element={<Landing />} />
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
+          <Route path="/" element={<Landing />} />
 
-        {/* The entry lane. Both routes own their full-viewport shell. */}
-        <Route path="/login" element={<LoginRoute />} />
-        <Route path="/signup" element={<SignupRoute />} />
-        <Route path="/arrival" element={<ArrivalStoryRoute />} />
-        {/* The old build called it `/onboarding`; the link lives on in case a
-            bookmark or an old internal link still points at it. */}
-        <Route path="/onboarding" element={<Navigate to="/signup" replace />} />
+          {/* The entry lane. Both routes own their full-viewport shell. */}
+          <Route path="/login" element={<LoginRoute />} />
+          <Route path="/signup" element={<SignupRoute />} />
+          <Route path="/arrival" element={<ArrivalStoryRoute />} />
+          {/* The old build called it `/onboarding`; the link lives on in case a
+              bookmark or an old internal link still points at it. */}
+          <Route
+            path="/onboarding"
+            element={<Navigate to="/signup" replace />}
+          />
 
-        {/* The ported app, guarded. One route covering `/app` and everything
-            under it, so the shell mounts once and its own route table handles
-            the sub-paths. */}
-        <Route path="/app/*" element={<GuardedApp />} />
+          {/* The ported app, guarded. One route covering `/app` and everything
+              under it, so the shell mounts once and its own route table handles
+              the sub-paths. */}
+          <Route path="/app/*" element={<GuardedApp />} />
 
-        {devPagesEnabled ? (
-          <>
-            <Route
-              path="/dev"
-              element={
-                <Suspense fallback={<RouteFallback />}>
-                  <DevHub />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/dev/gallery"
-              element={
-                <Suspense fallback={<RouteFallback />}>
-                  <Gallery />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/dev/primitives"
-              element={
-                <Suspense fallback={<RouteFallback />}>
-                  <Primitives />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/dev/components"
-              element={
-                <Suspense fallback={<RouteFallback />}>
-                  <Components />
-                </Suspense>
-              }
-            />
-          </>
-        ) : null}
+          {devPagesEnabled ? (
+            <>
+              <Route
+                path="/dev"
+                element={
+                  <Suspense fallback={<RouteFallback />}>
+                    <DevHub />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/dev/gallery"
+                element={
+                  <Suspense fallback={<RouteFallback />}>
+                    <Gallery />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/dev/primitives"
+                element={
+                  <Suspense fallback={<RouteFallback />}>
+                    <Primitives />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/dev/components"
+                element={
+                  <Suspense fallback={<RouteFallback />}>
+                    <Components />
+                  </Suspense>
+                }
+              />
+            </>
+          ) : null}
 
-        {/* An unknown path goes back to the landing page rather than to a dead
-            end. The routes above still win, because they are declared first and
-            match exactly. */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          {/* An unknown path goes back to the landing page rather than to a
+              dead end. The routes above still win because they match first. */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
 
       {/* One Toaster for the whole app, so a toast never has two homes. */}
       <Toaster />

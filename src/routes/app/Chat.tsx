@@ -273,6 +273,7 @@ export default function Chat(): JSX.Element {
             role="log"
             aria-live="polite"
             aria-label="Conversation"
+            tabIndex={0}
           >
             {isEmpty ? (
               <div className="ask-empty">
@@ -330,7 +331,10 @@ export default function Chat(): JSX.Element {
                           </div>
                           <footer className="ask-bubble__footer">
                             {msg.role === 'harbour' && msg.demo ? (
-                              <DemoBadge variant="demo" />
+                              <DemoBadge
+                                variant="demo"
+                                className="ask-bubble__demo"
+                              />
                             ) : null}
                             <Text role="small" tone="subtle">
                               <time dateTime={msg.at}>
@@ -456,7 +460,7 @@ export default function Chat(): JSX.Element {
               <FormField
                 id="chat-message"
                 label="Your question"
-                hint="Avoid including names or private account details. When available, your question is sent to Harbour's AI provider to prepare a response."
+                hint="Avoid names or private details. Your question may be sent to Harbour's AI provider."
               >
                 {(control: FormFieldControlProps) => (
                   <Textarea

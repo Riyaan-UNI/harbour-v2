@@ -1,3 +1,5 @@
+import { publicUrl } from '../../lib/public-url';
+
 /**
  * Dashboard data readers and derivations.
  *
@@ -36,22 +38,22 @@ export const FRIEND_DIRECTORY: Record<
   'lina-chen': {
     name: 'Lina Chen',
     country: 'Taiwan, China',
-    mascot: '/art/mascot-otter.webp',
+    mascot: publicUrl('/art/mascot-otter.webp'),
   },
   'arjun-mehta': {
     name: 'Arjun Mehta',
     country: 'India',
-    mascot: '/art/mascot-fox.webp',
+    mascot: publicUrl('/art/mascot-fox.webp'),
   },
   'mei-wong': {
     name: 'Mei Wong',
     country: 'Malaysia',
-    mascot: '/art/mascot-crane.webp',
+    mascot: publicUrl('/art/mascot-crane.webp'),
   },
   'sara-kim': {
     name: 'Sara Kim',
     country: 'South Korea',
-    mascot: '/art/mascot-turtle.webp',
+    mascot: publicUrl('/art/mascot-turtle.webp'),
   },
 };
 

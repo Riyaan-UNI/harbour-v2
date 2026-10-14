@@ -40,6 +40,7 @@ import {
   type PublicPerson,
 } from '../components/profile/ProfilePublicCard';
 import { ProfileMascotPicker } from '../components/profile/ProfileMascotPicker';
+import { publicUrl } from '../lib/public-url';
 
 /**
  * Profile — the rebuilt `/app/profile`.
@@ -631,7 +632,7 @@ function OwnProfileView(): JSX.Element {
                           renderIcon={(option) =>
                             option.value === 'OTHER' ? null : (
                               <img
-                                src={`/flags/${option.value.toLowerCase()}.svg`}
+                                src={publicUrl(`/flags/${option.value.toLowerCase()}.svg`)}
                                 alt=""
                                 loading="lazy"
                               />
@@ -766,7 +767,7 @@ function OwnProfileView(): JSX.Element {
                         {facts.countryFact.code ? (
                           <img
                             className="app-profile-flag"
-                            src={`/flags/${facts.countryFact.code}.svg`}
+                            src={publicUrl(`/flags/${facts.countryFact.code}.svg`)}
                             alt=""
                             aria-hidden="true"
                             loading="lazy"
@@ -952,7 +953,7 @@ function PortraitPlate({
 function Scene(): JSX.Element {
   return (
     <div className="app-profile__scene" aria-hidden="true">
-      <img src="/art/harbour-scene-1.svg" alt="" />
+      <img src={publicUrl('/art/harbour-scene-1.svg')} alt="" />
       <div className="app-profile__scene-tint" />
     </div>
   );

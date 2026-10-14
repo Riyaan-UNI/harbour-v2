@@ -43,6 +43,7 @@ import {
   type HarbourLogoVariant,
 } from '../../components/ui';
 import { AlertTriangle, CheckCircle, InfoCircle, ShieldAlert } from '../../components/ui/icons';
+import { publicUrl } from '../../lib/public-url';
 import { useResolvedTheme } from '../../theme/useTheme';
 
 /**
@@ -694,7 +695,7 @@ export function Components(): JSX.Element {
               <Cluster gap={6} align="center">
                 <span data-testid="logo-missing" className="inline-flex">
                   <UniversityLogo
-                    src="/logos/does-not-exist.svg"
+                    src={publicUrl('/logos/does-not-exist.svg')}
                     name="City University of Hong Kong"
                     acronym="CityU"
                     size="lg"

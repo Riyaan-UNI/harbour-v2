@@ -56,12 +56,6 @@ async function gotoWithRetry(page, url) {
 
 const results = {};
 
-async function shot(page, name, opts = {}) {
-  const file = path.join(OUT, `${name}.png`);
-  await page.screenshot({ path: file, ...opts });
-  return path.relative(process.cwd(), file).replace(/\\/g, '/');
-}
-
 async function run() {
   const browser = await chromium.launch({ args: ['--no-proxy-server'] });
 

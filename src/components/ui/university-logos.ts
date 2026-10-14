@@ -19,6 +19,8 @@
  * recorded in `public/logos/README.md`.
  */
 
+import { publicUrl } from '../../lib/public-url';
+
 export type UniversityId =
   | 'hku'
   | 'cuhk'
@@ -62,7 +64,7 @@ export type University = {
  * The nine rows of spec §10. Ordered as the spec orders them, with `other`
  * last, so a dropdown built from this array needs no sorting.
  */
-export const UNIVERSITIES: readonly University[] = [
+const RAW_UNIVERSITIES: readonly University[] = [
   {
     id: 'hku',
     name: 'The University of Hong Kong',
@@ -136,6 +138,19 @@ export const UNIVERSITIES: readonly University[] = [
     enrolled: false,
   },
 ];
+
+/**
+ * The manifest as the app reads it. The paths above are written root-relative
+ * (`/logos/hku.svg`); `publicUrl` adds the deploy base, so they also resolve on
+ * GitHub Pages' sub-path. At the root base nothing changes.
+ */
+export const UNIVERSITIES: readonly University[] = RAW_UNIVERSITIES.map(
+  (university) => ({
+    ...university,
+    logo: university.logo === null ? null : publicUrl(university.logo),
+    art: university.art === null ? null : publicUrl(university.art),
+  }),
+);
 
 /** Every id, in manifest order. */
 export const UNIVERSITY_IDS: readonly UniversityId[] = UNIVERSITIES.map(

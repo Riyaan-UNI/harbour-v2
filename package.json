@@ -15,6 +15,8 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:e2e:install": "playwright install chromium",
+    "check:public-assets": "node scripts/check-public-asset-urls.mjs",
+    "check:pages-build": "node scripts/check-pages-build.mjs",
     "sync:flags": "node scripts/sync-flags.mjs",
     "build:university-art": "node scripts/build-university-art.mjs",
     "dev:server": "node server/index.js",

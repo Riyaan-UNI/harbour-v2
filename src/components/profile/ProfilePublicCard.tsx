@@ -2,6 +2,7 @@ import { type CSSProperties } from 'react';
 import { Heading, Cluster, Stack, Text } from '../layout';
 import { Button, DemoBadge, Mascot, UniversityLogo, type MascotKind } from '../ui';
 import type { UniversityId } from '../ui';
+import { publicUrl } from '../../lib/public-url';
 
 /**
  * ProfilePublicCard — the ONE presentational "how others see you" view.
@@ -124,7 +125,7 @@ export function ProfilePublicCard({
               {flagCode ? (
                 <img
                   className="app-profile-public__flag"
-                  src={`/flags/${flagCode}.svg`}
+                  src={publicUrl(`/flags/${flagCode}.svg`)}
                   alt=""
                   aria-hidden="true"
                   loading="lazy"

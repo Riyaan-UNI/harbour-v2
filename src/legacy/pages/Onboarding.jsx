@@ -8,12 +8,13 @@ import { Icon } from "../components/Icons.jsx";
 import { HarbourMark } from "../../components/ui/harbour-mark";
 import { UNIVERSITY_ART_BY_ID } from "../../components/ui/university-logos";
 import { universityByName } from "../data/hkUniversities.js";
+import { publicUrl } from "../../lib/public-url.ts";
 
 const mascots = [
-  { id: "otter", name: "Otter", src: "/art/mascot-otter.webp" },
-  { id: "crane", name: "Crane", src: "/art/mascot-crane.webp" },
-  { id: "turtle", name: "Turtle", src: "/art/mascot-turtle.webp" },
-  { id: "fox", name: "Fox", src: "/art/mascot-fox.webp" },
+  { id: "otter", name: "Otter", src: publicUrl("/art/mascot-otter.webp") },
+  { id: "crane", name: "Crane", src: publicUrl("/art/mascot-crane.webp") },
+  { id: "turtle", name: "Turtle", src: publicUrl("/art/mascot-turtle.webp") },
+  { id: "fox", name: "Fox", src: publicUrl("/art/mascot-fox.webp") },
 ];
 
 const steps = [

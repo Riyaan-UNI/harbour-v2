@@ -1,0 +1,100 @@
+name: Deploy to GitHub Pages
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            server/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Lint CSS
+        run: npm run lint:css
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Check public asset URLs
+        run: npm run check:public-assets
+
+      - name: Install backend dependencies for end-to-end tests
+        run: npm ci --prefix server
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: End-to-end tests
+        run: npm run test:e2e
+
+      - name: Build
+        run: npm run build
+        env:
+          # The site lives at https://<user>.github.io/harbour-v2/, so every
+          # asset and route needs this prefix. Must start and end with "/".
+          VITE_BASE: /harbour-v2/
+          # The backend's HTTPS origin. Set it in the repo under
+          # Settings > Secrets and variables > Actions > Variables, as
+          # VITE_API_URL. Empty means the pages that need the API will show
+          # their "service unavailable" state.
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+
+      # GitHub Pages has no rewrite rules, so a refresh on /harbour-v2/app/home
+      # would 404. Pages serves 404.html for unknown paths; making it a copy of
+      # index.html hands the request to the router, which then draws the page.
+      - name: SPA fallback and no-Jekyll marker
+        run: |
+          cp dist/index.html dist/404.html
+          touch dist/.nojekyll
+
+      - name: Validate Pages artifact
+        run: npm run check:pages-build
+        env:
+          VITE_BASE: /harbour-v2/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

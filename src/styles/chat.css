@@ -58,10 +58,13 @@
   position: relative;
   display: flex;
   flex-direction: column;
+
   /* Fill exactly what the shell's `.portal-main` padding leaves, so the frame
      neither overflows the viewport nor floats above its bottom edge. */
   block-size: var(--ask-frame-block-size);
   overflow: hidden;
+  inline-size: 100%;
+  max-inline-size: none;
 }
 
 /* --------------------------------------------------------------------------
@@ -76,7 +79,7 @@
   position: relative;
   z-index: var(--z-raised);
   padding-inline: var(--container-padding-inline);
-  max-inline-size: var(--container-max-inline-size);
+  max-inline-size: none;
   margin-inline: auto;
   inline-size: 100%;
 }
@@ -559,6 +562,10 @@
   overflow-wrap: anywhere;
 }
 
+.ask-bubble--user .ask-bubble__body p {
+  color: inherit;
+}
+
 .ask-bubble__footer {
   display: flex;
   flex-wrap: wrap;
@@ -566,6 +573,20 @@
   gap: var(--space-2);
   margin-block-start: var(--space-1);
   opacity: 0.85;
+}
+
+.ask-bubble--user .ask-bubble__eyebrow,
+.ask-bubble--user .ask-bubble__footer {
+  opacity: 1;
+}
+
+.ask-bubble--user .ask-bubble__footer,
+.ask-bubble--user .ask-bubble__footer * {
+  color: var(--on-accent);
+}
+
+.ask-bubble__demo {
+  color: var(--arrival-text);
 }
 
 /* --------------------------------------------------------------------------
@@ -1039,6 +1060,14 @@
 }
 
 @media (width < 40em) {
+  .chat-compass {
+    display: none;
+  }
+
+  .ask-header__text {
+    flex: 1 1 100%;
+  }
+
   .ask-bubble {
     max-inline-size: 90%;
   }
@@ -1051,6 +1080,19 @@
   .ask-composer {
     padding-inline: var(--container-padding-inline);
     border-radius: 0;
+  }
+
+  .ask-composer {
+    padding-block: var(--space-3) var(--space-4);
+  }
+
+  .ask-form {
+    gap: var(--space-2);
+  }
+
+  .ask-composer > p {
+    font-size: var(--type-label);
+    line-height: var(--leading-body);
   }
 
   .ask-thread {

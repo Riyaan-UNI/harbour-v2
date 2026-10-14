@@ -19,7 +19,13 @@ export function AppGuard({ children }: { children: React.ReactNode }): JSX.Eleme
   const location = useLocation();
 
   if (!profile) {
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+    return (
+      <Navigate
+        to="/login"
+        replace
+        state={{ from: `${location.pathname}${location.search}${location.hash}` }}
+      />
+    );
   }
 
   return (

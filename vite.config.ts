@@ -3,10 +3,19 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
+const base = process.env['VITE_BASE'] || '/';
+if (!base.startsWith('/') || base.startsWith('//') || !base.endsWith('/')) {
+  throw new Error('VITE_BASE must be a root-relative path that starts and ends with "/".');
+}
+
 // Brick 0 keeps the Vite config deliberately thin: React, Tailwind v4 via its
 // first-party Vite plugin (CSS-first, no tailwind.config.js), and fixed ports so
 // the Playwright webServer can find the dev server predictably.
 export default defineConfig({
+  // The deploy base. `/` in dev and tests; the GitHub Pages workflow sets
+  // VITE_BASE=/harbour-v2/ so assets and routes resolve under the repo's
+  // sub-path. It must start and end with a slash.
+  base,
   plugins: [react(), tailwindcss()],
   // shadcn/ui resolves its imports through `@/`; components.json declares the
   // same alias so a future `npx shadcn add` lands in the right place.

@@ -19,10 +19,14 @@ const app = express();
 
 // Do not advertise the framework.
 app.disable("x-powered-by");
-// Behind a reverse proxy (Vercel / nginx) one hop, so req.ip is the real client
-// and the per-IP rate limiters key on something meaningful. Override with
-// TRUST_PROXY for other topologies.
-app.set("trust proxy", Number(process.env.TRUST_PROXY ?? 1));
+// Trust forwarding headers only when the deployment topology is configured.
+const trustProxyHops = process.env.TRUST_PROXY?.trim()
+  ? Number(process.env.TRUST_PROXY)
+  : 0;
+if (!Number.isSafeInteger(trustProxyHops) || trustProxyHops < 0) {
+  throw new Error("TRUST_PROXY must be a non-negative integer.");
+}
+app.set("trust proxy", trustProxyHops);
 
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
   .split(",")

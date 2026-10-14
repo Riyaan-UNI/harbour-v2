@@ -52,7 +52,7 @@ const SPACING_PROPERTIES =
  *   - the keywords `0` and `auto`.
  */
 const SPACING_VALUE =
-  '(?:var\\(--space-\\d+\\)|var\\(--section-padding-block\\)|var\\(--container-padding-inline\\)|var\\(--hero-pull-up\\)|var\\(--hero-padding-block-start\\)|var\\(--dash-rail-top\\)|var\\(--aurora-blob-[a-z0-9-]+\\)|var\\(--drifter-[a-z0-9-]+\\)|0|auto)';
+  '(?:var\\(--space-\\d+\\)|var\\(--section-padding-block\\)|var\\(--container-padding-inline\\)|var\\(--hero-pull-up\\)|var\\(--hero-padding-block-start\\)|var\\(--dash-rail-top\\)|var\\(--aurora-blob-[a-z0-9-]+\\)|var\\(--arrival-transition-center\\)|var\\(--drifter-[a-z0-9-]+\\)|0|auto)';
 
 /**
  * Flags a spacing value that is NOT a whitespace-separated run of permitted

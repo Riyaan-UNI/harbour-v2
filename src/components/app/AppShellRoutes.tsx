@@ -2,25 +2,14 @@ import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Grid, Stack } from '../layout';
 import { Skeleton } from '../ui/skeleton';
-import { AppHome } from '../../routes/AppHome';
-import { People } from '../../routes/People';
-import { Profile } from '../../routes/Profile';
-import Chat from '../../routes/app/Chat';
-import Checklist from '@legacy/pages/Checklist.jsx';
-import Translate from '../../routes/Translate';
-import Community from '@legacy/pages/Community.jsx';
-import VoiceSOS from '@legacy/pages/VoiceSOS.jsx';
-import TideBank from '@legacy/pages/TideBank.jsx';
 import { WelcomePlaceholder } from './WelcomePlaceholder';
 
 /**
  * Every `/app/*` route, ported from the old build's `Shell` route table.
  *
- * Two of the ported pages (`Dashboard`, `RentalShield`) were lazy in the old
- * build because they are the two heaviest — Dashboard carries recharts and
- * RentalShield carries the rule engines. They stay lazy here, with the same
- * section-shaped skeleton the old build used, so the bundle profile is
- * unchanged.
+ * Page modules load on demand so the app shell does not pull every route into
+ * the initial bundle. Dashboard and Rental Shield retain their own
+ * section-shaped loading skeletons.
  *
  * The legacy `/bunny-garden` route was dropped by the owner's decision (it is
  * a decorative breather with no product role), so nothing renders it.
@@ -35,6 +24,21 @@ const Dashboard = lazy(() =>
   })),
 );
 const RentalShield = lazy(() => import('@legacy/pages/RentalShield.jsx'));
+const AppHome = lazy(() =>
+  import('../../routes/AppHome').then((module) => ({ default: module.AppHome })),
+);
+const People = lazy(() =>
+  import('../../routes/People').then((module) => ({ default: module.People })),
+);
+const Profile = lazy(() =>
+  import('../../routes/Profile').then((module) => ({ default: module.Profile })),
+);
+const Chat = lazy(() => import('../../routes/app/Chat'));
+const Checklist = lazy(() => import('@legacy/pages/Checklist.jsx'));
+const Translate = lazy(() => import('../../routes/Translate'));
+const Community = lazy(() => import('@legacy/pages/Community.jsx'));
+const VoiceSOS = lazy(() => import('@legacy/pages/VoiceSOS.jsx'));
+const TideBank = lazy(() => import('@legacy/pages/TideBank.jsx'));
 
 /**
  * The v2 Scam Shield page. Lazy, like the two heavy pages above: it is the
@@ -92,6 +96,18 @@ function RentalFallback(): JSX.Element {
   );
 }
 
+function AppRouteFallback(): JSX.Element {
+  return (
+    <section className="dash-page" aria-label="Loading app page" aria-busy="true">
+      <Stack gap={6} className="dash-fallback">
+        <Skeleton className="h-12 w-2/3" />
+        <Skeleton className="h-64" />
+        <Skeleton className="h-40" />
+      </Stack>
+    </section>
+  );
+}
+
 export function AppShellRoutes(): JSX.Element {
   /**
    * These paths are **relative to the `/app/*` route** that renders this
@@ -104,51 +120,53 @@ export function AppShellRoutes(): JSX.Element {
    * and any `/app` link reach.
    */
   return (
-    <Routes>
-      <Route index element={<Navigate to="home" replace />} />
-      <Route path="coming-soon" element={<WelcomePlaceholder />} />
-      <Route path="home" element={<AppHome />} />
-      {/* The Scam Shield. `/app/scam` is the tool's one address: the old
-          build's `/shield` page was the ported original, and the v2 rebuild
-          replaces it rather than sitting beside it. */}
-      <Route
-        path="scam"
-        element={
-          <Suspense fallback={<ScamShieldFallback />}>
-            <ScamShield />
-          </Suspense>
-        }
-      />
-      <Route path="checklist" element={<Checklist />} />
-      <Route path="translate" element={<Translate />} />
-      <Route path="chat" element={<Chat />} />
-      <Route path="community" element={<Community />} />
-      <Route path="voice-sos" element={<VoiceSOS />} />
-      <Route path="tide-bank" element={<TideBank />} />
-      {/* The rebuilt profile. `profile` is the own-profile page (with the
-          preview toggle); `profile/:userId` renders the same page's public
-          view for a sample person, so the directory's card links keep working.
-          Paths are unchanged — People.tsx deep-links to `/app/profile/<id>`. */}
-      <Route path="profile" element={<Profile />} />
-      <Route path="profile/:userId" element={<Profile />} />
-      <Route path="people" element={<People />} />
-      <Route
-        path="dashboard"
-        element={
-          <Suspense fallback={<DashboardFallback />}>
-            <Dashboard />
-          </Suspense>
-        }
-      />
-      <Route
-        path="rental"
-        element={
-          <Suspense fallback={<RentalFallback />}>
-            <RentalShield />
-          </Suspense>
-        }
-      />
-      <Route path="*" element={<Navigate to="/app/home" replace />} />
-    </Routes>
+    <Suspense fallback={<AppRouteFallback />}>
+      <Routes>
+        <Route index element={<Navigate to="home" replace />} />
+        <Route path="coming-soon" element={<WelcomePlaceholder />} />
+        <Route path="home" element={<AppHome />} />
+        {/* The Scam Shield. `/app/scam` is the tool's one address: the old
+            build's `/shield` page was the ported original, and the v2 rebuild
+            replaces it rather than sitting beside it. */}
+        <Route
+          path="scam"
+          element={
+            <Suspense fallback={<ScamShieldFallback />}>
+              <ScamShield />
+            </Suspense>
+          }
+        />
+        <Route path="checklist" element={<Checklist />} />
+        <Route path="translate" element={<Translate />} />
+        <Route path="chat" element={<Chat />} />
+        <Route path="community" element={<Community />} />
+        <Route path="voice-sos" element={<VoiceSOS />} />
+        <Route path="tide-bank" element={<TideBank />} />
+        {/* The rebuilt profile. `profile` is the own-profile page (with the
+            preview toggle); `profile/:userId` renders the same page's public
+            view for a sample person, so the directory's card links keep working.
+            Paths are unchanged — People.tsx deep-links to `/app/profile/<id>`. */}
+        <Route path="profile" element={<Profile />} />
+        <Route path="profile/:userId" element={<Profile />} />
+        <Route path="people" element={<People />} />
+        <Route
+          path="dashboard"
+          element={
+            <Suspense fallback={<DashboardFallback />}>
+              <Dashboard />
+            </Suspense>
+          }
+        />
+        <Route
+          path="rental"
+          element={
+            <Suspense fallback={<RentalFallback />}>
+              <RentalShield />
+            </Suspense>
+          }
+        />
+        <Route path="*" element={<Navigate to="/app/home" replace />} />
+      </Routes>
+    </Suspense>
   );
 }

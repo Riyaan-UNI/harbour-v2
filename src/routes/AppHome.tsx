@@ -15,6 +15,7 @@ import {
   XAxis,
 } from 'recharts';
 import { useProfile } from '@legacy/context/ProfileContext.jsx';
+import { publicUrl } from '../lib/public-url';
 import {
   Bento,
   BentoItem,
@@ -329,7 +330,7 @@ export function AppHome(): JSX.Element {
     <div className="app-home">
       {/* Fixed harbour scene backdrop — sits at z-index -1 behind everything. */}
       <div className="app-home__scene" aria-hidden="true">
-        <img src="/art/harbour-scene-1.svg" alt="" />
+        <img src={publicUrl('/art/harbour-scene-1.svg')} alt="" />
         <div className="app-home__scene-tint" />
       </div>
 
