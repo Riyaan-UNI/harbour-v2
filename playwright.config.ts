@@ -60,14 +60,22 @@ export default defineConfig({
     },
   ],
 
-  webServer: {
-    command: 'npm run dev',
-    url: 'http://127.0.0.1:5173/dev',
-    reuseExistingServer: true,
-    timeout: 180_000,
-    env: {
-      NO_PROXY: '127.0.0.1,localhost',
-      no_proxy: '127.0.0.1,localhost',
+  webServer: [
+    {
+      command: 'npm run dev:server',
+      url: 'http://127.0.0.1:5000/api/health',
+      reuseExistingServer: true,
+      timeout: 180_000,
     },
-  },
+    {
+      command: 'npm run dev:web',
+      url: 'http://127.0.0.1:5173/dev',
+      reuseExistingServer: true,
+      timeout: 180_000,
+      env: {
+        NO_PROXY: '127.0.0.1,localhost',
+        no_proxy: '127.0.0.1,localhost',
+      },
+    },
+  ],
 });
