@@ -34,6 +34,9 @@ async function openGallery(
   }, theme);
   await page.goto(GALLERY_PATH);
   await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Foundation gallery' }),
+  ).toBeVisible();
 }
 
 async function expectNoHorizontalOverflow(page: Page): Promise<void> {
@@ -72,10 +75,6 @@ for (const theme of THEMES) {
   for (const width of WIDTHS) {
     test(`gallery · ${theme} · ${width}px`, async ({ page }) => {
       await openGallery(page, theme, width);
-
-      await expect(
-        page.getByRole('heading', { level: 1, name: 'Foundation gallery' }),
-      ).toBeVisible();
 
       await expectNoHorizontalOverflow(page);
 

@@ -19,7 +19,7 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          'border-transparent bg-accent-fill text-on-accent hover:bg-accent-fill/90 active:bg-accent-fill/75',
+          'ui-button--primary border-transparent bg-accent-fill text-on-accent hover:bg-accent-fill/90 active:bg-accent-fill/75',
         secondary:
           'border-border bg-glass-fill-strong text-text hover:bg-glass-fill active:bg-glass-fill-strong',
         ghost:

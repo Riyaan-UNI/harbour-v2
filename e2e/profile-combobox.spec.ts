@@ -32,9 +32,11 @@ async function openProfile(page: Page, theme: 'dark' | 'light'): Promise<void> {
   await page.addInitScript(
     ({ mode, profile, profiles, activeId }) => {
       window.localStorage.setItem('harbour:theme', mode);
-      window.localStorage.setItem('harbour-profile', profile);
-      window.localStorage.setItem('harbour:v1:profiles', profiles);
-      window.localStorage.setItem('harbour:v1:activeProfileId', activeId);
+      if (!window.localStorage.getItem('harbour-profile')) {
+        window.localStorage.setItem('harbour-profile', profile);
+        window.localStorage.setItem('harbour:v1:profiles', profiles);
+        window.localStorage.setItem('harbour:v1:activeProfileId', activeId);
+      }
     },
     {
       mode: theme,
@@ -84,6 +86,14 @@ test('country combobox filters, selects, saves and persists', async ({ page }) =
 
   // Save and read the ledger.
   await page.getByRole('button', { name: /save changes/i }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const raw = localStorage.getItem('harbour-profile');
+        return raw ? (JSON.parse(raw) as { country?: string }).country : null;
+      }),
+    )
+    .toBe('TW');
   const ledger = page.locator('.app-profile-ledger');
   await expect(ledger).toContainText('Taiwan, China');
   await expect(ledger.locator('img.app-profile-flag')).toHaveAttribute(

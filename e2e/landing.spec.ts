@@ -139,21 +139,22 @@ test('landing: one h1, named landmarks, and a skip link that moves focus', async
   await expect(page.locator('#main')).toBeFocused();
 });
 
-test('landing: the nav is a sticky glass bar above 48em', async ({ page }) => {
+test('landing: the sticky nav gains its glass surface after scrolling above 48em', async ({ page }) => {
   await openLanding(page, 'dark', 1024);
 
-  // The stickiness is on the <header>, not on the <nav>: a sticky element only
-  // sticks within its parent, and the header is what spans the page. The glass
-  // is on the nav, which is the surface that meets the viewport edges.
+  // The header owns stickiness and switches to its frosted surface after the
+  // bare nav scrolls past the hero.
   const header = page.locator('.landing-nav');
   const position = await header.evaluate(
     (el) => getComputedStyle(el).position,
   );
   expect(position).toBe('sticky');
+  await expect(header).toHaveAttribute('data-scrolled', 'false');
 
   const nav = page.getByRole('navigation', { name: 'Main' });
-  await expect(nav).toHaveClass(/glass/);
-  await expect(nav).toHaveClass(/glass--bar/);
+  await expect(nav).toHaveClass(/landing-nav__bar-surface/);
+  await page.evaluate(() => window.scrollTo({ top: 1, behavior: 'instant' }));
+  await expect(header).toHaveAttribute('data-scrolled', 'true');
 
   // Above 48em the link row is visible and the sheet trigger is not.
   await expect(page.getByRole('link', { name: 'Tools' })).toBeVisible();
@@ -366,15 +367,18 @@ test('landing · reduced motion · dark · 768px', async ({ page }) => {
 /* The art slot                                                                */
 /* -------------------------------------------------------------------------- */
 
-test('art slot: empty, it is a marked placeholder rather than a blank box', async ({
+test('landing hero: the supplied journey illustration is displayed', async ({
   page,
 }) => {
   await openLanding(page, 'dark', 1024);
 
-  const slot = page.locator('.art-slot');
-  await expect(slot).toHaveAttribute('data-empty', 'true');
-  await expect(slot).toContainText('Art slot');
-  await expect(slot.locator('img')).toHaveCount(0);
+  const scene = page.locator('.journey-scene');
+  await expect(scene).toBeVisible();
+  const image = scene.locator('img');
+  await expect(image).toHaveAttribute('alt', /Students climb bright city steps/);
+  await expect
+    .poll(() => image.evaluate((el) => (el as HTMLImageElement).naturalWidth))
+    .toBeGreaterThan(0);
 });
 
 /* -------------------------------------------------------------------------- */

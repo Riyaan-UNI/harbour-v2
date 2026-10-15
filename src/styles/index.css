@@ -88,3 +88,8 @@
    wrapper, so Radix and shadcn portals inherit it.
    Syntax per the Tailwind v4 dark-mode docs, "Using a data attribute". */
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* The unlayered legacy `a` color must not override primary link-button text. */
+a.ui-button--primary {
+  color: var(--on-accent);
+}

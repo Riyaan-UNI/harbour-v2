@@ -8,6 +8,11 @@ The Pages site is built for `https://riyaan-uni.github.io/harbour-v2/`.
 `BrowserRouter` use Vite's base so public files, route links, and nested route
 refreshes share the same prefix.
 
+In repository Settings > Pages, set the deployment source to **GitHub Actions**.
+Do not select **Deploy from a branch**: that publishes the raw Vite source
+instead of `dist`, so the app entry point and its assets do not load under the
+project URL.
+
 The Pages workflow runs lint, CSS lint, type-checking, unit tests, end-to-end
 tests, public-asset URL checks, and the production build. It copies
 `dist/index.html` to `dist/404.html` for GitHub Pages deep-link fallback and

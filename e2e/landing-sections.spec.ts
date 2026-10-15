@@ -177,10 +177,7 @@ test('landing sections: the nav anchors resolve to real sections', async ({
     // section's heading is inside the viewport afterwards.
     await page.getByRole('link', { name: label, exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`#${id}$`));
-    const box = await target.boundingBox();
-    expect(box).not.toBeNull();
-    expect(box!.y).toBeLessThan(900);
-    expect(box!.y + box!.height).toBeGreaterThan(0);
+    await expect(target.getByRole('heading', { level: 2 })).toBeInViewport();
   }
 });
 
@@ -193,9 +190,15 @@ test('landing sections: every sample, demo and simulation is labelled', async ({
 }) => {
   await openLanding(page, 'dark', 1024);
 
-  // The four tool cards carry SAMPLE badges.
+  // Each tab exposes one honest sample, rather than rendering every sample
+  // panel at once.
   const tools = page.locator('#tools');
-  await expect(tools.getByText('sample', { exact: true })).toHaveCount(4);
+  const toolTabs = tools.getByRole('tab');
+  await expect(toolTabs).toHaveCount(4);
+  for (const tab of await toolTabs.all()) {
+    await tab.click();
+    await expect(tools.getByText('sample', { exact: true })).toBeVisible();
+  }
 
   // The live demo is labelled DEMO on the section and on the result.
   const demo = page.locator('section', {
@@ -223,44 +226,41 @@ test('landing sections: every sample, demo and simulation is labelled', async ({
 });
 
 /* -------------------------------------------------------------------------- */
-/* The expandable tool cards                                                   */
+/* The keyboard-operated tool tabs                                             */
 /* -------------------------------------------------------------------------- */
 
-test('landing sections: a tool card expands from the keyboard and closes on Escape', async ({
+test('landing sections: tool tabs are keyboard navigable', async ({
   page,
 }) => {
   await openLanding(page, 'dark', 1024);
 
-  const trigger = page.getByRole('button', { name: 'Scam X-ray' });
-  await trigger.focus();
-  await expect(trigger).toBeFocused();
-  await page.keyboard.press('Enter');
+  const scam = page.getByRole('tab', { name: /Scam X-ray/ });
+  await scam.focus();
+  await expect(scam).toBeFocused();
+  await page.keyboard.press('End');
 
-  const dialog = page.getByRole('dialog');
-  await expect(dialog).toBeVisible();
-  await expect(
-    dialog.getByRole('heading', { name: 'Scam X-ray' }),
-  ).toBeVisible();
-  await expect(dialog).toContainText('hides emails, phone numbers');
+  const ask = page.getByRole('tab', { name: /Ask Harbour/ });
+  await expect(ask).toBeFocused();
+  await expect(ask).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tabpanel')).toContainText('a common question');
 
-  await page.keyboard.press('Escape');
-  await expect(page.getByRole('dialog')).toHaveCount(0);
-  await expect(trigger).toBeFocused();
+  await page.keyboard.press('Home');
+  await expect(scam).toBeFocused();
+  await expect(scam).toHaveAttribute('aria-selected', 'true');
 });
 
-test('landing sections: the settle-in sample shows a progress ring and its words', async ({
+test('landing sections: the settle-in tab shows a progress ring and its words', async ({
   page,
 }) => {
   await openLanding(page, 'dark', 1024);
 
-  const card = page.locator('.ui-card-hit', {
-    has: page.getByRole('heading', { name: 'Settle-in list' }),
-  });
-  await expect(card.locator('svg.progress-ring')).toHaveCount(1);
-  await expect(card.getByText('1 of 3 done')).toBeVisible();
+  await page.getByRole('tab', { name: /Settle-in list/ }).click();
+  const panel = page.getByRole('tabpanel');
+  await expect(panel.locator('svg.progress-ring')).toHaveCount(1);
+  await expect(panel.getByText('1 of 3 done')).toBeVisible();
 
   // The ring is a third full: the dash array is a third of the circumference.
-  const dash = await card
+  const dash = await panel
     .locator('.progress-ring__value')
     .getAttribute('stroke-dasharray');
   expect(dash).toBe('87.96 263.89');

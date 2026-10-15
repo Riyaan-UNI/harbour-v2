@@ -652,7 +652,7 @@ export function Components(): JSX.Element {
 
         <Block
           title="UniversityLogo"
-          description="A square box on a white plate in both themes, radius md at 3rem and sm at 2rem and 2.5rem. The nine boxes below are built from the typed manifest, so the ids, names and acronyms are spec section 10's table. No logo file is bundled yet — a search of public/, src/assets/ and the previous build found no university artwork — so every box falls back to its acronym with no layout shift, which is the behaviour the last box proves on purpose."
+          description="A square box on a white plate in both themes, radius md at 3rem and sm at 2rem and 2.5rem. The nine boxes below are built from the typed manifest; the eight bundled marks load with their full names as alt text, and the missing-logo example below verifies the acronym fallback without shifting the box."
         >
           <Stack gap={6}>
             <Row label="all nine, from the manifest (spec §10)">

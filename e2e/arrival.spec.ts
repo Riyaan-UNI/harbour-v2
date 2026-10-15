@@ -126,12 +126,8 @@ for (const theme of THEMES) {
 test('the warp transition settles and hands off to the app', async ({ page }) => {
   await openArrival(page, 'dark', 1440);
 
-  // Skip the storyline to reach the settled state where "Continue" appears.
+  // Skip the storyline and enter the handoff animation directly.
   await page.getByRole('button', { name: /Skip story/ }).click();
-
-  const continueButton = page.getByRole('button', { name: /Continue to Harbour/ });
-  await expect(continueButton).toBeVisible();
-  await continueButton.click();
 
   // The overlay takes over: the ripple and the WebGL warp host both mount.
   await expect(page.locator('.arrival-transition')).toBeAttached();

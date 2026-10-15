@@ -648,21 +648,20 @@ const SPEC_UNIVERSITIES = [
 const STUB_PNG =
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
 
-/**
- * Every id in the manifest is wired to a real box on the page. No university
- * logo file is bundled in the repo, so what is on screen is the acronym
- * fallback — asserted, not assumed, because it is the honest current state.
- */
-test('university manifest: all nine ids render, and each falls back to its acronym', async ({
+test('university manifest: bundled logos render and the generic entry has a mark', async ({
   page,
 }) => {
   await openComponents(page, 'dark', 1024);
 
-  for (const { id, acronym } of SPEC_UNIVERSITIES) {
+  for (const { id, name } of SPEC_UNIVERSITIES) {
     const box = page.locator(`[data-testid="uni-logo-${id}"] .ui-logo`);
     await box.scrollIntoViewIfNeeded();
     await expect(box).toBeVisible();
-    await expect(box).toContainText(acronym);
+    const image = box.locator('img');
+    await expect(image).toHaveAttribute('alt', name);
+    await expect
+      .poll(() => image.evaluate((el) => (el as HTMLImageElement).naturalWidth))
+      .toBeGreaterThan(0);
     // The plate is a fixed square at every size, so the fallback never shifts.
     const measured = await box.boundingBox();
     expect(measured?.width).toBeCloseTo(40, 0); // md = 2.5rem
@@ -677,21 +676,17 @@ test('university manifest: all nine ids render, and each falls back to its acron
 });
 
 /**
- * "Test that each loads": the manifest path is the one the browser actually
- * requests, and the full name is the image's alt text. The eight files are not
- * in the repo yet, so the requests are stubbed with a 1x1 PNG — this proves the
- * wiring, and `university manifest: all nine ids render` above records that the
- * real files are missing.
+ * Stub only the eight bundled marks so the test can verify their manifest
+ * paths and alt text independently of the files' formats and contents.
  */
 test('university manifest: each logo path is requested and carries the full name as alt', async ({
   page,
 }) => {
   const requested: string[] = [];
 
-  // Only the eight manifest paths are stubbed. `/logos/does-not-exist.svg` is
-  // deliberately left alone, so the error-fallback demo further up the page
-  // still 404s and still proves the acronym swap.
-  await page.route(/\/logos\/(?:hku|cuhk|hkust|polyu|cityu|hkbu|lingnan|eduhk)\.svg$/, async (route) => {
+  // The intentionally missing-logo demo is not matched and still reaches its
+  // real 404/error fallback.
+  await page.route(/\/logos\/(?:hku|hkust|polyu|cityu|hkbu|lingnan|eduhk)\.svg$|\/logos\/cuhk\.png$/, async (route) => {
     requested.push(new URL(route.request().url()).pathname);
     await route.fulfill({
       status: 200,
@@ -702,7 +697,8 @@ test('university manifest: each logo path is requested and carries the full name
 
   await openComponents(page, 'dark', 1024);
 
-  for (const { id, name } of SPEC_UNIVERSITIES) {
+  const logoUniversities = SPEC_UNIVERSITIES;
+  for (const { id, name } of logoUniversities) {
     const image = page.locator(`[data-testid="uni-logo-${id}"] img`);
     await image.scrollIntoViewIfNeeded();
     await expect(image).toHaveAttribute('alt', name);
@@ -716,7 +712,9 @@ test('university manifest: each logo path is requested and carries the full name
     ).toHaveCount(0);
   }
 
-  expect([...requested].sort()).toEqual(
-    SPEC_UNIVERSITIES.map(({ id }) => `/logos/${id}.svg`).sort(),
+  const requestedFiles = requested.map((path) => path.slice(path.lastIndexOf('/logos/')));
+  const expectedFiles = logoUniversities.map(({ id }) =>
+    id === 'cuhk' ? '/logos/cuhk.png' : `/logos/${id}.svg`,
   );
+  expect(requestedFiles.sort()).toEqual(expectedFiles.sort());
 });
