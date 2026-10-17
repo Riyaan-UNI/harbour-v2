@@ -7,7 +7,7 @@ Harbour is designed to feel like a steady guide through unfamiliar waters: welco
 ## What’s in the website
 
 ### Public and onboarding pages
-
+https://harbour-v2-delta.vercel.app/
 - **Landing page (`/`)** — introduces Harbour, its tools, and how it can help.
 - **Sign up (`/signup`)** — creates a local profile through a short, three-step flow. University is optional.
 - **Log in (`/login`)** — lets someone choose a profile saved in the current browser.
